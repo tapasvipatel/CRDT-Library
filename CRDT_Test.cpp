@@ -32,6 +32,9 @@ public:
     g_Counter(int id){
         this->id = id;
     }
+    void set_id(int id){
+        this->id = id;
+    }
 
     g_Counter increment(int val = 1){ //the value represents how much we want to increment by // add function
         g_Counter curr;
@@ -66,8 +69,54 @@ public:
     }
 };
 
+class pn_Counter{
+    public:
+    g_Counter p,n;
+    pn_Counter(){
+    }
+    pn_Counter(int id){
+        p.set_id(id);
+        n.set_id(id);
+    }
+
+    pn_Counter increment(int val = 1){
+        pn_Counter curr;
+        curr.p=p.increment(val);
+        return curr;
+    }
+    pn_Counter decrement(int val = 1){
+        pn_Counter curr;
+        curr.n=n.increment(val);
+        return curr;
+    }
+    
+    int get_total_val(){
+        return p.get_total_val()-n.get_total_val();
+    }
+    int get_curr_val(){
+        return p.get_curr_val()-n.get_curr_val();
+    }
+    void join(pn_Counter replica){
+        p.join(replica.p);
+        n.join(replica.n);
+    }
+    void print(){
+        cout << "PNCounter P: ";
+        for (auto i: p.m){
+            cout << i.first << "->" << i.second << " "; 
+        }
+        cout << "PNCounter N: ";
+        for (auto i: n.m){
+            cout << i.first << "->" << i.second << " "; 
+        }
+    }
+};
+
+
+
 main()
 {
+    cout << "-------Testing g_counters----------";
     g_Counter replicaA(0);
     g_Counter replicaB(1);
     g_Counter replicaC;
@@ -84,4 +133,25 @@ main()
     cout << "Here Replica D and Replica B should converge" << endl;
     replicaD.print();
     replicaB.print();
+    cout << endl;
+    cout << "-------Testing pn_counters----------" << endl;
+    pn_Counter replica_A(2);
+    pn_Counter replica_B(5);
+    pn_Counter replica_C;
+    pn_Counter replica_D;
+    replica_C.join(replica_A.increment(3));
+    replica_C.join(replica_A.decrement(2));
+    replica_D.join(replica_B.increment());
+    replica_D.join(replica_B.increment(5));
+    cout << "Here Replica_A and Replica_C should converge" << endl;
+    replica_C.print();
+    replica_A.print();
+    cout << endl;
+    cout << replica_C.get_total_val() << " " << replica_A.get_total_val() << endl; //The value converges towards the sum of its increments
+    cout << "Here Replica_D and Replica_B should converge" << endl;
+    replica_D.print();
+    replica_B.print();
+    cout << endl;
+    cout << replica_D.get_total_val() << " " << replica_B.get_total_val() << endl; //The value converges towards the sum of its increments
+    cout << endl;
 }
