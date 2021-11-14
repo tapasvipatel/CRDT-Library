@@ -47,7 +47,7 @@ public:
         return curr;
     }
 
-    void join(g_Counter replica){   //merge 
+    void join(g_Counter<K,V> replica){   //merge 
         for (auto i: replica.m){
             m[i.first] = max(i.second,m[i.first]);
         }
@@ -101,7 +101,7 @@ class pn_Counter{
     V get_curr_val(){
         return p.get_curr_val()-n.get_curr_val();
     }
-    void join(pn_Counter replica){
+    void join(pn_Counter<K,V> replica){
         p.join(replica.p);
         n.join(replica.n);
     }
