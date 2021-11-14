@@ -33,7 +33,7 @@ public:
     g_Counter(){
     }
      //Give each object unique id
-    g_Counter(int id){
+    g_Counter(K id){
         this->id = id;
     }
     void set_id(K id){
