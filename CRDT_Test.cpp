@@ -18,13 +18,17 @@ Funtion 2 Objective --> Request the current value
 
 */
 
+
+
+
+template <class K=int, class V=int>
 class g_Counter
 {
 public:
     //Database
-    unordered_map<int, int> m;
+    unordered_map<K, V> m;
     //id
-    int id;
+    K id;
 
     g_Counter(){
     }
@@ -32,12 +36,12 @@ public:
     g_Counter(int id){
         this->id = id;
     }
-    void set_id(int id){
+    void set_id(K id){
         this->id = id;
     }
 
-    g_Counter increment(int val = 1){ //the value represents how much we want to increment by // add function
-        g_Counter curr;
+    g_Counter increment(V val = 1){ //the value represents how much we want to increment by // add function
+        g_Counter<K,V> curr;
         m[id]+=val;
         curr.m[id]=m[id];
         return curr;
@@ -48,12 +52,12 @@ public:
             m[i.first] = max(i.second,m[i.first]);
         }
     }
-    int get_curr_val(){  // query lookup
+    V get_curr_val(){  // query lookup
         return m[id];
     }
 
-    int get_total_val(){
-        int res = 0;
+    V get_total_val(){
+        V res = 0;
         for (auto i: m){
             res+=i.second;
         }
@@ -69,31 +73,32 @@ public:
     }
 };
 
+template <class K=int, class V=int>
 class pn_Counter{
     public:
-    g_Counter p,n;
+    g_Counter<K,V> p,n;
     pn_Counter(){
     }
-    pn_Counter(int id){
+    pn_Counter(K id){
         p.set_id(id);
         n.set_id(id);
     }
 
-    pn_Counter increment(int val = 1){
-        pn_Counter curr;
+    pn_Counter increment(V val = 1){
+        pn_Counter<K,V> curr;
         curr.p=p.increment(val);
         return curr;
     }
-    pn_Counter decrement(int val = 1){
-        pn_Counter curr;
+    pn_Counter decrement(V val = 1){
+        pn_Counter<K,V> curr;
         curr.n=n.increment(val);
         return curr;
     }
     
-    int get_total_val(){
+    V get_total_val(){
         return p.get_total_val()-n.get_total_val();
     }
-    int get_curr_val(){
+    V get_curr_val(){
         return p.get_curr_val()-n.get_curr_val();
     }
     void join(pn_Counter replica){
@@ -117,14 +122,14 @@ class pn_Counter{
 main()
 {
     cout << "-------Testing g_counters----------";
-    g_Counter replicaA(0);
-    g_Counter replicaB(1);
-    g_Counter replicaC;
-    g_Counter replicaD;
+    g_Counter<int,int> replicaA(0);
+    g_Counter<int,double> replicaB(1);
+    g_Counter<int,int> replicaC;
+    g_Counter<int,double> replicaD;
     replicaC.join(replicaA.increment());
     replicaC.join(replicaA.increment(7));
     replicaD.join(replicaB.increment());
-    replicaD.join(replicaB.increment(5));
+    replicaD.join(replicaB.increment(5.5));
     
     cout << "Here Replica A and Replica C should converge" << endl;
     replicaC.print();
@@ -135,14 +140,14 @@ main()
     replicaB.print();
     cout << endl;
     cout << "-------Testing pn_counters----------" << endl;
-    pn_Counter replica_A(2);
-    pn_Counter replica_B(5);
-    pn_Counter replica_C;
-    pn_Counter replica_D;
+    pn_Counter<int,int> replica_A(2);
+    pn_Counter<int,double> replica_B(5);
+    pn_Counter<int,int> replica_C;
+    pn_Counter<int,double> replica_D;
     replica_C.join(replica_A.increment(3));
     replica_C.join(replica_A.decrement(2));
     replica_D.join(replica_B.increment());
-    replica_D.join(replica_B.increment(5));
+    replica_D.join(replica_B.increment(5.7));
     cout << "Here Replica_A and Replica_C should converge" << endl;
     replica_C.print();
     replica_A.print();
