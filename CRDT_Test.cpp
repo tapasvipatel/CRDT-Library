@@ -1,125 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std;
+#include "CRDT Data structures/PN_Counter.h"
+#include "CRDT Data structures/2P_Set.h"
+#include "CRDT Data structures/G_Set.h"
 
-//To do: Implement gCounter using key,value
-
-
-/* Basic Info about this CRDT 
-an integer counter that can only be incremeneted
-
-Function 1 Objective --> TO increment
-
-Funtion 2 Objective --> Request the current value
-
-
-// To sync with this data structure, the value converges towards the sum of its increments
-
-
-
-*/
-
-
-
-
-template <class K=int, class V=int>
-class g_Counter
-{
-public:
-    //Database
-    unordered_map<K, V> m;
-    //id
-    K id;
-
-    g_Counter(){
-    }
-     //Give each object unique id
-    g_Counter(K id){
-        this->id = id;
-    }
-    void set_id(K id){
-        this->id = id;
-    }
-
-    g_Counter increment(V val = 1){ //the value represents how much we want to increment by // add function
-        g_Counter<K,V> curr;
-        m[id]+=val;
-        curr.m[id]=m[id];
-        return curr;
-    }
-
-    void join(g_Counter<K,V> replica){   //merge 
-        for (auto i: replica.m){
-            m[i.first] = max(i.second,m[i.first]);
-        }
-    }
-    V get_curr_val(){  // query lookup
-        return m[id];
-    }
-
-    V get_total_val(){
-        V res = 0;
-        for (auto i: m){
-            res+=i.second;
-        }
-        return res;
-    }
-
-    void print(){
-        cout << "GCounter: (";
-        for (auto i: m){
-            cout << i.first << "->" << i.second;
-        }
-        cout << ")";
-    }
-};
-
-template <class K=int, class V=int>
-class pn_Counter{
-    public:
-    g_Counter<K,V> p,n;
-    pn_Counter(){
-    }
-    pn_Counter(K id){
-        p.set_id(id);
-        n.set_id(id);
-    }
-
-    pn_Counter increment(V val = 1){
-        pn_Counter<K,V> curr;
-        curr.p=p.increment(val);
-        return curr;
-    }
-    pn_Counter decrement(V val = 1){
-        pn_Counter<K,V> curr;
-        curr.n=n.increment(val);
-        return curr;
-    }
-    
-    V get_total_val(){
-        return p.get_total_val()-n.get_total_val();
-    }
-    V get_curr_val(){
-        return p.get_curr_val()-n.get_curr_val();
-    }
-    void join(pn_Counter<K,V> replica){
-        p.join(replica.p);
-        n.join(replica.n);
-    }
-    void print(){
-        cout << "PNCounter P: ";
-        for (auto i: p.m){
-            cout << i.first << "->" << i.second << " "; 
-        }
-        cout << "PNCounter N: ";
-        for (auto i: n.m){
-            cout << i.first << "->" << i.second << " "; 
-        }
-    }
-};
-
-
-
-main()
+int main()
 {
     cout << "-------Testing g_counters----------";
     g_Counter<int,int> replicaA(0);
@@ -159,4 +44,85 @@ main()
     cout << endl;
     cout << replica_D.get_total_val() << " " << replica_B.get_total_val() << endl; //The value converges towards the sum of its increments
     cout << endl;
+
+    cout << "-------Testing 2P_set----------" << endl;
+    cout << "Update: Add" << endl;
+    TwoPhase_Set<int,int> replica_2P_A(0);
+    TwoPhase_Set<int,int> replica_2P_B(1);
+    replica_2P_A.add(6);
+    replica_2P_A.add(7);
+    replica_2P_A.add(8);
+    replica_2P_B.add(6);
+    replica_2P_B.add(3);
+    replica_2P_B.add(5);
+    cout << "Before Merge" << endl;
+    cout << "replicaA: ";
+    replica_2P_A.print();
+    cout << "replicaB: ";
+    replica_2P_B.print();
+    replica_2P_A.merge(replica_2P_B);
+    cout << "After Merge replicaA" << endl;
+    cout << "replicaA: ";
+    replica_2P_A.print();
+    cout << "replicaB: ";
+    replica_2P_B.print();
+    replica_2P_B.merge(replica_2P_A);
+    cout << "After Merge replicaB" << endl;
+    cout << "replicaA: ";
+    replica_2P_A.print();
+    cout << "replicaB: ";
+    replica_2P_B.print();
+    
+    cout << "Update: Remove" << endl;
+    cout << "Remove 3 from replicaA" << endl;
+    replica_2P_A.remove(3);
+    cout << "Remove 5 from replicaB" << endl;
+    replica_2P_B.remove(5);
+    cout << "Before Merge" << endl;
+    cout << "replicaA: ";
+    replica_2P_A.print();
+    cout << "replicaB: ";
+    replica_2P_B.print();
+    replica_2P_A.merge(replica_2P_B);
+    cout << "After Merge replicaA" << endl;
+    cout << "replicaA: ";
+    replica_2P_A.print();
+    cout << "replicaB: ";
+    replica_2P_B.print();
+    replica_2P_B.merge(replica_2P_A);
+    cout << "After Merge replicaB" << endl;
+    cout << "replicaA: ";
+    replica_2P_A.print();
+    cout << "replicaB: ";
+    replica_2P_B.print();
+    cout << "------------------------------" << endl;
+
+     
+    cout << "-------Testing g_set----------" << endl;
+    g_Set<int,int> replica_gSet_A(0);
+    g_Set<int,int> replica_gSet_B(1);
+    replica_gSet_A.add(6);
+    replica_gSet_A.add(7);
+    replica_gSet_A.add(8);
+    replica_gSet_B.add(6);
+    replica_gSet_B.add(3);
+    replica_gSet_B.add(5);
+    cout << "Before Merge" << endl;
+    cout << "replicaA: ";
+    replica_gSet_A.print();
+    cout << "replicaB: ";
+    replica_gSet_B.print();
+    replica_gSet_A.merge(replica_gSet_B);
+    cout << "After Merge replicaA" << endl;
+    cout << "replicaA: ";
+    replica_gSet_A.print();
+    cout << "replicaB: ";
+    replica_gSet_B.print();
+    replica_gSet_B.merge(replica_gSet_A);
+    cout << "After Merge replicaB" << endl;
+    cout << "replicaA: ";
+    replica_gSet_A.print();
+    cout << "replicaB: ";
+    replica_gSet_B.print();
+    cout << "------------------------------" << endl;
 }
