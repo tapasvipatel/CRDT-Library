@@ -13,14 +13,14 @@ class pn_Counter{
         n.set_id(id);
     }
 
-    pn_Counter increment(V val = 1){
+    pn_Counter add(V val = 1){
         pn_Counter<K,V> curr;
-        curr.p=p.increment(val);
+        curr.p=p.add(val);
         return curr;
     }
-    pn_Counter decrement(V val = 1){
+    pn_Counter subtract(V val = 1){
         pn_Counter<K,V> curr;
-        curr.n=n.increment(val);
+        curr.n=n.add(val);
         return curr;
     }
     
@@ -30,9 +30,11 @@ class pn_Counter{
     V get_curr_val(){
         return p.get_curr_val()-n.get_curr_val();
     }
-    void join(pn_Counter<K,V> replica){
-        p.join(replica.p);
-        n.join(replica.n);
+    void merge(vector<pn_Counter<K,V>> replicas){
+        for (auto replica: replicas){
+            p.merge({replica.p});
+            n.merge({replica.n});
+        }
     }
     void print(){
         cout << "PNCounter P: ";

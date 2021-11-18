@@ -5,8 +5,9 @@ template <class K=int, class V=int>
 class TwoPhase_Set //Two-Phase Set
 {
 public:
-    unordered_set<K> set;
-    unordered_set<K> tombstone;
+    set <K> tombstone;
+    set <K> set;
+    
     K id;
     
     TwoPhase_Set(){
@@ -48,9 +49,12 @@ public:
         return includes(S.set.begin(), S.set.end(), T.set.begin(), T.set.end()) || includes(S.tombstone.begin(), S.tombstone.end(), T.tombstone.begin(), T.tombstone.end());
     }
     
-    void merge(TwoPhase_Set<K,V> replica) {
-        set.insert(replica.set.begin(), replica.set.end());
-        tombstone.insert(replica.tombstone.begin(), replica.tombstone.end());
+    void merge(vector<TwoPhase_Set<K,V>> replicas) {
+        for (auto replica: replicas){
+            set.insert(replica.set.begin(), replica.set.end());
+            tombstone.insert(replica.tombstone.begin(), replica.tombstone.end());
+        }
+        
     }
     
     void print() {

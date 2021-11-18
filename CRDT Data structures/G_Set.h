@@ -5,7 +5,7 @@ template <class K=int, class V=int>
 class g_Set  //Grow-Only Set
 {
 public:
-    unordered_set<K> set;
+    set<K> set;
     K id;
     
     g_Set() {
@@ -41,8 +41,10 @@ public:
         return includes(S.set.begin(), S.set.end(), T.set.begin(), T.set.end());
     }
     
-    void merge(g_Set<K,V> replica) {
-        set.insert(replica.set.begin(), replica.set.end());
+    void merge(vector<g_Set<K,V>> replicas) {
+        for (auto replica: replicas){
+            set.insert(replica.set.begin(), replica.set.end());
+        }
     }
     
     void print() {

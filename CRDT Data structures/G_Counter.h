@@ -27,17 +27,25 @@ public:
         this->id = id;
     }
 
-    g_Counter increment(V val = 1){ //the value represents how much we want to increment by // add function
+    g_Counter add(V val = 1){ //the value represents how much we want to increment by // add function
         g_Counter<K,V> curr;
         m[id]+=val;
         curr.m[id]=m[id];
         return curr;
     }
+    // g_Counter subtract(V val = 1){
+    //     g_Counter<K,V> curr;
+    //     m[id]-=val;
+    //     curr.m[id]=m[id];
+    //     return curr;
+    // }
 
-    void join(g_Counter<K,V> replica){   //merge 
-        for (auto i: replica.m){
-            m[i.first] = max(i.second,m[i.first]);
-        }
+    void merge(vector<g_Counter<K,V>> replica){   //merge
+        for (auto i: replica){
+            for (auto j: i.m){
+                m[j.first] = max(j.second,m[j.first]);
+            }
+        } 
     }
     V get_curr_val(){  // query lookup
         return m[id];
