@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-template <class K=int, class V=int>
+template <class K=int>
 class TwoPhase_Set //Two-Phase Set
 {
 public:
@@ -22,15 +22,15 @@ public:
         this->id = id;
     }
     
-    int get_id(K id) {
+    K get_id() {
         return this->id;
     }
     
-    void add(V e) {
+    void add(K e) {
         set.insert(e);
     }
     
-    bool lookup(V e) {
+    bool lookup(K e) {
         if (set.count(e) && !tombstone.count(e)) {
             return true;
         }
@@ -39,17 +39,17 @@ public:
         }
     }
     
-    void remove(V e) {
+    void remove(K e) {
         if (lookup(e)) {
             tombstone.insert(e);
         }
     }
     
-    bool compare(TwoPhase_Set<K,V> S, TwoPhase_Set<K,V> T) {
+    bool compare(TwoPhase_Set<K> S, TwoPhase_Set<K> T) {
         return includes(S.set.begin(), S.set.end(), T.set.begin(), T.set.end()) || includes(S.tombstone.begin(), S.tombstone.end(), T.tombstone.begin(), T.tombstone.end());
     }
     
-    void merge(vector<TwoPhase_Set<K,V>> replicas) {
+    void merge(vector<TwoPhase_Set<K>> replicas) {
         for (auto replica: replicas){
             set.insert(replica.set.begin(), replica.set.end());
             tombstone.insert(replica.tombstone.begin(), replica.tombstone.end());
@@ -58,11 +58,20 @@ public:
     }
     
     void print() {
-        cout << "2PSet: (";
+        cout << "2PSet with ID=" << get_id();
+        cout << " (";
+        int size_of_Set = set.size();
         for (auto const &e: set) {
-            if (lookup(e)) {
-                std::cout << e << ' ';
+            if (size_of_Set == 1){
+                if (lookup(e)) {
+                    std::cout << e;
+                }
+            } else{
+                if (lookup(e)) {
+                    std::cout << e << ' ';
+                }
             }
+            size_of_Set--;
         }
         cout << ")" << endl;
     }

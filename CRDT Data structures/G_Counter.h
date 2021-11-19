@@ -13,7 +13,7 @@ class g_Counter
 {
 public:
     //Database
-    unordered_map<K, V> m;
+    map<K, V> m;
     //id
     K id;
 
@@ -25,6 +25,10 @@ public:
     }
     void set_id(K id){
         this->id = id;
+    }
+
+    K get_id(){
+        return this->id;
     }
 
     g_Counter add(V val = 1){ //the value represents how much we want to increment by // add function
@@ -40,8 +44,8 @@ public:
     //     return curr;
     // }
 
-    void merge(vector<g_Counter<K,V>> replica){   //merge
-        for (auto i: replica){
+    void merge(vector<g_Counter<K,V>> replicas){   //merge
+        for (auto i: replicas){
             for (auto j: i.m){
                 m[j.first] = max(j.second,m[j.first]);
             }
@@ -60,10 +64,20 @@ public:
     }
 
     void print(){
-        cout << "GCounter: (";
+        cout << "GCounter with ID=" << get_id();
+        cout << " (";
+        int size_map = m.size();
         for (auto i: m){
-            cout << i.first << "->" << i.second;
+            if (size_map == 1){
+                cout << i.first << "->" << i.second;
+            } else{
+                cout << i.first << "->" << i.second << " ";
+            }
+            size_map--;
         }
         cout << ")";
+        // display_result.pop_back();
+        // display_result+=")";
+        // cout << display_result;
     }
 };

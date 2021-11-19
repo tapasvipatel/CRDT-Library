@@ -12,6 +12,9 @@ class pn_Counter{
         p.set_id(id);
         n.set_id(id);
     }
+    K get_id(){
+        return p.get_id();
+    }
 
     pn_Counter add(V val = 1){
         pn_Counter<K,V> curr;
@@ -37,13 +40,29 @@ class pn_Counter{
         }
     }
     void print(){
-        cout << "PNCounter P: ";
+        cout << "PN Counter with ID=" << get_id() << " ";
+        cout << "P: (";
+        int size_p = p.m.size();
         for (auto i: p.m){
-            cout << i.first << "->" << i.second << " "; 
+            if (size_p == 1){
+                cout << i.first << "->" << i.second;
+            } else{
+                cout << i.first << "->" << i.second << " "; 
+            }
+            size_p--;
         }
-        cout << "PNCounter N: ";
+        cout << ") ";
+        cout << "N: (";
+        int size_n = n.m.size();
         for (auto i: n.m){
-            cout << i.first << "->" << i.second << " "; 
+            if (size_n == 1){
+                cout << i.first << "->" << i.second;
+            } else{
+                cout << i.first << "->" << i.second << " ";
+            }
+            size_n--;
         }
+        cout << ") ";
+        cout << "Sum=" << get_total_val();
     }
 };

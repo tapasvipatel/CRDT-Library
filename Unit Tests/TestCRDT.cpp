@@ -1,8 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
-#include "CRDT Data structures/PN_Counter.h"
-#include "CRDT Data structures/2P_Set.h"
-#include "CRDT Data structures/G_Set.h"
+#include "../CRDT Data structures/PN_Counter.h"
+#include "../CRDT Data structures/2P_Set.h"
+#include "../CRDT Data structures/G_Set.h"
 
 /*
 Rules for current CRDT to follow when creating tests for each new CRTD Objects
@@ -67,8 +67,8 @@ void test_PNCounter(){
 
 void test_gSet(){
     cout << "Unit Tests for G Set:" << endl;
-    g_Set<int,int> replica_gSet_A(0);
-    g_Set<int,int> replica_gSet_B(1);
+    g_Set<int> replica_gSet_A(0);
+    g_Set<int> replica_gSet_B(1);
     replica_gSet_A.add(6);
     replica_gSet_A.add(7);
     replica_gSet_A.add(8);
@@ -92,8 +92,8 @@ void test_gSet(){
 
 void test_2PSet(){
     cout << "Unit Tests for 2P Set:" << endl;
-    TwoPhase_Set<int,int> replica_2P_A(0);
-    TwoPhase_Set<int,int> replica_2P_B(1);
+    TwoPhase_Set<int> replica_2P_A(0);
+    TwoPhase_Set<int> replica_2P_B(1);
     replica_2P_A.add(6);
     replica_2P_A.add(7);
     replica_2P_A.add(8);

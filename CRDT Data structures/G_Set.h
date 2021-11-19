@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-template <class K=int, class V=int>
+template <class K=int>
 class g_Set  //Grow-Only Set
 {
 public:
@@ -20,15 +20,15 @@ public:
         this->id = id;
     }
     
-    int get_id(K id) {
+    K get_id() {
         return this->id;
     }
     
-    void add(V e) {
+    void add(K e) {
         set.insert(e);
     }
     
-    bool lookup(V e) {
+    bool lookup(K e) {
         if (set.count(e)) {
             return true;
         }
@@ -37,20 +37,27 @@ public:
         }
     }
     
-    bool compare(g_Set<K,V> S, g_Set<K,V> T) {
+    bool compare(g_Set<K> S, g_Set<K> T) {
         return includes(S.set.begin(), S.set.end(), T.set.begin(), T.set.end());
     }
     
-    void merge(vector<g_Set<K,V>> replicas) {
+    void merge(vector<g_Set<K>> replicas) {
         for (auto replica: replicas){
             set.insert(replica.set.begin(), replica.set.end());
         }
     }
     
     void print() {
-        cout << "GSet: (";
+        int gSet_size = set.size(); 
+        cout << "GSet with ID=" << get_id();
+        cout << " (";
         for (auto const &e: set) {
-            std::cout << e << ' ';
+            if (gSet_size == 1){
+                std::cout << e;
+            } else{
+                std::cout << e << ' ';
+            }
+            gSet_size--;   
         }
         cout << ")" << endl;
     }
