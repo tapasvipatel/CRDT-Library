@@ -156,9 +156,9 @@ void display_grow_Set(){
 }
 
 void display_2P_Set(){
-    cout << "Creating Grow Set with ID = 0" << endl;
+    cout << "Creating 2P Set with ID = 0" << endl;
     TwoPhase_Set<double> replica_2P_A(0);
-    cout << "Creating Grow Set with ID = 1" << endl;
+    cout << "Creating 2P Set with ID = 1" << endl;
     TwoPhase_Set<double> replica_2P_B(1);
     cout << "Inserting the elements (5.55 6.75 9.21) in ID == 0" << endl;
     replica_2P_A.add(5.55);
