@@ -1,4 +1,8 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
+#include <algorithm>
 using namespace std;
 #include "../../CRDT Data structures/PN_Counter.h"
 #include "../../CRDT Data structures/2P_Set.h"
