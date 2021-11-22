@@ -12,7 +12,7 @@ using namespace std;
 
 
 void display_GrowCounter_int_variant(){
-    cout << "------------ G Counter Test ------------" << endl;
+    cout << "-- G Counter Test (datatype = <INT,INT>) --" << endl;
     cout << "Creating grow counter with ID = 0" << endl;
     g_Counter<int,int> replica_GCounter_A(0);
     cout << "Creating grow counter with ID = 1" << endl;
@@ -50,7 +50,7 @@ void display_GrowCounter_int_variant(){
 }
 
 void display_GrowCounter_string_variant(){
-    cout << "------------ G Counter Test ------------" << endl;
+    cout << "-- G Counter Test (datatype = <STRING,DOUBLE>) --" << endl;
     cout << "Creating grow counter with ID = Hello" << endl;
     g_Counter<string,double> replica_GCounter_A("Hello");
     cout << "Creating grow counter with ID = World" << endl;
@@ -88,7 +88,7 @@ void display_GrowCounter_string_variant(){
 }
 
 void display_PNCounter(){
-    cout << "------------ PN Counter Set Test ------------" << endl;
+    cout << "-- PN Counter Set Test (datatype = <INT,INT>) --" << endl;
     cout << "Creating Positive/Negative counter with ID = 0" << endl;
     pn_Counter<int,int> replica_PNCounter_A(0);
     cout << "Creating Positive/Negative counter with ID = 1" << endl;
@@ -153,7 +153,7 @@ void display_PNCounter(){
 }
 
 void display_grow_Set(){
-    cout << "------------ G Set Test ------------" << endl;
+    cout << "-- G Set Test (datatype = <STRING>) --" << endl;
     cout << "Creating Grow Set with ID = GrowA" << endl;
     g_Set<string> replica_gSet_A("GrowA");
     cout << "Creating Grow Set with ID = GrowB" << endl;
@@ -185,7 +185,7 @@ void display_grow_Set(){
 }
 
 void display_2P_Set(){
-    cout << "------------ 2P Set Test ------------" << endl;
+    cout << "-- 2P Set Test (datatype = <DOUBLE>) --" << endl;
     cout << "Creating 2P Set with ID = 0" << endl;
     TwoPhase_Set<double> replica_2P_A(0);
     cout << "Creating 2P Set with ID = 1" << endl;
