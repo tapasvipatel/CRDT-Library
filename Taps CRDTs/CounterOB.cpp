@@ -20,15 +20,18 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "counter.hpp"
+#include "CounterOB.hpp"
 
 namespace crdt
 {
 namespace operation
 {
 
+/*******************************************************************************************
+Constructor & Destructor
+*******************************************************************************************/
 template<typename T>
-counter<T>::counter()
+CounterOB<T>::CounterOB()
 {
     this->payload = T();
     this->num_increments = 0;
@@ -36,142 +39,155 @@ counter<T>::counter()
 }
 
 template<typename T>
-counter<T>::counter(T payload)
+CounterOB<T>::CounterOB(T payload)
 {
     this->payload = payload;
     payload > 0 ? this->num_increments = payload : this->num_decrements = payload;
 }
 
 template<typename T>
-counter<T>::counter(const counter<T>& rhs)
+CounterOB<T>::CounterOB(const CounterOB<T>& rhs)
 {
     this->payload = rhs.payload;
     rhs.payload > 0 ? this->num_increments = rhs.payload : this->num_decrements = rhs.payload;
 }
 
 template<typename T>
-counter<T>::~counter()
+CounterOB<T>::~CounterOB()
 {
     ;
 }
 
+/*******************************************************************************************
+Protected Methods
+*******************************************************************************************/
 template<typename T>
-T counter<T>::query()
+T& CounterOB<T>::query()
 {
     return this->payload;
 }
 
 template<typename T>
-counter<T> counter<T>::operator+(const counter<T>& rhs)
+bool merge(const T& item);
+bool serialize(std::string& buffer);
+bool deserialize(std::string& buffer);
+bool db_export();
+bool db_import();
+
+/*******************************************************************************************
+Public Methods
+*******************************************************************************************/
+template<typename T>
+CounterOB<T> CounterOB<T>::operator+(const CounterOB<T>& rhs)
 {
-    return counter<T>(this->payload + rhs.payload);
+    return CounterOB<T>(this->payload + rhs.payload);
 }
 
 template<typename T>
-counter<T> counter<T>::operator-(const counter<T>& rhs)
+CounterOB<T> CounterOB<T>::operator-(const CounterOB<T>& rhs)
 {
-    return counter<T>(this->payload - rhs.payload);
+    return CounterOB<T>(this->payload - rhs.payload);
 }
 
 /*
 * modulo operator is specialized for int32_t type only
 */
 template<>
-counter<int32_t> counter<int32_t>::operator%(const counter<T>& rhs)
+CounterOB<int32_t> CounterOB<int32_t>::operator%(const CounterOB<T>& rhs)
 {
-    return counter<int32_t>(this->payload % rhs.payload);
+    return CounterOB<int32_t>(this->payload % rhs.payload);
 }
 
 template<typename T>
-counter<T> counter<T>::operator^(const counter<T>& rhs)
+CounterOB<T> CounterOB<T>::operator^(const CounterOB<T>& rhs)
 {
-    return counter<T>(this->payload ^ rhs.payload);
+    return CounterOB<T>(this->payload ^ rhs.payload);
 }
 
 template<typename T>
-bool counter<T>::operator&(const counter<T>& rhs)
+bool CounterOB<T>::operator&(const CounterOB<T>& rhs)
 {
     return this->payload & rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator|(const counter<T>& rhs)
+bool CounterOB<T>::operator|(const CounterOB<T>& rhs)
 {
     return this->payload | rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator~(const counter<T>& rhs)
+bool CounterOB<T>::operator~(const CounterOB<T>& rhs)
 {
     return this->payload ~ rhs.payload;
 }
     
 template<typename T>
-void counter<T>::operator=(const counter<T>& rhs)
+void CounterOB<T>::operator=(const CounterOB<T>& rhs)
 {
     this->payload = rhs.payload;
     rhs.payload - this->payload > 0 ? this->num_increments += rhs.payload - this->payload : this->num_decrements -= this->payload - rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator<(const counter<T>& rhs)
+bool CounterOB<T>::operator<(const CounterOB<T>& rhs)
 {
     return this->payload < rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator>(const counter<T>& rhs)
+bool CounterOB<T>::operator>(const CounterOB<T>& rhs)
 {
     return this->payload > rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator<=(const counter<T>& rhs)
+bool CounterOB<T>::operator<=(const CounterOB<T>& rhs)
 {
     return this->payload <= rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator>=(const counter<T>& rhs)
+bool CounterOB<T>::operator>=(const CounterOB<T>& rhs)
 {
     return this->payload >= rhs.payload;
 }
 
 template<typename T>
-void counter<T>::operator++()
+void CounterOB<T>::operator++()
 {
     this->payload++;
     this->num_increments++;
 }
 
 template<typename T>
-void counter<T>::operator--()
+void CounterOB<T>::operator--()
 {
     this->payload--;
     this->num_decrements++;
 }
 
 template<typename T>
-bool counter<T>::operator==(const counter<T>& rhs)
+bool CounterOB<T>::operator==(const CounterOB<T>& rhs)
 {
     return this->payload == rhs.payload;
 }
 
 template<typename T>
-bool counter<T>::operator!=(const counter<T>& rhs)
+bool CounterOB<T>::operator!=(const CounterOB<T>& rhs)
 {
     return this->payload != rhs.payload;
 }
 
 template<typename T>
-void counter<T>::operator+=(const counter<T>& rhs)
+void CounterOB<T>::operator+=(const CounterOB<T>& rhs)
 {
     this->payload += rhs.payload;
     rhs.payload > 0 ? this->num_increments += rhs.payload : this->num_decrements += rhs.payload;
 }
 
 template<typename T>
-void counter<T>::operator-=(const counter<T>& rhs)
+void CounterOB<T>::operator-=(const CounterOB<T>& rhs)
 {
     this->payload -= rhs.payload;
     rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;

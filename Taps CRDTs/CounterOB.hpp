@@ -20,16 +20,16 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __COUNTER_H__
-#define __COUNTER_H__
+#ifndef __COUNTEROB_H__
+#define __COUNTEROB_H__
 
-#include "crdt_object.hpp"
+#include "CrdtObject.hpp"
 
 /*
 * template class for CRDT counter
 */
 template<typename T=int32_t>
-class counter : crdt_object
+class CounterOB : CrdtObject
 {
 private:
     T payload;
@@ -37,30 +37,35 @@ private:
     int32_t num_decrements;
 protected:
     T& query();
+    bool merge(const T& item);
+    bool serialize(std::string& buffer);
+    bool deserialize(std::string& buffer);
+    bool db_export();
+    bool db_import();
 public:
-    counter<T>();
-    counter<T>(T payload);
-    counter<T>(const counter<T>& rhs);
-    ~counter();
+    CounterOB<T>();
+    CounterOB<T>(T payload);
+    CounterOB<T>(const CounterOB<T>& rhs);
+    ~CounterOB();
 
-    counter<T> operator+(const counter<T>& rhs);
-    counter<T> operator-(const counter<T>& rhs);
-    counter<T> operator%(const counter<T>& rhs);
-    counter<T> operator^(const counter<T>& rhs);
-    bool operator&(const counter<T>& rhs);
-    bool operator|(const counter<T>& rhs);
-    bool operator~(const counter<T>& rhs);
-    void operator=(const counter<T>& rhs);
-    bool operator<(const counter<T>& rhs);
-    bool operator>(const counter<T>& rhs);
-    bool operator<=(const counter<T>& rhs);
-    bool operator>=(const counter<T>& rhs);
+    CounterOB<T> operator+(const CounterOB<T>& rhs);
+    CounterOB<T> operator-(const CounterOB<T>& rhs);
+    CounterOB<T> operator%(const CounterOB<T>& rhs);
+    CounterOB<T> operator^(const CounterOB<T>& rhs);
+    bool operator&(const CounterOB<T>& rhs);
+    bool operator|(const CounterOB<T>& rhs);
+    bool operator~(const CounterOB<T>& rhs);
+    void operator=(const CounterOB<T>& rhs);
+    bool operator<(const CounterOB<T>& rhs);
+    bool operator>(const CounterOB<T>& rhs);
+    bool operator<=(const CounterOB<T>& rhs);
+    bool operator>=(const CounterOB<T>& rhs);
     void operator++();
     void operator--();
-    bool operator==(const counter<T>& rhs);
-    bool operator!=(const counter<T>& rhs);
-    void operator+=(const counter<T>& rhs);
-    void operator-=(const counter<T>& rhs);
+    bool operator==(const CounterOB<T>& rhs);
+    bool operator!=(const CounterOB<T>& rhs);
+    void operator+=(const CounterOB<T>& rhs);
+    void operator-=(const CounterOB<T>& rhs);
 };
 
-#endif  // __COUNTER_H__
+#endif  // __COUNTEROB_H__

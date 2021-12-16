@@ -20,27 +20,4 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __CRDT_OBJECT__
-#define __CRDT_OBJECT__
-
-#include <chrono>
-
-template<typename T>
-class crdt_object
-{
-private:
-    uint32_t id;
-    auto date_last_modified;    //std::chrono::system_clock::now()
-protected:
-    virtual T query() = 0;
-    virtual bool merge(const T& item) = 0;
-    virtual bool serialize(std::string& buffer) = 0;
-    virtual bool deserialize(std::string& buffer) = 0;
-    virtual bool db_export() = 0;
-    virtual bool db_import() = 0;
-public:
-    crdt_object<T>();
-    ~crdt_object<T>();
-};
-
-#endif  // __CRDT_OBJECT__
+#include "CrdtObject.hpp"
