@@ -22,6 +22,9 @@
 
 #include "counter.hpp"
 
+namespace crdt
+{
+
 namespace operation
 {
 
@@ -187,4 +190,6 @@ void counter<T>::operator-=(const counter<T>& rhs)
     rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;
 }
 
-}
+}   // namespace operation
+
+}   // namespace crdt
