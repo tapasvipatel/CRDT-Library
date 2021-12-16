@@ -32,6 +32,9 @@ template<typename T=int32_t>
 class CounterOB : CrdtObject
 {
 private:
+    static uint32_t next_available_id;
+
+private:
     T payload;
     int32_t num_increments;
     int32_t num_decrements;
@@ -40,8 +43,8 @@ protected:
     bool merge(const T& item);
     bool serialize(std::string& buffer);
     bool deserialize(std::string& buffer);
-    bool db_export();
-    bool db_import();
+    bool exportDB();
+    bool importDB();
 public:
     CounterOB<T>();
     CounterOB<T>(T payload);
@@ -66,6 +69,8 @@ public:
     bool operator!=(const CounterOB<T>& rhs);
     void operator+=(const CounterOB<T>& rhs);
     void operator-=(const CounterOB<T>& rhs);
+
+    friend uint32_t getNextAvailableID(const CounterOB<T>& counterob);
 };
 
 #endif  // __COUNTEROB_H__

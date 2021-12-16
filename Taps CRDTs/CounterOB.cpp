@@ -36,6 +36,7 @@ CounterOB<T>::CounterOB()
     this->payload = T();
     this->num_increments = 0;
     this->num_decrements = 0;
+    this->next_available_id = 0;
 }
 
 template<typename T>
@@ -43,6 +44,7 @@ CounterOB<T>::CounterOB(T payload)
 {
     this->payload = payload;
     payload > 0 ? this->num_increments = payload : this->num_decrements = payload;
+    this->next_available_id = 0;
 }
 
 template<typename T>
@@ -50,6 +52,7 @@ CounterOB<T>::CounterOB(const CounterOB<T>& rhs)
 {
     this->payload = rhs.payload;
     rhs.payload > 0 ? this->num_increments = rhs.payload : this->num_decrements = rhs.payload;
+    this->next_available_id = 0;
 }
 
 template<typename T>
@@ -191,6 +194,12 @@ void CounterOB<T>::operator-=(const CounterOB<T>& rhs)
 {
     this->payload -= rhs.payload;
     rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;
+}
+
+uint32_t getNextAvailableID(const CounterOB<T>& counterob)
+{
+    counterob.next_available_id++;
+    return counterob.next_available_id;
 }
 
 }   // namespace operation

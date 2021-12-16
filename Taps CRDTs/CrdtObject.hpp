@@ -36,8 +36,8 @@ protected:
     virtual bool merge(const T& item) = 0;
     virtual bool serialize(std::string& buffer) = 0;
     virtual bool deserialize(std::string& buffer) = 0;
-    virtual bool db_export() = 0;
-    virtual bool db_import() = 0;
+    virtual bool exportDB() = 0;
+    virtual bool importDB() = 0;
 public:
     CrdtObject<T>();
     ~CrdtObject<T>();
