@@ -24,7 +24,6 @@
 
 namespace crdt
 {
-
 namespace operation
 {
 
@@ -60,20 +59,6 @@ template<typename T>
 T counter<T>::query()
 {
     return this->payload;
-}
-
-template<typename T>
-void counter<T>::increment()
-{
-    this->payload++;
-    this->num_increments++;
-}
-
-template<typename T>
-void counter<T>::decrement()
-{
-    this->payload--;
-    this->num_decrements++;
 }
 
 template<typename T>
@@ -155,13 +140,15 @@ bool counter<T>::operator>=(const counter<T>& rhs)
 template<typename T>
 void counter<T>::operator++()
 {
-    this->increment();
+    this->payload++;
+    this->num_increments++;
 }
 
 template<typename T>
 void counter<T>::operator--()
 {
-    this->decrement();
+    this->payload--;
+    this->num_decrements++;
 }
 
 template<typename T>
@@ -191,5 +178,4 @@ void counter<T>::operator-=(const counter<T>& rhs)
 }
 
 }   // namespace operation
-
 }   // namespace crdt

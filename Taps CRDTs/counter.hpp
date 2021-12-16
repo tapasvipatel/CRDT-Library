@@ -23,20 +23,20 @@
 #ifndef __COUNTER_H__
 #define __COUNTER_H__
 
+#include "crdt_object.hpp"
+
 /*
 * template class for CRDT counter
 */
 template<typename T=int32_t>
-class counter
+class counter : crdt_object
 {
 private:
     T payload;
     int32_t num_increments;
     int32_t num_decrements;
 protected:
-    T query();
-    void increment();
-    void decrement();
+    T& query();
 public:
     counter<T>();
     counter<T>(T payload);
