@@ -58,6 +58,7 @@ CounterOB<T>::CounterOB(const CounterOB<T>& rhs)
 template<typename T>
 CounterOB<T>::~CounterOB()
 {
+    // remove from global list
     ;
 }
 
@@ -69,13 +70,6 @@ T& CounterOB<T>::query()
 {
     return this->payload;
 }
-
-template<typename T>
-bool merge(const T& item);
-bool serialize(std::string& buffer);
-bool deserialize(std::string& buffer);
-bool db_export();
-bool db_import();
 
 /*******************************************************************************************
 Public Methods
