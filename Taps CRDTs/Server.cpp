@@ -21,3 +21,36 @@
 */
 
 #include "Server.hpp"
+
+/*******************************************************************************************
+ExternalReplicaMetadata
+*******************************************************************************************/
+ExternalReplicaMetadata::ExternalReplicaMetadata(uint32_t external_replica_id)
+{
+    this->external_replica_id = external_replica_id;
+}
+
+ExternalReplicaMetadata::~ExternalReplicaMetadata()
+{
+    ;
+}
+
+/*******************************************************************************************
+Server
+*******************************************************************************************/
+Server::Server()
+{
+    this->ip_address = "";
+    this->port = -1;
+}
+
+Server::Server(std::string ip_address, uint32_t port)
+{
+    this->ip_address = ip_address;
+    this->port = port;
+}
+
+Server::~Server()
+{
+    ;
+}

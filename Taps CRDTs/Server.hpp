@@ -23,12 +23,41 @@
 #ifndef __SERVER__
 #define __SERVER__
 
+#include <string>
+#include <unordered_map>
+#include <queue>
+
+#include "CrdtObject.hpp"
+
+enum Request
+{
+    Identity,   // send identity of remote connection
+    Insert, // insert new replica into distributed system
+    Remove, // remove replica from distributed system
+    Get,    // get updates for an existing crdt
+    Drop    // drop an existing crdt
+}
+
+class ExternalReplicaMetadata
+{
+private:
+    uint32_t external_replica_id;
+    queue<CrdtMetadata> previous_queue;
+    queue<CrdtMetadata> ready_queue;
+public:
+    ExternalReplicaMetadata();
+    ~ExternalReplicaMetadata();
+};
+
 class Server
 {
 private:
     std::string ip_address;
     uint32_t port;
+    unordered_map<string, uint32_t> lookup_table;
+    unordered_map<uint32_t, ExternalReplicaMetadata> replica_table;
 public:
+    Server();
     Server(std::string ip_address, uint32_t port);
     ~Server();
 };
