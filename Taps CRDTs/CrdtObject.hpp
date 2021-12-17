@@ -23,7 +23,18 @@
 #ifndef __CRDTOBJECT__
 #define __CRDTOBJECT__
 
+#include <string>
 #include <chrono>
+
+class CrdtMetaData
+{
+private:
+    crdtType crdt_type;
+    uint32_t id;
+public:
+    CrdtMetaData(crdtType crdt_type, uint32_t id);
+    ~CrdtMetaData();
+};
 
 template<typename T>
 class CrdtObject
@@ -39,7 +50,7 @@ protected:
     virtual bool exportDB() = 0;
     virtual bool importDB() = 0;
 public:
-    CrdtObject<T>();
+    CrdtObject<T>(uint32_t id);
     ~CrdtObject<T>();
 };
 
