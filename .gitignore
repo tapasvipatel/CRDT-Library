@@ -1,0 +1,23 @@
+# Ignore Mac system files
+.DS_store
+
+# Object
+*.o
+*.obj
+
+# Headers
+*.gch
+*.pch
+
+# Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
