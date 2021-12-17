@@ -1,0 +1,2 @@
+# lib
+Library build directory
