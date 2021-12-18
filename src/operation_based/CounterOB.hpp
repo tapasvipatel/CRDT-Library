@@ -25,6 +25,12 @@
 
 #include "CrdtObject.hpp"
 
+class CounterMetadata : CrdtMetaData
+{
+private:
+
+};
+
 /*
 * template class for CRDT counter
 */

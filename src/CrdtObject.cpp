@@ -20,6 +20,8 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <chrono>
+
 #include "CrdtObject.hpp"
 
 /*******************************************************************************************
@@ -42,6 +44,7 @@ CrdtObject
 CrdtObject::CrdtObject(uint32_t id)
 {
     this->id = id;
+    this->date_last_modified = std::chrono::system_clock::now();
 }
 
 CrdtObject::~CrdtObject()

@@ -24,7 +24,6 @@
 #define __CRDTOBJECT__
 
 #include <string>
-#include <chrono>
 
 class CrdtMetaData
 {
@@ -41,7 +40,7 @@ class CrdtObject
 {
 private:
     uint32_t id;
-    auto date_last_modified;    //std::chrono::system_clock::now()
+    auto date_last_modified;
 protected:
     virtual T query() = 0;
     virtual bool merge(const T& item) = 0;
