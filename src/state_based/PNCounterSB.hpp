@@ -20,9 +20,10 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __COUNTEROB_H__
-#define __COUNTEROB_H__
+#ifndef __PNCOUNTERSB_H__
+#define __PNCOUNTERSB_H__
 
+#include "CrdtHandle.hpp"
 #include "CrdtObject.hpp"
 
 /*
@@ -33,9 +34,6 @@ class PNCounterSB : CrdtObject
 {
 private:
     static uint32_t next_available_id;
-private:
-    T payload;
-    std::vector
 }
 
-#endif  // __COUNTEROB_H__
+#endif  // __PNCOUNTERSB_H__
