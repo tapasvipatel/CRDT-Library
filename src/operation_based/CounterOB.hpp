@@ -165,7 +165,7 @@ public:
         return CounterOB<T>(this->payload - rhs.payload);
     }
 
-    template<>
+    template<uint32_t>
     CounterOB<uint32_t> operator%(const CounterOB<uint32_t>& rhs)
     {
         return CounterOB<uint32_t>(this->payload % rhs.payload);
