@@ -28,15 +28,74 @@ namespace operation
 {
 
 /*******************************************************************************************
+CounterMetadata
+*******************************************************************************************/
+template<typename T>
+CounterMetadata<T>::CounterMetadata(uint32_t id)
+{
+    this->id = id;
+    this->num_increments = 0;
+    this->num_decrements = 0;
+}
+
+template<typename T>
+CounterMetadata(uint32_t id, T num_increments, T num_decrements)
+{
+    this->id = id;
+    this->num_increments = num_increments;
+    this->num_decrements = num_decrements;
+}
+
+template<typename T>
+CounterMetadata<T>::~CounterMetadata()
+{
+    ;
+}
+
+template<typename T>
+const T& CounterMetadata<T>::getNumIncrements() const
+{
+    return this->num_increments;
+}
+
+template<typename T>
+const T& CounterMetadata<T>::getNumDecrements() const
+{
+    return this->num_decrements;
+}
+
+void CounterMetadata<T>::setNumIncrements(T num_increments)
+{
+    this->num_increments = num_increments;
+}
+
+void CounterMetadata<T>::setNumDecrements(T num_decrements)
+{
+    this->num_decrements = num_decrements;
+}
+
+/*******************************************************************************************
 Constructor & Destructor
 *******************************************************************************************/
+template<typename T>
+static void CounterOB<T>::initializeCounterOB()
+{
+    CounterOB::next_available_id = 0;
+}
+template<typename T>
+static uint32_t consumeNextAvailableID()
+{
+    return CounterOB::next_available_id++;
+}
+
 template<typename T>
 CounterOB<T>::CounterOB()
 {
     this->payload = T();
     this->num_increments = 0;
     this->num_decrements = 0;
-    this->next_available_id = 0;
+    this->id = CounterOB::consumeNextAvailableID();
+    // add to global list
 }
 
 template<typename T>
@@ -44,7 +103,8 @@ CounterOB<T>::CounterOB(T payload)
 {
     this->payload = payload;
     payload > 0 ? this->num_increments = payload : this->num_decrements = payload;
-    this->next_available_id = 0;
+    this->id = CounterOB::consumeNextAvailableID();
+    // add to global list
 }
 
 template<typename T>
@@ -52,7 +112,8 @@ CounterOB<T>::CounterOB(const CounterOB<T>& rhs)
 {
     this->payload = rhs.payload;
     rhs.payload > 0 ? this->num_increments = rhs.payload : this->num_decrements = rhs.payload;
-    this->next_available_id = 0;
+    this->id = CounterOB::consumeNextAvailableID();
+    // add to global list
 }
 
 template<typename T>
@@ -66,7 +127,7 @@ CounterOB<T>::~CounterOB()
 Protected Methods
 *******************************************************************************************/
 template<typename T>
-T& CounterOB<T>::query()
+const T& CounterOB<T>::query() const
 {
     return this->payload;
 }
@@ -87,12 +148,12 @@ CounterOB<T> CounterOB<T>::operator-(const CounterOB<T>& rhs)
 }
 
 /*
-* modulo operator is specialized for int32_t type only
+* modulo operator is specialized for uint32_t type only
 */
 template<>
-CounterOB<int32_t> CounterOB<int32_t>::operator%(const CounterOB<T>& rhs)
+CounterOB<uint32_t> CounterOB<uint32_t>::operator%(const CounterOB<T>& rhs)
 {
-    return CounterOB<int32_t>(this->payload % rhs.payload);
+    return CounterOB<uint32_t>(this->payload % rhs.payload);
 }
 
 template<typename T>
@@ -188,12 +249,6 @@ void CounterOB<T>::operator-=(const CounterOB<T>& rhs)
 {
     this->payload -= rhs.payload;
     rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;
-}
-
-uint32_t getNextAvailableID(const CounterOB<T>& counterob)
-{
-    counterob.next_available_id++;
-    return counterob.next_available_id;
 }
 
 }   // namespace operation

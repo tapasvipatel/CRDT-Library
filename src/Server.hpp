@@ -38,6 +38,21 @@ enum Request
     Drop    // drop an existing crdt
 }
 
+enum DataType
+{
+    uint8_t,
+    int8_t,
+    uint16_t,
+    int16_t
+    uint32_t,
+    int32_t,
+    uint64_t,
+    int64_t,
+    char,
+    bool,
+    double
+}
+
 class ExternalReplicaMetadata
 {
 private:

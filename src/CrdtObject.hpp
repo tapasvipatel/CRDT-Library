@@ -29,7 +29,6 @@ class CrdtMetaData
 {
 private:
     crdtType crdt_type;
-    uint32_t id;
 public:
     CrdtMetaData(crdtType crdt_type, uint32_t id);
     ~CrdtMetaData();
@@ -39,11 +38,10 @@ template<typename T>
 class CrdtObject
 {
 private:
-    uint32_t id;
     auto date_last_modified;
 protected:
-    virtual T query() = 0;
-    virtual bool merge(const T& item) = 0;
+    virtual const T& query() const = 0;
+    virtual bool merge(uint32_t replica_id) = 0;
     virtual bool serialize(std::string& buffer) = 0;
     virtual bool deserialize(std::string& buffer) = 0;
     virtual bool exportDB() = 0;
