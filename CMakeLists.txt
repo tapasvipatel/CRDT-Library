@@ -1,6 +1,6 @@
-make_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
-project(CRDT LANGUAGES CXX)
+project(crdt)
 
 set(CMAKE_CXX_FLAGS "")
 set(CMAKE_CXX_FLAGS_DEBUG "")
