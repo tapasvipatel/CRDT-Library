@@ -21,3 +21,6 @@
 # Executables
 *.exe
 *.out
+
+# Folders
+/build

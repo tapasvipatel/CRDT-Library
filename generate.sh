@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TESTING=''
+TESTING=0
 
 while [[ $# -gt 0 ]]; do
 	key="$1"
