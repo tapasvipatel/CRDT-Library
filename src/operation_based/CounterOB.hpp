@@ -39,8 +39,8 @@ private:
     T num_increments;
     T num_decrements;
 public:
-    CounterMetadata(uint32_t id);
-    CounterMetadata(uint32_t id, T num_increments, T num_decrements);
+    CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOB);
+    CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOB);
     ~CounterMetadata();
 
     const T& getNumIncrements() const;

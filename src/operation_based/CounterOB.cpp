@@ -31,7 +31,7 @@ namespace operation
 CounterMetadata
 *******************************************************************************************/
 template<typename T>
-CounterMetadata<T>::CounterMetadata(uint32_t id)
+CounterMetadata<T>::CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOB)
 {
     this->id = id;
     this->num_increments = 0;
@@ -39,7 +39,7 @@ CounterMetadata<T>::CounterMetadata(uint32_t id)
 }
 
 template<typename T>
-CounterMetadata(uint32_t id, T num_increments, T num_decrements)
+CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOB)
 {
     this->id = id;
     this->num_increments = num_increments;
