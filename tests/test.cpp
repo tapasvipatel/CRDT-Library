@@ -5,17 +5,20 @@
 
 #include "../src/operation_based/CounterOB.hpp"
 
-TEST_CASE("test equality", "[classic]")
+TEST_CASE("Test CounterOB", "[classic]")
 {
-	crdt::operation::CounterOB<uint32_t> obj1(5);
-	crdt::operation::CounterOB<uint32_t> obj2(5);
-	crdt::operation::CounterOB<uint32_t> obj3;
-	obj3 = obj1 + obj2;
-
-	SECTION("test multiple")
+	SECTION("Test Overloaded Operators")
 	{
-		REQUIRE(obj1.query() == 5);
-		REQUIRE(obj2.query() == 5);
-		REQUIRE(obj3.query() == 10);
+		crdt::operation::CounterOB<uint32_t> obj1(1);
+		crdt::operation::CounterOB<uint32_t> obj2(2);
+		crdt::operation::CounterOB<uint32_t> obj3;
+		crdt::operation::CounterOB<uint32_t> obj4;
+		obj3 = obj1 + obj2;
+		obj4 = obj2 - obj1;
+
+		REQUIRE(obj1.query() == 1);
+		REQUIRE(obj2.query() == 2);
+		REQUIRE(obj3.query() == 3);
+		REQUIRE(obj4.query() == 1);
 	}
 }
