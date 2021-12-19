@@ -36,18 +36,3 @@ CrdtMetaData::~CrdtMetaData()
 {
     ;
 }
-
-/*******************************************************************************************
-CrdtObject
-*******************************************************************************************/
-template<typename T>
-CrdtObject<T>::CrdtObject()
-{
-    this->date_last_modified = std::chrono::system_clock::now();
-}
-
-template<typename T>
-CrdtObject<T>::~CrdtObject()
-{
-    ;
-}

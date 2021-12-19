@@ -49,15 +49,23 @@ class CrdtObject
 private:
     std::chrono::time_point<std::chrono::system_clock> date_last_modified;
 protected:
-    virtual const T& query() const = 0;
     virtual bool merge(uint32_t replica_id) = 0;
     virtual bool serialize(std::string& buffer) = 0;
     virtual bool deserialize(std::string& buffer) = 0;
     virtual bool exportDB() = 0;
     virtual bool importDB() = 0;
 public:
-    CrdtObject<T>();
-    ~CrdtObject<T>();
+    virtual const T& query() const = 0;
+    
+    CrdtObject()
+    {
+        this->date_last_modified = std::chrono::system_clock::now();
+    }
+
+    ~CrdtObject()
+    {
+        ;
+    }
 };
 
 #endif  // __CRDTOBJECT__

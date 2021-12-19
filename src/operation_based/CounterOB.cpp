@@ -30,6 +30,7 @@ namespace operation
 /*******************************************************************************************
 CounterMetadata
 *******************************************************************************************/
+    /*
 template<typename T>
 CounterMetadata<T>::CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOBType)
 {
@@ -75,7 +76,7 @@ void CounterMetadata<T>::setNumDecrements(T num_decrements)
 {
     this->num_decrements = num_decrements;
 }
-
+*/
 /*******************************************************************************************
 Constructor & Destructor
 *******************************************************************************************/
@@ -90,6 +91,7 @@ uint32_t consumeNextAvailableID()
     return CounterOB<T>::next_available_id++;
 }
 
+/*
 template<typename T>
 CounterOB<T>::CounterOB()
 {
@@ -124,19 +126,21 @@ CounterOB<T>::~CounterOB()
     // remove from global list
     ;
 }
+*/
 
 /*******************************************************************************************
 Protected Methods
 *******************************************************************************************/
-template<typename T>
-const T& CounterOB<T>::query() const
-{
-    return this->payload;
-}
+//template<typename T>
+//const T& CounterOB<T>::query() const
+//{
+//    return this->payload;
+//}
 
 /*******************************************************************************************
 Public Methods
 *******************************************************************************************/
+/*
 template<typename T>
 CounterOB<T> CounterOB<T>::operator+(const CounterOB<T>& rhs)
 {
@@ -152,6 +156,7 @@ CounterOB<T> CounterOB<T>::operator-(const CounterOB<T>& rhs)
 /*
 * modulo operator is specialized for uint32_t type only
 */
+/*
 template<>
 CounterOB<uint32_t> CounterOB<uint32_t>::operator%(const CounterOB<uint32_t>& rhs)
 {
@@ -246,6 +251,7 @@ void CounterOB<T>::operator-=(const CounterOB<T>& rhs)
     this->payload -= rhs.payload;
     rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;
 }
+*/
 
 }   // namespace operation
 }   // namespace crdt

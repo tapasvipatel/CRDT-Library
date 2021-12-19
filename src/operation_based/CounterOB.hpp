@@ -44,14 +44,44 @@ private:
     T num_increments;
     T num_decrements;
 public:
-    CounterMetadata(uint32_t id); //: CrdtMetaData(CrdtType::CounterOB);
-    CounterMetadata(uint32_t id, T num_increments, T num_decrements); //: CrdtMetaData(CrdtType::CounterOB);
-    ~CounterMetadata();
+    CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOBType)
+    {
+        this->id = id;
+        this->num_increments = 0;
+        this->num_decrements = 0;
+    }
 
-    const T& getNumIncrements() const;
-    const T& getNumDecrements() const;
-    void setNumIncrements(T num_increments);
-    void setNumDecrements(T num_decrements);
+    CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOBType)
+    {
+        this->id = id;
+        this->num_increments = num_increments;
+        this->num_decrements = num_decrements;
+    }
+
+    ~CounterMetadata()
+    {
+        ;
+    }
+
+    const T& getNumIncrements() const
+    {
+        return this->num_increments;
+    }
+
+    const T& getNumDecrements() const
+    {
+        return this->num_decrements;
+    }
+
+    void setNumIncrements(T num_increments)
+    {
+        this->num_increments = num_increments;
+    }
+
+    void setNumDecrements(T num_decrements)
+    {
+        this->num_decrements = num_decrements;
+    }
 };
 
 /*
@@ -61,28 +91,68 @@ template<typename T=uint32_t>
 class CounterOB : CrdtObject<T>
 {
 private:
-    static uint32_t next_available_id;
-    static void initializeCounterOB();
-    static uint32_t consumeNextAvailableID();
-
-private:
     uint32_t id;
     T payload;
     T num_increments;
     T num_decrements;
     std::unordered_map<uint32_t, CounterMetadata<T>> external_replica_metadata;
 protected:
-    const T& query() const;
-    bool merge(uint32_t replica_id);
-    bool serialize(std::string& buffer);
-    bool deserialize(std::string& buffer);
-    bool exportDB();
-    bool importDB();
+    bool merge(uint32_t replica_id)
+    {
+        return false;
+    }
+
+    bool serialize(std::string& buffer)
+    {
+        return false;
+    }
+
+    bool deserialize(std::string& buffer)
+    {
+        return false;
+    }
+
+    bool exportDB()
+    {
+        return false;
+    }
+
+    bool importDB()
+    {
+        return false;
+    }
+
 public:
-    CounterOB<T>();
-    CounterOB<T>(T payload);
-    CounterOB<T>(const CounterOB<T>& rhs);
-    ~CounterOB();
+    CounterOB()
+    {
+        this->payload = T();
+        this->num_increments = 0;
+        this->num_decrements = 0;
+        this->id = 1;
+        // add to global list
+    }
+
+    CounterOB(T payload)
+    {
+        this->payload = payload;
+        payload > 0 ? this->num_increments = payload : this->num_decrements = payload;
+        this->id = 1;
+        // add to global list
+    }
+
+    CounterOB(const CounterOB<T>& rhs)
+    {
+        this->payload = rhs.payload;
+        rhs.payload > 0 ? this->num_increments = rhs.payload : this->num_decrements = rhs.payload;
+        this->id = 1;
+        // add to global list
+    }
+
+    ~CounterOB()
+    {
+        // remove from global list
+        ;  
+    }
 
     CounterOB<T> operator+(const CounterOB<T>& rhs);
     CounterOB<T> operator-(const CounterOB<T>& rhs);
@@ -101,6 +171,13 @@ public:
     bool operator!=(const CounterOB<T>& rhs);
     void operator+=(const CounterOB<T>& rhs);
     void operator-=(const CounterOB<T>& rhs);
+
+    const T& query() const
+    {
+        return this->payload;
+    }
+
+    // TODO: overload cout as friend to access variable, rn query is public, but make it protected
 };
 
 }   // namespace operation
