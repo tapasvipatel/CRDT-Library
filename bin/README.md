@@ -1,2 +1,0 @@
-# bin
-Tools build directory
