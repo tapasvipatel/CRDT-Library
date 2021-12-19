@@ -29,11 +29,12 @@
 #include "CrdtObject.hpp"
 #include "Server.hpp"
 
-enum crdtType
+enum CrdtType
 {
     CounterOB,
     GCounterOB,
-    GCounterSB
+    GCounterSB,
+    PNCounterSB
 }
 
 class CrdtHandle

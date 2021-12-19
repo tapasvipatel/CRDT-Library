@@ -25,4 +25,17 @@
 
 #include "CrdtObject.hpp"
 
+/*
+* template class for CRDT PNcounter
+*/
+template<typename T=int32_t>
+class PNCounterSB : CrdtObject
+{
+private:
+    static uint32_t next_available_id;
+private:
+    T payload;
+    std::vector
+}
+
 #endif  // __COUNTEROB_H__

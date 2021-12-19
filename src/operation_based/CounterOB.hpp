@@ -23,30 +23,52 @@
 #ifndef __COUNTEROB_H__
 #define __COUNTEROB_H__
 
+#include <unordered_map>
+
+#include "CrdtHandle.hpp"
 #include "CrdtObject.hpp"
 
+/*
+* metadata template class for CRDT counter
+*/
+template<typename T=uint32_t>
 class CounterMetadata : CrdtMetaData
 {
 private:
+    uint32_t id;
+    T num_increments;
+    T num_decrements;
+public:
+    CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOB);
+    CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOB);
+    ~CounterMetadata();
 
+    const T& getNumIncrements() const;
+    const T& getNumDecrements() const;
+    void setNumIncrements(T num_increments);
+    void setNumDecrements(T num_decrements);
 };
 
 /*
 * template class for CRDT counter
 */
-template<typename T=int32_t>
+template<typename T=uint32_t>
 class CounterOB : CrdtObject
 {
 private:
     static uint32_t next_available_id;
+    static void initializeCounterOB();
+    static uint32_t consumeNextAvailableID();
 
 private:
+    uint32_t id;
     T payload;
-    int32_t num_increments;
-    int32_t num_decrements;
+    T num_increments;
+    T num_decrements;
+    std::unordered_map<uint32_t, CounterMetadata> external_replica_metadata;
 protected:
-    T& query();
-    bool merge(const T& item);
+    const T& query() const;
+    bool merge(uint32_t replica_id);
     bool serialize(std::string& buffer);
     bool deserialize(std::string& buffer);
     bool exportDB();
@@ -75,8 +97,6 @@ public:
     bool operator!=(const CounterOB<T>& rhs);
     void operator+=(const CounterOB<T>& rhs);
     void operator-=(const CounterOB<T>& rhs);
-
-    friend uint32_t getNextAvailableID(const CounterOB<T>& counterob);
 };
 
 #endif  // __COUNTEROB_H__

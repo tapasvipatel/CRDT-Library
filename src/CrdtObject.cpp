@@ -27,10 +27,9 @@
 /*******************************************************************************************
 CrdtMetaData
 *******************************************************************************************/
-CrdtMetaData::CrdtMetaData(crdtType crdt_type, uint32_t id)
+CrdtMetaData::CrdtMetaData(crdtType crdt_type)
 {
     this->crdt_type = crdt_type;
-    this->id = id;
 }
 
 CrdtHandle::~CrdtMetaData()
@@ -41,9 +40,8 @@ CrdtHandle::~CrdtMetaData()
 /*******************************************************************************************
 CrdtObject
 *******************************************************************************************/
-CrdtObject::CrdtObject(uint32_t id)
+CrdtObject::CrdtObject()
 {
-    this->id = id;
     this->date_last_modified = std::chrono::system_clock::now();
 }
 
