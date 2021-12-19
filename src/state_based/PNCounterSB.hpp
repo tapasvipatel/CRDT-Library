@@ -23,17 +23,25 @@
 #ifndef __PNCOUNTERSB_H__
 #define __PNCOUNTERSB_H__
 
-#include "CrdtHandle.hpp"
-#include "CrdtObject.hpp"
+#include "../CrdtHandle.hpp"
+#include "../CrdtObject.hpp"
+
+namespace crdt
+{
+namespace state
+{
 
 /*
 * template class for CRDT PNcounter
 */
 template<typename T=int32_t>
-class PNCounterSB : CrdtObject
+class PNCounterSB : CrdtObject<T>
 {
 private:
     static uint32_t next_available_id;
-}
+};
+
+}   // namespace state
+}   // namespace crdt
 
 #endif  // __PNCOUNTERSB_H__

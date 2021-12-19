@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/tapasvi/workspace/CRDT-Library/src/CrdtHandle.hpp
+vector
+-
+unordered_map
+-
+CrdtObject.hpp
+/home/tapasvi/workspace/CRDT-Library/src/CrdtObject.hpp
+Server.hpp
+/home/tapasvi/workspace/CRDT-Library/src/Server.hpp
+
+/home/tapasvi/workspace/CRDT-Library/src/CrdtObject.hpp
+string
+-
+chrono
+-
+
+/home/tapasvi/workspace/CRDT-Library/src/Server.hpp
+string
+-
+unordered_map
+-
+queue
+-
+CrdtObject.hpp
+/home/tapasvi/workspace/CRDT-Library/src/CrdtObject.hpp
+
+/home/tapasvi/workspace/CRDT-Library/src/state_based/PNCounterSB.cpp
+PNCounterSB.hpp
+/home/tapasvi/workspace/CRDT-Library/src/state_based/PNCounterSB.hpp
+
+/home/tapasvi/workspace/CRDT-Library/src/state_based/PNCounterSB.hpp
+../CrdtHandle.hpp
+/home/tapasvi/workspace/CRDT-Library/src/CrdtHandle.hpp
+../CrdtObject.hpp
+/home/tapasvi/workspace/CRDT-Library/src/CrdtObject.hpp
+

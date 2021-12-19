@@ -1,12 +1,13 @@
-make_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
-project(crdtlib VERSION 1.0.0 LANGUAGES CXX)
+project(crdt VERSION 1.0.0 LANGUAGES CXX)
 
-add_library(crdtlib SHARED
-    CounterOB.cpp
+add_library(crdt SHARED
     CrdtHandle.cpp
     CrdtObject.cpp
     Server.cpp
+    operation_based/CounterOB.cpp
+    state_based/PNCounterSB.cpp
 )
 
-target_include_directories(crdtlib PRIVATE include)
+#target_include_directories(crdt PRIVATE include)

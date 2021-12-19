@@ -25,8 +25,13 @@
 
 #include <unordered_map>
 
-#include "CrdtHandle.hpp"
-#include "CrdtObject.hpp"
+#include "../CrdtHandle.hpp"
+#include "../CrdtObject.hpp"
+
+namespace crdt
+{
+namespace operation
+{
 
 /*
 * metadata template class for CRDT counter
@@ -39,8 +44,8 @@ private:
     T num_increments;
     T num_decrements;
 public:
-    CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOB);
-    CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOB);
+    CounterMetadata(uint32_t id); //: CrdtMetaData(CrdtType::CounterOB);
+    CounterMetadata(uint32_t id, T num_increments, T num_decrements); //: CrdtMetaData(CrdtType::CounterOB);
     ~CounterMetadata();
 
     const T& getNumIncrements() const;
@@ -53,7 +58,7 @@ public:
 * template class for CRDT counter
 */
 template<typename T=uint32_t>
-class CounterOB : CrdtObject
+class CounterOB : CrdtObject<T>
 {
 private:
     static uint32_t next_available_id;
@@ -65,7 +70,7 @@ private:
     T payload;
     T num_increments;
     T num_decrements;
-    std::unordered_map<uint32_t, CounterMetadata> external_replica_metadata;
+    std::unordered_map<uint32_t, CounterMetadata<T>> external_replica_metadata;
 protected:
     const T& query() const;
     bool merge(uint32_t replica_id);
@@ -85,7 +90,6 @@ public:
     CounterOB<T> operator^(const CounterOB<T>& rhs);
     bool operator&(const CounterOB<T>& rhs);
     bool operator|(const CounterOB<T>& rhs);
-    bool operator~(const CounterOB<T>& rhs);
     void operator=(const CounterOB<T>& rhs);
     bool operator<(const CounterOB<T>& rhs);
     bool operator>(const CounterOB<T>& rhs);
@@ -98,5 +102,8 @@ public:
     void operator+=(const CounterOB<T>& rhs);
     void operator-=(const CounterOB<T>& rhs);
 };
+
+}   // namespace operation
+}   // namespace crdt
 
 #endif  // __COUNTEROB_H__

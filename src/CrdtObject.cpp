@@ -27,12 +27,12 @@
 /*******************************************************************************************
 CrdtMetaData
 *******************************************************************************************/
-CrdtMetaData::CrdtMetaData(crdtType crdt_type)
+CrdtMetaData::CrdtMetaData(CrdtType crdt_type)
 {
     this->crdt_type = crdt_type;
 }
 
-CrdtHandle::~CrdtMetaData()
+CrdtMetaData::~CrdtMetaData()
 {
     ;
 }
@@ -40,12 +40,14 @@ CrdtHandle::~CrdtMetaData()
 /*******************************************************************************************
 CrdtObject
 *******************************************************************************************/
-CrdtObject::CrdtObject()
+template<typename T>
+CrdtObject<T>::CrdtObject()
 {
     this->date_last_modified = std::chrono::system_clock::now();
 }
 
-CrdtObject::~CrdtObject()
+template<typename T>
+CrdtObject<T>::~CrdtObject()
 {
     ;
 }

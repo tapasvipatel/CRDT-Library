@@ -29,19 +29,11 @@
 #include "CrdtObject.hpp"
 #include "Server.hpp"
 
-enum CrdtType
-{
-    CounterOB,
-    GCounterOB,
-    GCounterSB,
-    PNCounterSB
-}
-
 class CrdtHandle
 {
 private:
     Server server;
-    std::vector<unordered_map<uint32_t, CrdtObject*>> global_crdt_list;
+    // std::vector<std::unordered_map<uint32_t, CrdtObject*>> global_crdt_list;
 public:
     CrdtHandle(std::string ip_address, uint32_t port);
     ~CrdtHandle();

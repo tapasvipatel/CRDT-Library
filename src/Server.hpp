@@ -36,8 +36,9 @@ enum Request
     Remove, // remove replica from distributed system
     Get,    // get updates for an existing crdt
     Drop    // drop an existing crdt
-}
+};
 
+/*
 enum DataType
 {
     uint8_t,
@@ -52,15 +53,16 @@ enum DataType
     bool,
     double
 }
+*/
 
 class ExternalReplicaMetadata
 {
 private:
     uint32_t external_replica_id;
-    queue<CrdtMetadata> previous_queue;
-    queue<CrdtMetadata> ready_queue;
+    std::queue<CrdtMetaData> previous_queue;
+    std::queue<CrdtMetaData> ready_queue;
 public:
-    ExternalReplicaMetadata();
+    ExternalReplicaMetadata(uint32_t external_replica_id);
     ~ExternalReplicaMetadata();
 };
 
@@ -69,8 +71,8 @@ class Server
 private:
     std::string ip_address;
     uint32_t port;
-    unordered_map<string, uint32_t> lookup_table;
-    unordered_map<uint32_t, ExternalReplicaMetadata> replica_table;
+    std::unordered_map<std::string, uint32_t> lookup_table;
+    std::unordered_map<uint32_t, ExternalReplicaMetadata> replica_table;
 public:
     Server();
     Server(std::string ip_address, uint32_t port);

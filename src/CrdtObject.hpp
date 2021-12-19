@@ -24,13 +24,22 @@
 #define __CRDTOBJECT__
 
 #include <string>
+#include <chrono>
+
+enum CrdtType
+{
+    CounterOBType,
+    GCounterOBType,
+    GCounterSBType,
+    PNCounterSBType
+};
 
 class CrdtMetaData
 {
 private:
-    crdtType crdt_type;
+    CrdtType crdt_type;
 public:
-    CrdtMetaData(crdtType crdt_type, uint32_t id);
+    CrdtMetaData(CrdtType crdt_type);
     ~CrdtMetaData();
 };
 
@@ -38,7 +47,7 @@ template<typename T>
 class CrdtObject
 {
 private:
-    auto date_last_modified;
+    std::chrono::time_point<std::chrono::system_clock> date_last_modified;
 protected:
     virtual const T& query() const = 0;
     virtual bool merge(uint32_t replica_id) = 0;
@@ -47,7 +56,7 @@ protected:
     virtual bool exportDB() = 0;
     virtual bool importDB() = 0;
 public:
-    CrdtObject<T>(uint32_t id);
+    CrdtObject<T>();
     ~CrdtObject<T>();
 };
 

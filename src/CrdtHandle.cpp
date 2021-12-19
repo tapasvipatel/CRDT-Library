@@ -25,7 +25,7 @@
 /*******************************************************************************************
 CrdtHandle
 *******************************************************************************************/
-CrdtHandle::CrdtHandle(std::string ip_address, uint32_t port);
+CrdtHandle::CrdtHandle(std::string ip_address, uint32_t port)
 {
     this->server = Server(ip_address, port);
 }

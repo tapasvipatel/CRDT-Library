@@ -31,7 +31,7 @@ namespace operation
 CounterMetadata
 *******************************************************************************************/
 template<typename T>
-CounterMetadata<T>::CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOB)
+CounterMetadata<T>::CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::CounterOBType)
 {
     this->id = id;
     this->num_increments = 0;
@@ -39,7 +39,7 @@ CounterMetadata<T>::CounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::Counte
 }
 
 template<typename T>
-CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOB)
+CounterMetadata<T>::CounterMetadata(uint32_t id, T num_increments, T num_decrements) : CrdtMetaData(CrdtType::CounterOBType)
 {
     this->id = id;
     this->num_increments = num_increments;
@@ -64,11 +64,13 @@ const T& CounterMetadata<T>::getNumDecrements() const
     return this->num_decrements;
 }
 
+template<typename T>
 void CounterMetadata<T>::setNumIncrements(T num_increments)
 {
     this->num_increments = num_increments;
 }
 
+template<typename T>
 void CounterMetadata<T>::setNumDecrements(T num_decrements)
 {
     this->num_decrements = num_decrements;
@@ -78,14 +80,14 @@ void CounterMetadata<T>::setNumDecrements(T num_decrements)
 Constructor & Destructor
 *******************************************************************************************/
 template<typename T>
-static void CounterOB<T>::initializeCounterOB()
+void CounterOB<T>::initializeCounterOB()
 {
     CounterOB::next_available_id = 0;
 }
 template<typename T>
-static uint32_t consumeNextAvailableID()
+uint32_t consumeNextAvailableID()
 {
-    return CounterOB::next_available_id++;
+    return CounterOB<T>::next_available_id++;
 }
 
 template<typename T>
@@ -151,7 +153,7 @@ CounterOB<T> CounterOB<T>::operator-(const CounterOB<T>& rhs)
 * modulo operator is specialized for uint32_t type only
 */
 template<>
-CounterOB<uint32_t> CounterOB<uint32_t>::operator%(const CounterOB<T>& rhs)
+CounterOB<uint32_t> CounterOB<uint32_t>::operator%(const CounterOB<uint32_t>& rhs)
 {
     return CounterOB<uint32_t>(this->payload % rhs.payload);
 }
@@ -172,12 +174,6 @@ template<typename T>
 bool CounterOB<T>::operator|(const CounterOB<T>& rhs)
 {
     return this->payload | rhs.payload;
-}
-
-template<typename T>
-bool CounterOB<T>::operator~(const CounterOB<T>& rhs)
-{
-    return this->payload ~ rhs.payload;
 }
     
 template<typename T>

@@ -21,3 +21,12 @@
 */
 
 #include "PNCounterSB.hpp"
+
+namespace crdt
+{
+namespace state
+{
+
+
+}   // namespace state
+}   // namespace crdt
