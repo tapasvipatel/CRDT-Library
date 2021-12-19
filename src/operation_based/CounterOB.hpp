@@ -96,6 +96,7 @@ private:
     T num_increments;
     T num_decrements;
     std::unordered_map<uint32_t, CounterMetadata<T>> external_replica_metadata;
+
 protected:
     bool merge(uint32_t replica_id)
     {
@@ -128,50 +129,124 @@ public:
         this->payload = T();
         this->num_increments = 0;
         this->num_decrements = 0;
-        this->id = 1;
-        // add to global list
+        this->id = 1;   // TODO: fix logic
+        // TODO: add to global list
     }
 
     CounterOB(T payload)
     {
         this->payload = payload;
         payload > 0 ? this->num_increments = payload : this->num_decrements = payload;
-        this->id = 1;
-        // add to global list
+        this->id = 1;   // TODO: fix logic
+        // TODO: add to global list
     }
 
     CounterOB(const CounterOB<T>& rhs)
     {
         this->payload = rhs.payload;
         rhs.payload > 0 ? this->num_increments = rhs.payload : this->num_decrements = rhs.payload;
-        this->id = 1;
-        // add to global list
+        this->id = 1;   // TODO: fix logic
+        // TODO: add to global list
     }
 
     ~CounterOB()
     {
-        // remove from global list
+        // TODO: remove from global list
         ;  
     }
 
-    CounterOB<T> operator+(const CounterOB<T>& rhs);
-    CounterOB<T> operator-(const CounterOB<T>& rhs);
-    CounterOB<T> operator%(const CounterOB<T>& rhs);
-    CounterOB<T> operator^(const CounterOB<T>& rhs);
-    bool operator&(const CounterOB<T>& rhs);
-    bool operator|(const CounterOB<T>& rhs);
-    void operator=(const CounterOB<T>& rhs);
-    bool operator<(const CounterOB<T>& rhs);
-    bool operator>(const CounterOB<T>& rhs);
-    bool operator<=(const CounterOB<T>& rhs);
-    bool operator>=(const CounterOB<T>& rhs);
-    void operator++();
-    void operator--();
-    bool operator==(const CounterOB<T>& rhs);
-    bool operator!=(const CounterOB<T>& rhs);
-    void operator+=(const CounterOB<T>& rhs);
-    void operator-=(const CounterOB<T>& rhs);
+    CounterOB<T> operator+(const CounterOB<T>& rhs)
+    {
+        return CounterOB<T>(this->payload + rhs.payload);
+    }
 
+    CounterOB<T> operator-(const CounterOB<T>& rhs)
+    {
+        return CounterOB<T>(this->payload - rhs.payload);
+    }
+
+    template<>
+    CounterOB<uint32_t> operator%(const CounterOB<uint32_t>& rhs)
+    {
+        return CounterOB<uint32_t>(this->payload % rhs.payload);
+    }
+
+    CounterOB<T> operator^(const CounterOB<T>& rhs)
+    {
+        return CounterOB<T>(this->payload ^ rhs.payload);
+    }
+
+    bool operator&(const CounterOB<T>& rhs)
+    {
+        return this->payload & rhs.payload;
+    }
+
+    bool operator|(const CounterOB<T>& rhs)
+    {
+        return this->payload | rhs.payload;
+    }
+
+    void operator=(const CounterOB<T>& rhs)
+    {
+        this->payload = rhs.payload;
+    rhs.payload - this->payload > 0 ? this->num_increments += rhs.payload - this->payload : this->num_decrements -= this->payload - rhs.payload;
+    }
+
+    bool operator<(const CounterOB<T>& rhs)
+    {
+        return this->payload < rhs.payload;
+    }
+
+    bool operator>(const CounterOB<T>& rhs)
+    {
+        return this->payload > rhs.payload;
+    }
+
+    bool operator<=(const CounterOB<T>& rhs)
+    {
+        return this->payload <= rhs.payload;
+    }
+
+    bool operator>=(const CounterOB<T>& rhs)
+    {
+        return this->payload >= rhs.payload;
+    }
+
+    void operator++()
+    {
+        this->payload++;
+        this->num_increments++;
+    }
+
+    void operator--()
+    {
+        this->payload--;
+        this->num_decrements++;
+    }
+
+    bool operator==(const CounterOB<T>& rhs)
+    {
+        return this->payload == rhs.payload;
+    }
+
+    bool operator!=(const CounterOB<T>& rhs)
+    {
+        return this->payload != rhs.payload;
+    }
+
+    void operator+=(const CounterOB<T>& rhs)
+    {
+        this->payload += rhs.payload;
+        rhs.payload > 0 ? this->num_increments += rhs.payload : this->num_decrements += rhs.payload;
+    }
+
+    void operator-=(const CounterOB<T>& rhs)
+    {
+        this->payload -= rhs.payload;
+        rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;
+    }
+
+    // TODO: change to protected
     const T& query() const
     {
         return this->payload;

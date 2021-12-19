@@ -6,8 +6,6 @@ add_library(crdt STATIC
     CrdtHandle.cpp
     CrdtObject.cpp
     Server.cpp
-    #operation_based/CounterOB.cpp
-    state_based/PNCounterSB.cpp
 )
 
 #target_include_directories(crdt PRIVATE include)
