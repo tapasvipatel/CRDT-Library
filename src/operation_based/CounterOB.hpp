@@ -212,16 +212,18 @@ public:
         return this->payload >= rhs.payload;
     }
 
-    void operator++()
+    CounterOB<T>& operator++(int)
     {
         this->payload++;
         this->num_increments++;
+        return *this;
     }
 
-    void operator--()
+    CounterOB<T>& operator--(int)
     {
         this->payload--;
         this->num_decrements++;
+        return *this;
     }
 
     bool operator==(const CounterOB<T>& rhs)
