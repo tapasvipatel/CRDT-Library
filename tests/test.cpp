@@ -82,11 +82,10 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		obj2.setNumIncrements(3);
 		obj2.setNumIncrements(5);
 		obj3.setNumIncrements(100);
-		obj1.join({obj2,obj3,obj4});
-		// obj1.merge({2,3,4});
-		obj2.join({obj1,obj3,obj4});
-		obj3.join({obj1,obj2,obj4});
-		obj4.join({obj1,obj2,obj3});
+		obj1.merge({obj2,obj3,obj4});
+		obj2.merge({obj1,obj3,obj4});
+		obj3.merge({obj1,obj2,obj4});
+		obj4.merge({obj1,obj2,obj3});
 		REQUIRE(obj1.getTotalNumIncrements() == obj2.getTotalNumIncrements());
 		REQUIRE(obj3.getTotalNumIncrements() == obj4.getTotalNumIncrements());
 		REQUIRE(obj1.getTotalNumIncrements() == obj4.getTotalNumIncrements());  

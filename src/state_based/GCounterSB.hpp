@@ -52,17 +52,6 @@ class GCounterMetadata : CrdtMetaData
     {
         ;
     }
-
-    // void merge(std::vector<K> replica_ids) 
-    // {
-    //     for (auto replica_id : replica_ids) {
-    //         for (auto j: this->internal_replica_metadata)  {
-    //             this->internal_replica_metadata [j.first] = std::max(j.second, 
-    //             this->internal_replica_metadata [replica_id]);
-    //         }
-    //     }
-    // }
-
 };
 
 /*
@@ -127,13 +116,13 @@ public:
         }
         return totalSum;
     }
-    bool join(std::vector<GCounterSB<K,V>> replica_ids)
+    bool merge(std::vector<GCounterSB<K,V>> replica_ids)
     {
         for (auto replica_id : replica_ids) {
             for (auto replica: replica_id.internal_replica_metadata)  {
                 
                 internal_replica_metadata[replica.first] = std::max(replica.second, 
-                 internal_replica_metadata[replica.first]);
+                internal_replica_metadata[replica.first]);
             }
         }
         return true;
