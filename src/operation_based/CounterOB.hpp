@@ -36,7 +36,7 @@ namespace operation
 /*
 * metadata template class for CRDT counter
 */
-template<typename T=uint32_t>
+template<typename K = uint32_t, typename T=uint32_t>
 class CounterMetadata : CrdtMetaData
 {
 private:
@@ -87,8 +87,8 @@ public:
 /*
 * template class for CRDT counter
 */
-template<typename T=uint32_t>
-class CounterOB : CrdtObject<T>
+template<typename K = uint32_t, typename T=uint32_t>
+class CounterOB : CrdtObject<K,T>
 {
 private:
     uint32_t id;
@@ -98,7 +98,7 @@ private:
     std::unordered_map<uint32_t, CounterMetadata<T>> external_replica_metadata;
 
 protected:
-    bool merge(uint32_t replica_id)
+    bool merge(std::vector<T> replica_ids)
     {
         return false;
     }

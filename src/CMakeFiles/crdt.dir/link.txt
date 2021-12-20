@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcrdt.a  CMakeFiles/crdt.dir/CrdtHandle.cpp.o CMakeFiles/crdt.dir/CrdtObject.cpp.o CMakeFiles/crdt.dir/Server.cpp.o
+/usr/bin/ranlib libcrdt.a

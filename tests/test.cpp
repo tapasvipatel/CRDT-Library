@@ -4,6 +4,7 @@
 #include <catch2/catch_all.hpp>
 
 #include "../src/operation_based/CounterOB.hpp"
+#include "../src/state_based/GCounterSB.hpp"
 
 TEST_CASE("Test CounterOB", "[classic]")
 {
@@ -45,5 +46,49 @@ TEST_CASE("Test CounterOB", "[classic]")
 		REQUIRE(three.query_num_decrements() == 1);
 		REQUIRE(three.query_payload() == 2);
 		REQUIRE(four.query_num_increments() == 5);
+	}
+}
+
+
+
+TEST_CASE("Test GCounterSB", "[classic]")
+{
+	SECTION("Test Insert Operation")
+	{
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj1(1);
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj2(2);
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj3(3);
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj4(4);
+		obj1.setNumIncrements(6);
+		obj1.setNumIncrements(7);
+		obj1.setNumIncrements(8);
+		obj2.setNumIncrements(6);
+		obj2.setNumIncrements(3);
+		obj2.setNumIncrements(5);
+		obj3.setNumIncrements(100);
+		REQUIRE(obj1.getTotalNumIncrements() == 21);
+		REQUIRE(obj2.getTotalNumIncrements() == 14);
+	}
+	SECTION("Test Merge Operation")
+	{
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj1(1);
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj2(2);
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj3(3);
+		crdt::state::GCounterSB<uint32_t,uint32_t> obj4(4);
+		obj1.setNumIncrements(6);
+		obj1.setNumIncrements(7);
+		obj1.setNumIncrements(8);
+		obj2.setNumIncrements(6);
+		obj2.setNumIncrements(3);
+		obj2.setNumIncrements(5);
+		obj3.setNumIncrements(100);
+		obj1.join({obj2,obj3,obj4});
+		// obj1.merge({2,3,4});
+		obj2.join({obj1,obj3,obj4});
+		obj3.join({obj1,obj2,obj4});
+		obj4.join({obj1,obj2,obj3});
+		REQUIRE(obj1.getTotalNumIncrements() == obj2.getTotalNumIncrements());
+		REQUIRE(obj3.getTotalNumIncrements() == obj4.getTotalNumIncrements());
+		REQUIRE(obj1.getTotalNumIncrements() == obj4.getTotalNumIncrements());  
 	}
 }
