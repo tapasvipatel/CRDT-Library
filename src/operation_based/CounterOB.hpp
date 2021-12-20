@@ -246,13 +246,27 @@ public:
         rhs.payload > 0 ? this->num_decrements += rhs.payload : this->num_increments += rhs.payload;
     }
 
-    // TODO: change to protected
-    const T& query() const
+#ifdef BUILD_TESTING
+    const uint32_t& query_id() const
+    {
+        return this->id;
+    }
+
+    const T& query_payload() const
     {
         return this->payload;
     }
 
-    // TODO: overload cout as friend to access variable, rn query is public, but make it protected
+    const T& query_num_increments() const
+    {
+        return this->num_increments;
+    }
+
+    const T& query_num_decrements() const
+    {
+        return this->num_decrements;
+    }
+#endif
 };
 
 }   // namespace operation

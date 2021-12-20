@@ -16,9 +16,9 @@ TEST_CASE("Test CounterOB", "[classic]")
 		obj3 = obj1 + obj2;
 		obj4 = obj2 - obj1;
 
-		REQUIRE(obj1.query() == 1);
-		REQUIRE(obj2.query() == 2);
-		REQUIRE(obj3.query() == 3);
-		REQUIRE(obj4.query() == 1);
+		REQUIRE(obj1.query_payload() == 1);
+		REQUIRE(obj2.query_payload() == 2);
+		REQUIRE(obj3.query_payload() == 3);
+		REQUIRE(obj4.query_payload() == 1);
 	}
 }

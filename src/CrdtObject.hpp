@@ -54,9 +54,7 @@ protected:
     virtual bool deserialize(std::string& buffer) = 0;
     virtual bool exportDB() = 0;
     virtual bool importDB() = 0;
-public:
-    virtual const T& query() const = 0;
-    
+public:    
     CrdtObject()
     {
         this->date_last_modified = std::chrono::system_clock::now();
