@@ -189,7 +189,7 @@ public:
     void operator=(const CounterOB<T>& rhs)
     {
         this->payload = rhs.payload;
-    rhs.payload - this->payload > 0 ? this->num_increments += rhs.payload - this->payload : this->num_decrements -= this->payload - rhs.payload;
+        rhs.payload - this->payload > 0 ? this->num_increments += rhs.payload - this->payload : this->num_decrements -= this->payload - rhs.payload;
     }
 
     bool operator<(const CounterOB<T>& rhs)
@@ -212,16 +212,18 @@ public:
         return this->payload >= rhs.payload;
     }
 
-    void operator++()
+    CounterOB<T>& operator++(int)
     {
         this->payload++;
         this->num_increments++;
+        return *this;
     }
 
-    void operator--()
+    CounterOB<T>& operator--(int)
     {
         this->payload--;
         this->num_decrements++;
+        return *this;
     }
 
     bool operator==(const CounterOB<T>& rhs)
