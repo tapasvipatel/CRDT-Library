@@ -1,3 +1,0 @@
-/home/rushab/Capstone/GitHub/CRDT-Library/src/CMakeFiles/rebuild_cache.dir
-/home/rushab/Capstone/GitHub/CRDT-Library/src/CMakeFiles/edit_cache.dir
-/home/rushab/Capstone/GitHub/CRDT-Library/src/CMakeFiles/crdt.dir

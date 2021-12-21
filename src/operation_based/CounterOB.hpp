@@ -98,7 +98,7 @@ private:
     std::unordered_map<uint32_t, CounterMetadata<T>> external_replica_metadata;
 
 protected:
-    bool merge(std::vector<T> replica_ids)
+    bool merge(uint32_t replica_id)
     {
         return false;
     }
