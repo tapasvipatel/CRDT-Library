@@ -25,8 +25,9 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <map>
+#include <unordered_map>
 #include <vector>
+#include <iterator>
 
 
 namespace crdt
@@ -51,6 +52,12 @@ public:
         this->payload = 0;
     }
 
+    GCounterMetadata(uint32_t id, T payload) : CrdtMetaData(CrdtType::GCounterSBType)
+    {
+        this->id = id;
+        this->payload = payload;
+    }
+
     ~GCounterMetadata()
     {
         ;
@@ -61,13 +68,20 @@ public:
         this->payload = max(this->payload, payload);
     }
 
-#ifdef BUILD_TESTING
+    const T& queryId() const
+    {
+        return this->id;
+    }
+
+    const T& queryPayload() const
+    {
+        return this->payload;
+    }
+
     void updatePayload(T payload)
     {
         this->payload = payload;
     }
-
-#endif
 };
 
 /*
@@ -79,7 +93,7 @@ class GCounterSB : CrdtObject<T>
 private:
     uint32_t id;
     T payload;
-    std::map<uint32_t,GCounterMetadata<T>> replica_metadata;
+    std::unordered_map<uint32_t,GCounterMetadata<T>> replica_metadata;
 
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -106,36 +120,39 @@ protected:
         return false;
     }
 
-    bool updateInternalPayload()
-    {
-        T curr = T();
-        std::map<uint32_t,GCounterMetadata<T>>::iterator it;
-
-        for(it = this->replica_metadata.begin(); it != this->replica_metadata.end(); it++)
-        {
-            curr += it->second.payload;
-        }
-
-        this->payload = curr;
-    }
-
-    bool updateExternalPayload()
-    {
-        std::map<uint32_t,GCounterMetadata<T>>::iterator it;
-        it = this->replica_metadata.find(this->id);
-        it->second.payload = this->payload;
-    }
-
 public:
     GCounterSB(uint32_t id, T payload)
     {
         this->id = id;
         this->payload = payload;
+        this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(this->id, GCounterMetadata<T>(this->id, this->payload)));
     }
     
     ~GCounterSB()
     {
         ;
+    }
+
+    bool updateInternalPayload()
+    {
+        T curr = T();
+        typename std::unordered_map<uint32_t,GCounterMetadata<T>>::iterator metadata_it;
+
+        for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
+        {
+            curr += metadata_it->second.queryPayload();
+        }
+
+        this->payload = curr;
+        return true;
+    }
+
+    bool updateExternalPayload()
+    {
+        typename std::unordered_map<uint32_t,GCounterMetadata<T>>::iterator metadata_it;
+        metadata_it = this->replica_metadata.find(this->id);
+        metadata_it->second.payload = this->payload;
+        return true;
     }
 
 #ifdef BUILD_TESTING
@@ -149,9 +166,9 @@ public:
         return this->payload;
     }
 
-    void addExternalReplica(GCounterMetadata external_replica_metadata)
+    void addExternalReplica(GCounterMetadata<T> external_replica_metadata)
     {
-        this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata>(external_replica_metadata.id, external_replica_metadata));
+        this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(external_replica_metadata.queryId(), external_replica_metadata));
     }
 #endif
 };

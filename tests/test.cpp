@@ -75,16 +75,16 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		crdt::state::GCounterMetadata<uint32_t> replica2(2);
 		replica2.updatePayload(2);
 		crdt::state::GCounterMetadata<uint32_t> replica3(3);
-		replica2.updatePayload(5);
+		replica3.updatePayload(5);
 		crdt::state::GCounterMetadata<uint32_t> replica4(4);
-		replica2.updatePayload(7);
-
+		replica4.updatePayload(7);
+		
 		replica1.addExternalReplica(replica2);
 		replica1.addExternalReplica(replica3);
 		replica1.addExternalReplica(replica4);
 
 		replica1.updateInternalPayload();
 
-		REQUIRE(replica1.query_payload() == 15);
+		REQUIRE(replica1.queryPayload() == 15);
 	}
 }
