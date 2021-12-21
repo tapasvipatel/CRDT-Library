@@ -80,7 +80,7 @@ public:
 
     void updatePayload(T payload)
     {
-        this->payload = payload;
+        this->payload += payload;
     }
 };
 
@@ -166,9 +166,27 @@ public:
         return this->payload;
     }
 
-    void addExternalReplica(GCounterMetadata<T> external_replica_metadata)
+    void setPayLoad(T payload)
     {
-        this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(external_replica_metadata.queryId(), external_replica_metadata));
+        this->payload = payload;
+    }
+
+    void addExternalReplica(std::vector<GCounterMetadata<T>> external_replica_metadata)
+    {
+        for (auto &metadata: external_replica_metadata)
+        {
+            this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+        }
+        
+    }
+    void updateLocalExternalPayload(std::vector<GCounterSB> handlers)
+    {
+        T maxPayload;
+        for (auto handler: handlers)
+        {
+            maxPayload = std::max(handler.queryPayload(), maxPayload);
+        }
+        setPayLoad(maxPayload);
     }
 #endif
 };
