@@ -44,7 +44,7 @@ public:
     ~CrdtMetaData();
 };
 
-template<typename K, typename T>
+template<typename T>
 class CrdtObject
 {
 private:

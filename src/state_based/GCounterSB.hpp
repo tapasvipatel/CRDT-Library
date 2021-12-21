@@ -37,17 +37,45 @@ namespace state
 /*
 * metadata template class for CRDT counter
 */
-template<typename K=int32_t, typename V=int32_t>
+template<typename T=int32_t>
 class GCounterMetadata : CrdtMetaData
 {
     private:
-    K id;
+    uint32_t id;
+    T num_increments;
     public:
     
-    GCounterMetadata(K id) : CrdtMetaData(CrdtType::GCounterOBType)
+    GCounterMetadata(uint32_t id = 1) : CrdtMetaData(CrdtType::GCounterSBType)
     {
         this->id = id;
+        this->num_increments = 0;
     }
+    GCounterMetadata(uint32_t id, T num_increments) : CrdtMetaData(CrdtType::GCounterSBType)
+    {
+        this->id = id;
+        this->num_increments = num_increments;
+    }
+
+    void setReplicaID(uint32_t id, T num_increments = 0)
+    {
+        this->id = id;
+        this->num_increments = num_increments;
+    }
+
+    const T& getNumIncrements() const
+    {
+        return this->num_increments;
+    }
+
+    void setNumIncrements(T num_increments)
+    {
+        this->num_increments += num_increments;
+    }
+    void localMerge(T newPayload)
+    {
+        this->num_increments = newPayload;
+    }
+
     ~GCounterMetadata()
     {
         ;
@@ -57,14 +85,14 @@ class GCounterMetadata : CrdtMetaData
 /*
 * template class for CRDT Gcounter
 */
-template<typename K=int32_t, typename V=int32_t>
-class GCounterSB : CrdtObject<K,V>
+template<typename T=int32_t>
+class GCounterSB : CrdtObject<T>
 {
 private:
-    K id;
-    
+    uint32_t id;
+    T num_increments;
 protected:
-    bool merge(std::vector<K> replica_ids)
+    bool merge(std::vector<T> replica_ids)
     {
         return false;
     }
@@ -88,68 +116,49 @@ protected:
         return false;
     }
 
-    const V& getNumIncrements() const
-    {
-        return this->internal_replica_metadata[this->id];
-    }
-
-    const V& getTotalNumIncrements() const
-    {
-        V totalSum = 0;
-        for (auto &i: this->internal_replica_metadata) {
-            totalSum+=i.second;
-        }
-        return totalSum;
-    }
-
 public:
-    std::map<K,V> internal_replica_metadata;
-    GCounterSB(K id = 1)
+    std::map<uint32_t,GCounterMetadata<T>> external_replica_metadata;
+
+    //This function is just used for unit testing and testing locally
+    //Do not use for merging over the server
+    void localMerge() 
     {
+        T maxVal;
+        for (auto &replica: external_replica_metadata)
+        {
+            maxVal = std::max(maxVal, replica.second.getNumIncrements());
+        }
+        for (auto &replica: external_replica_metadata)
+        {
+            replica.second.localMerge(maxVal);
+        }
+
+    }
+
+    GCounterSB(uint32_t id = 1)
+    {
+        
         this->id = id;
+        this->num_increments = 0;
     }
-    V getTotalNumIncrements()
-    {
-        V totalSum = 0;
-        for (auto &i: internal_replica_metadata) {
-            totalSum+=i.second;
-        }
-        return totalSum;
-    }
-    bool merge(std::vector<GCounterSB<K,V>> replica_ids)
-    {
-        for (auto replica_id : replica_ids) {
-            for (auto replica: replica_id.internal_replica_metadata)  {
-                
-                internal_replica_metadata[replica.first] = std::max(replica.second, 
-                internal_replica_metadata[replica.first]);
-            }
-        }
-        return true;
-    }
-
-    void setNumIncrements(V num_increments)
-    {
-        this->internal_replica_metadata[this->id]+=num_increments;
-    }
-
+    
     ~GCounterSB()
     {
 
     }
 
 #ifdef BUILD_TESTING
-    const K& query_id() const
+    const T& query_id() const
     {
         return this->id;
     }
 
-    const V& query_num_increments() const
+    const T& query_num_increments() const
     {
         return this->getNumIncrements();
     }
 
-    const V& total_query_num_increments() const 
+    const T& total_query_num_increments() const 
     {
         return this->getTotalNumIncrements();
     }

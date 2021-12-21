@@ -55,39 +55,35 @@ TEST_CASE("Test GCounterSB", "[classic]")
 {
 	SECTION("Test Insert Operation")
 	{
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj1(1);
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj2(2);
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj3(3);
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj4(4);
-		obj1.setNumIncrements(6);
-		obj1.setNumIncrements(7);
-		obj1.setNumIncrements(8);
-		obj2.setNumIncrements(6);
-		obj2.setNumIncrements(3);
-		obj2.setNumIncrements(5);
-		obj3.setNumIncrements(100);
-		REQUIRE(obj1.getTotalNumIncrements() == 21);
-		REQUIRE(obj2.getTotalNumIncrements() == 14);
+		crdt::state::GCounterSB<uint32_t> obj1(1);
+		obj1.external_replica_metadata[1].setReplicaID(1);
+		obj1.external_replica_metadata[2].setReplicaID(2);
+		obj1.external_replica_metadata[1].setNumIncrements(6);
+		obj1.external_replica_metadata[1].setNumIncrements(7);
+		obj1.external_replica_metadata[1].setNumIncrements(8);
+		obj1.external_replica_metadata[2].setNumIncrements(6);
+		obj1.external_replica_metadata[2].setNumIncrements(3);
+		obj1.external_replica_metadata[2].setNumIncrements(5);
+		REQUIRE(obj1.external_replica_metadata[1].getNumIncrements() == 21);
+		REQUIRE(obj1.external_replica_metadata[2].getNumIncrements() == 14);
 	}
 	SECTION("Test Merge Operation")
 	{
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj1(1);
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj2(2);
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj3(3);
-		crdt::state::GCounterSB<uint32_t,uint32_t> obj4(4);
-		obj1.setNumIncrements(6);
-		obj1.setNumIncrements(7);
-		obj1.setNumIncrements(8);
-		obj2.setNumIncrements(6);
-		obj2.setNumIncrements(3);
-		obj2.setNumIncrements(5);
-		obj3.setNumIncrements(100);
-		obj1.merge({obj2,obj3,obj4});
-		obj2.merge({obj1,obj3,obj4});
-		obj3.merge({obj1,obj2,obj4});
-		obj4.merge({obj1,obj2,obj3});
-		REQUIRE(obj1.getTotalNumIncrements() == obj2.getTotalNumIncrements());
-		REQUIRE(obj3.getTotalNumIncrements() == obj4.getTotalNumIncrements());
-		REQUIRE(obj1.getTotalNumIncrements() == obj4.getTotalNumIncrements());  
+		crdt::state::GCounterSB<uint32_t> obj1(1);
+		obj1.external_replica_metadata[1].setReplicaID(1);
+		obj1.external_replica_metadata[2].setReplicaID(2);
+		obj1.external_replica_metadata[3].setReplicaID(3);
+		obj1.external_replica_metadata[4].setReplicaID(4);
+		obj1.external_replica_metadata[1].setNumIncrements(6);
+		obj1.external_replica_metadata[1].setNumIncrements(7);
+		obj1.external_replica_metadata[1].setNumIncrements(8);
+		obj1.external_replica_metadata[2].setNumIncrements(6);
+		obj1.external_replica_metadata[2].setNumIncrements(3);
+		obj1.external_replica_metadata[2].setNumIncrements(5);
+		obj1.external_replica_metadata[3].setNumIncrements(100);
+		obj1.localMerge();
+		REQUIRE(obj1.external_replica_metadata[1].getNumIncrements() == obj1.external_replica_metadata[2].getNumIncrements());
+		REQUIRE(obj1.external_replica_metadata[3].getNumIncrements() == obj1.external_replica_metadata[4].getNumIncrements());
+		REQUIRE(obj1.external_replica_metadata[1].getNumIncrements() == obj1.external_replica_metadata[4].getNumIncrements());
 	}
 }

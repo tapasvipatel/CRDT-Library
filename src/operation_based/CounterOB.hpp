@@ -36,7 +36,7 @@ namespace operation
 /*
 * metadata template class for CRDT counter
 */
-template<typename K = uint32_t, typename T=uint32_t>
+template<typename T=uint32_t>
 class CounterMetadata : CrdtMetaData
 {
 private:
@@ -87,8 +87,8 @@ public:
 /*
 * template class for CRDT counter
 */
-template<typename K = uint32_t, typename T=uint32_t>
-class CounterOB : CrdtObject<K,T>
+template<typename T=uint32_t>
+class CounterOB : CrdtObject<T>
 {
 private:
     uint32_t id;
