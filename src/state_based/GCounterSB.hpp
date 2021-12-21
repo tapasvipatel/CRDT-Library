@@ -40,46 +40,34 @@ namespace state
 template<typename T=int32_t>
 class GCounterMetadata : CrdtMetaData
 {
-    private:
+private:
     uint32_t id;
-    T num_increments;
-    public:
-    
-    GCounterMetadata(uint32_t id = 1) : CrdtMetaData(CrdtType::GCounterSBType)
+    T payload;
+
+public:
+    GCounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::GCounterSBType)
     {
         this->id = id;
-        this->num_increments = 0;
-    }
-    GCounterMetadata(uint32_t id, T num_increments) : CrdtMetaData(CrdtType::GCounterSBType)
-    {
-        this->id = id;
-        this->num_increments = num_increments;
-    }
-
-    void setReplicaID(uint32_t id, T num_increments = 0)
-    {
-        this->id = id;
-        this->num_increments = num_increments;
-    }
-
-    const T& getNumIncrements() const
-    {
-        return this->num_increments;
-    }
-
-    void setNumIncrements(T num_increments)
-    {
-        this->num_increments += num_increments;
-    }
-    void localMerge(T newPayload)
-    {
-        this->num_increments = newPayload;
+        this->payload = 0;
     }
 
     ~GCounterMetadata()
     {
         ;
     }
+    
+    void merge(T payload)
+    {
+        this->payload = max(this->payload, payload);
+    }
+
+#ifdef BUILD_TESTING
+    void updatePayload(T payload)
+    {
+        this->payload = payload;
+    }
+
+#endif
 };
 
 /*
@@ -90,9 +78,11 @@ class GCounterSB : CrdtObject<T>
 {
 private:
     uint32_t id;
-    T num_increments;
+    T payload;
+    std::map<uint32_t,GCounterMetadata<T>> replica_metadata;
+
 protected:
-    bool merge(std::vector<T> replica_ids)
+    bool merge(std::vector<uint32_t> replica_ids)
     {
         return false;
     }
@@ -116,51 +106,52 @@ protected:
         return false;
     }
 
-public:
-    std::map<uint32_t,GCounterMetadata<T>> external_replica_metadata;
-
-    //This function is just used for unit testing and testing locally
-    //Do not use for merging over the server
-    void localMerge() 
+    bool updateInternalPayload()
     {
-        T maxVal;
-        for (auto &replica: external_replica_metadata)
+        T curr = T();
+        std::map<uint32_t,GCounterMetadata<T>>::iterator it;
+
+        for(it = this->replica_metadata.begin(); it != this->replica_metadata.end(); it++)
         {
-            maxVal = std::max(maxVal, replica.second.getNumIncrements());
-        }
-        for (auto &replica: external_replica_metadata)
-        {
-            replica.second.localMerge(maxVal);
+            curr += it->second.payload;
         }
 
+        this->payload = curr;
     }
 
-    GCounterSB(uint32_t id = 1)
+    bool updateExternalPayload()
     {
-        
+        std::map<uint32_t,GCounterMetadata<T>>::iterator it;
+        it = this->replica_metadata.find(this->id);
+        it->second.payload = this->payload;
+    }
+
+public:
+    GCounterSB(uint32_t id, T payload)
+    {
         this->id = id;
-        this->num_increments = 0;
+        this->payload = payload;
     }
     
     ~GCounterSB()
     {
-
+        ;
     }
 
 #ifdef BUILD_TESTING
-    const T& query_id() const
+    const T& queryId() const
     {
         return this->id;
     }
 
-    const T& query_num_increments() const
+    const T& queryPayload() const
     {
-        return this->getNumIncrements();
+        return this->payload;
     }
 
-    const T& total_query_num_increments() const 
+    void addExternalReplica(GCounterMetadata external_replica_metadata)
     {
-        return this->getTotalNumIncrements();
+        this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata>(external_replica_metadata.id, external_replica_metadata));
     }
 #endif
 };
