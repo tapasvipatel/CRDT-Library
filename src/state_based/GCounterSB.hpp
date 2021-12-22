@@ -182,10 +182,21 @@ public:
     }
     void updateLocalExternalPayload(std::vector<GCounterSB> handlers)
     {
-        T maxPayload;
+        T maxPayload = T();
         for (auto handler: handlers)
         {
-            maxPayload = std::max(handler.queryPayload(), maxPayload);
+            for (auto &iter: handler.replica_metadata)
+            {
+                auto metadata = iter.second;
+                auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+                if (replica.second)
+                {
+                    maxPayload += std::max(metadata.queryPayload(),replica.first->second.queryPayload());
+                } else
+                {
+                    maxPayload += metadata.queryPayload();
+                }
+            }
         }
         setPayLoad(maxPayload);
     }
