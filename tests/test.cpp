@@ -256,12 +256,12 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		crdt::state::PNCounterSB<uint32_t> handler1(1, 0); //Represents Server 1
 		crdt::state::PNCounterSB<uint32_t> handler2(2, 0); //Represents Server 2
 		crdt::state::PNCounterSB<uint32_t> handler3(3, 0); //Represents Server 3
-		crdt::state::PNCounterMetadata<uint32_t> replica1A(2,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica1B(3,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica2A(4,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica2B(5,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica3A(6,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica3B(7,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica1A(4,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica1B(5,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica2A(6,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica2B(7,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica3A(8,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica3B(9,10);
 		handler1.addExternalReplica({replica1A,replica1B});
 		handler1.updateInternalPayload();
 		handler2.addExternalReplica({replica2A,replica2B});
@@ -293,10 +293,10 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		handler3.updateLocalExternalPayload({handler3,handler1,handler2});
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
-		crdt::state::PNCounterMetadata<uint32_t> replicaConflict(3,9);
+		crdt::state::PNCounterMetadata<uint32_t> replicaConflict(5,9);
 		handler2.addExternalReplica({replicaConflict});
 		handler2.updateInternalPayload();
-		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler1.updateLocalExternalPayload({handler2,handler1,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());

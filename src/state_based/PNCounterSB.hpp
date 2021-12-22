@@ -67,7 +67,7 @@ public:
         return this->id;
     }
 
-    const T& queryPayload() const
+    const T& queryPayloadT() const
     {
         return this->totalPayload;
     }
@@ -163,7 +163,7 @@ public:
 
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
-            curr += metadata_it->second.queryPayload();
+            curr += metadata_it->second.queryPayloadT();
         }
 
         this->payload = curr;
@@ -209,15 +209,33 @@ public:
     }
     void updateLocalExternalPayload(std::vector<PNCounterSB> handlers)
     {
+       
        T maxPayload = T();
         for (auto handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
-                maxPayload += metadata.queryPayload();
+                
+                auto metadata_it = this->replica_metadata.find(metadata.queryId());
+                if (metadata_it != this->replica_metadata.end()) 
+                {
+                    auto newmaxVal = std::max(metadata.queryPayloadT(),metadata_it->second.queryPayloadT());
+                    if (metadata.queryPayloadT() == newmaxVal)
+                    {
+                       auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
+                       replica.first->second = metadata;
+                    }
+                    maxPayload += newmaxVal;
+                }
+                else
+                {
+                    maxPayload += metadata.queryPayloadT();
+                }
+                // std::cout << maxPayload << " ";
             }
         }
+       //  std::cout << std::endl;
         setPayLoad(maxPayload);
     }
 #endif
