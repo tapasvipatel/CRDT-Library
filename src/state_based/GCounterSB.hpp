@@ -65,7 +65,7 @@ public:
     
     void merge(T payload)
     {
-        this->payload = max(this->payload, payload);
+        this->payload = std::max(this->payload, payload);
     }
 
     const T& queryId() const
@@ -82,6 +82,12 @@ public:
     {
         this->payload += payload;
     }
+
+    void setPayload(T payload)
+    {
+        this->payload = payload;
+    }
+    
 };
 
 /*
@@ -175,8 +181,19 @@ public:
     {
         for (auto &metadata: external_replica_metadata)
         {
-            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
-            if (!replica.second) replica.first->second = metadata;
+            auto metadata_it = this->replica_metadata.find(metadata.queryId());
+            if (metadata_it != this->replica_metadata.end())
+            {
+               auto metadata_it = this->replica_metadata.find(metadata.queryId());
+               metadata.setPayload(std::max(metadata_it->second.queryPayload(), metadata.queryPayload()));
+               auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+               if (!replica.second) replica.first->second = metadata;
+            } 
+            else
+            {
+                auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+                if (!replica.second) replica.first->second = metadata;
+            } 
         }
         
     }
@@ -188,10 +205,18 @@ public:
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
-                auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
-                if (replica.second) //If there two replicas with the same ids, we take the max of the two
+                auto metadata_it = this->replica_metadata.find(metadata.queryId());
+                if (metadata_it != this->replica_metadata.end()) //If there two replicas with the same ids, we take the max of the two
                 {
-                    maxPayload += std::max(metadata.queryPayload(),replica.first->second.queryPayload());
+                    auto newmaxVal = std::max(metadata.queryPayload(),metadata_it->second.queryPayload());
+                    if (metadata_it->second.queryPayload() != newmaxVal)
+                    {
+                        //If it found a conflict, aka, found the same replica id, but another server has higher value
+                        //the server will update its own replica to become this higher value
+                        auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+                        if (!replica.second) replica.first->second = metadata;
+                    } 
+                    maxPayload += newmaxVal;
                 } else
                 {
                     maxPayload += metadata.queryPayload();

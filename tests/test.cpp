@@ -76,6 +76,21 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		REQUIRE(handler.queryPayload() == 21);
 		REQUIRE(handler2.queryPayload() == 14);
 	}
+	SECTION("Test Handling Same Keys")
+	{
+		crdt::state::GCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		/* Create several replicas all with key = 1 */
+		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica1B(1,15);
+		crdt::state::GCounterMetadata<uint32_t> replica1C(1,8);
+		crdt::state::GCounterMetadata<uint32_t> replica1D(1,2);
+		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
+		handler.updateInternalPayload();
+		replica1A.updatePayload(25);
+		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
+		handler.updateInternalPayload();
+		REQUIRE(handler.queryPayload()== 31);
+	}
 	SECTION("Test Merge Operation")
 	{
 		crdt::state::GCounterSB<uint32_t> handler(1, 0); //Represents Server 1
@@ -106,15 +121,10 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		crdt::state::GCounterMetadata<uint32_t> replica4C(9,15);
 		handler4.addExternalReplica({replica4A,replica4B,replica4C});
 		handler4.updateInternalPayload();
-		auto server1 = handler;
-		auto server2 = handler2;
-		auto server3 = handler3;
-		auto server4 = handler4;
-		handler.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler2.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler3.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler4.updateLocalExternalPayload({server1,server2,server3,server4});
-		INFO(handler.queryPayload());
+		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler2.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler3.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler4.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
@@ -124,15 +134,10 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		handler.addExternalReplica({replica1A});
 		handler.updateInternalPayload();
 		//30 s have passed and now we poll from all servers
-		server1 = handler;
-		server2 = handler2;
-		server3 = handler3;
-		server4 = handler4;
-		handler.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler2.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler3.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler4.updateLocalExternalPayload({server1,server2,server3,server4});
-		INFO(handler.queryPayload());
+		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler2.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler3.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler4.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
@@ -141,15 +146,14 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		handler.addExternalReplica({replica2A}); //Server one will now cause conflict with server two
 		handler.updateInternalPayload();
 		//30 s have passed and now we poll from all servers
-		server1 = handler;
-		server2 = handler2;
-		server3 = handler3;
-		server4 = handler4;
-		handler.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler2.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler3.updateLocalExternalPayload({server1,server2,server3,server4});
-		handler4.updateLocalExternalPayload({server1,server2,server3,server4});
+		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler2.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler3.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		handler4.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		INFO(handler.queryPayload());
+		INFO(handler2.queryPayload());
+		INFO(handler3.queryPayload());
+		INFO(handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
