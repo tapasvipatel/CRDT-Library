@@ -41,6 +41,7 @@ private:
     uint32_t id;
     T positivePayload;
     T negativePayload;
+    T totalPayload;
 public:
     PNCounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::PNCounterSBType)
     {
@@ -52,6 +53,7 @@ public:
     {
         this->id = id;
         this->positivePayload = positivePayload;
+        this->totalPayload = positivePayload;
         this->negativePayload = 0;
     }
     ~PNCounterMetadata()
@@ -71,17 +73,19 @@ public:
 
     const T& queryPayload() const
     {
-        return this->positivePayload - this->negativePayload;
+        return this->totalPayload;
     }
 
     void increasePayload(T positivePayload)
     {
         this->positivePayload += positivePayload;
+        this->totalPayload = this->positivePayload - this->negativePayload;
     }
 
     void decreasePayload(T negativePayload)
     {
         this->negativePayload += negativePayload;
+        this->totalPayload = this->positivePayload - this->negativePayload;
     }
 
 };
@@ -96,7 +100,7 @@ class PNCounterSB : CrdtObject<T>
 private:
     uint32_t id;
     T payload;
-    std::unordered_map<uint32_t,GCounterMetadata<T>> replica_metadata;
+    std::unordered_map<uint32_t,PNCounterMetadata<T>> replica_metadata;
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
     {

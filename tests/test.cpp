@@ -6,6 +6,7 @@
 
 #include "../src/operation_based/CounterOB.hpp"
 #include "../src/state_based/GCounterSB.hpp"
+#include "../src/state_based/PNCounterSB.hpp"
 
 TEST_CASE("Test CounterOB", "[classic]")
 {
@@ -111,5 +112,30 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
+	}
+}
+
+TEST_CASE("Test PNCounterSB", "[classic]")
+{
+	SECTION("Test Insert Operation")
+	{
+			crdt::state::PNCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+			/* Belongs to Server 1 */
+			crdt::state::PNCounterMetadata<uint32_t> replica1A(2,6);
+			crdt::state::PNCounterMetadata<uint32_t> replica1B(3,7);
+			crdt::state::PNCounterMetadata<uint32_t> replica1C(4,8);
+			handler.addExternalReplica({replica1A,replica1B,replica1C});
+			handler.updateInternalPayload();
+
+			crdt::state::PNCounterSB<uint32_t> handler2(5, 0); //Represents Server 2
+			/* Belongs to Server 2 */
+			crdt::state::PNCounterMetadata<uint32_t> replica2A(6,6);
+			crdt::state::PNCounterMetadata<uint32_t> replica2B(7,3);
+			crdt::state::PNCounterMetadata<uint32_t> replica2C(8,5);
+			handler2.addExternalReplica({replica2A,replica2B,replica2C});
+			handler2.updateInternalPayload();
+
+			REQUIRE(handler.queryPayload() == 21);
+			REQUIRE(handler2.queryPayload() == 14);
 	}
 }
