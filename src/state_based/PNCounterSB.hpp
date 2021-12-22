@@ -184,10 +184,21 @@ public:
     }
     void updateLocalExternalPayload(std::vector<PNCounterSB> handlers)
     {
-        T maxPayload = T();
+       T maxPayload = T();
         for (auto handler: handlers)
         {
-            maxPayload = std::max(handler.queryPayload(), maxPayload);
+            for (auto &iter: handler.replica_metadata)
+            {
+                auto metadata = iter.second;
+                auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
+                if (replica.second) //If there two replicas with the same ids, we take the max of the two
+                {
+                    maxPayload += std::max(metadata.queryPayload(),replica.first->second.queryPayload());
+                } else
+                {
+                    maxPayload += metadata.queryPayload();
+                }
+            }
         }
         setPayLoad(maxPayload);
     }

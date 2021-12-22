@@ -114,7 +114,7 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		handler2.updateLocalExternalPayload({server1,server2,server3,server4});
 		handler3.updateLocalExternalPayload({server1,server2,server3,server4});
 		handler4.updateLocalExternalPayload({server1,server2,server3,server4});
-
+		INFO(handler.queryPayload());
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
@@ -132,10 +132,27 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		handler2.updateLocalExternalPayload({server1,server2,server3,server4});
 		handler3.updateLocalExternalPayload({server1,server2,server3,server4});
 		handler4.updateLocalExternalPayload({server1,server2,server3,server4});
+		INFO(handler.queryPayload());
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
-
+		replica2A.updatePayload(3);
+		
+		handler.addExternalReplica({replica2A}); //Server one will now cause conflict with server two
+		handler.updateInternalPayload();
+		//30 s have passed and now we poll from all servers
+		server1 = handler;
+		server2 = handler2;
+		server3 = handler3;
+		server4 = handler4;
+		handler.updateLocalExternalPayload({server1,server2,server3,server4});
+		handler2.updateLocalExternalPayload({server1,server2,server3,server4});
+		handler3.updateLocalExternalPayload({server1,server2,server3,server4});
+		handler4.updateLocalExternalPayload({server1,server2,server3,server4});
+		INFO(handler.queryPayload());
+		REQUIRE(handler.queryPayload() == handler2.queryPayload());
+		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
+		REQUIRE(handler.queryPayload() == handler4.queryPayload());
 	}
 }
 
@@ -239,6 +256,14 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		replica3B.decreasePayload(5);
 		handler3.addExternalReplica({replica3A,replica3B});
 		handler3.updateInternalPayload();
-		
+		auto server1 = handler1;
+		auto server2 = handler2;
+		auto server3 = handler3;
+		handler1.updateLocalExternalPayload({server1,server2,server3});
+		handler2.updateLocalExternalPayload({server1,server2,server3});
+		handler3.updateLocalExternalPayload({server1,server2,server3});
+		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
+		INFO(handler1.queryPayload());
 	}
 }

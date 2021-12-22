@@ -189,7 +189,7 @@ public:
             {
                 auto metadata = iter.second;
                 auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
-                if (replica.second)
+                if (replica.second) //If there two replicas with the same ids, we take the max of the two
                 {
                     maxPayload += std::max(metadata.queryPayload(),replica.first->second.queryPayload());
                 } else
