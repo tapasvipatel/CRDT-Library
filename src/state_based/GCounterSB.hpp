@@ -186,16 +186,10 @@ public:
             {
                auto metadata_it = this->replica_metadata.find(metadata.queryId());
                metadata.setPayload(std::max(metadata_it->second.queryPayload(), metadata.queryPayload()));
-               auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
-               if (!replica.second) replica.first->second = metadata;
             } 
-            else
-            {
-                auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
-                if (!replica.second) replica.first->second = metadata;
-            } 
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+            if (!replica.second) replica.first->second = metadata;
         }
-        
     }
     void updateLocalExternalPayload(std::vector<GCounterSB> handlers)
     {

@@ -60,11 +60,7 @@ public:
     {
         ;
     }
-    void merge(T payload)
-    {
-        this->positivePayload = std::max(this->positivePayload, payload);
-        this->negativePayload = std::max(this->negativePayload, payload);
-    }
+    
 
     const T& queryId() const
     {
@@ -76,6 +72,15 @@ public:
         return this->totalPayload;
     }
 
+    const T& queryPayloadP() const
+    {
+        return this->positivePayload;
+    }
+    const T& queryPayloadN() const
+    {
+        return this->negativePayload;
+    }
+
     void increasePayload(T positivePayload)
     {
         this->positivePayload += positivePayload;
@@ -85,6 +90,20 @@ public:
     void decreasePayload(T negativePayload)
     {
         this->negativePayload += negativePayload;
+        this->totalPayload = this->positivePayload - this->negativePayload;
+    }
+    void setPayloadT(T payload)
+    {
+        this->totalPayload = payload;
+    }
+    void setPayloadP(T payload)
+    {
+        this->positivePayload = payload;
+        this->totalPayload = this->positivePayload - this->negativePayload;
+    }
+    void setPayloadN(T payload)
+    {
+        this->negativePayload = payload;
         this->totalPayload = this->positivePayload - this->negativePayload;
     }
 
@@ -177,10 +196,16 @@ public:
     {
         for (auto &metadata: external_replica_metadata)
         {
+            auto metadata_it = this->replica_metadata.find(metadata.queryId());
+            if (metadata_it != this->replica_metadata.end())
+            {
+               auto metadata_it = this->replica_metadata.find(metadata.queryId());
+               metadata.setPayloadP(std::max(metadata_it->second.queryPayloadP(), metadata.queryPayloadP()));
+               metadata.setPayloadN(std::max(metadata_it->second.queryPayloadN(), metadata.queryPayloadN()));
+            } 
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
-            
-        }   
+        }
     }
     void updateLocalExternalPayload(std::vector<PNCounterSB> handlers)
     {
@@ -190,14 +215,7 @@ public:
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
-                auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
-                if (replica.second) //If there two replicas with the same ids, we take the max of the two
-                {
-                    maxPayload += std::max(metadata.queryPayload(),replica.first->second.queryPayload());
-                } else
-                {
-                    maxPayload += metadata.queryPayload();
-                }
+                maxPayload += metadata.queryPayload();
             }
         }
         setPayLoad(maxPayload);
