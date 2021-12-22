@@ -139,6 +139,7 @@ public:
     bool updateInternalPayload()
     {
         T curr = T();
+        
         typename std::unordered_map<uint32_t,PNCounterMetadata<T>>::iterator metadata_it;
 
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
@@ -176,13 +177,14 @@ public:
     {
         for (auto &metadata: external_replica_metadata)
         {
-            this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
-        }
-        
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
+            if (!replica.second) replica.first->second = metadata;
+            
+        }   
     }
     void updateLocalExternalPayload(std::vector<PNCounterSB> handlers)
     {
-        T maxPayload;
+        T maxPayload = T();
         for (auto handler: handlers)
         {
             maxPayload = std::max(handler.queryPayload(), maxPayload);

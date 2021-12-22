@@ -175,7 +175,8 @@ public:
     {
         for (auto &metadata: external_replica_metadata)
         {
-            this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
+            if (!replica.second) replica.first->second = metadata;
         }
         
     }

@@ -138,4 +138,20 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 			REQUIRE(handler.queryPayload() == 21);
 			REQUIRE(handler2.queryPayload() == 14);
 	}
+	SECTION("Test Add/Subtract Operation")
+	{
+		crdt::state::PNCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::PNCounterMetadata<uint32_t> replica1A(2,6);
+		handler.addExternalReplica({replica1A});
+		replica1A.increasePayload(7);
+		replica1A.increasePayload(16);
+		handler.addExternalReplica({replica1A});
+		handler.updateInternalPayload();
+		REQUIRE(handler.queryPayload() == 29);
+		replica1A.increasePayload(2);
+		replica1A.decreasePayload(8);
+		handler.addExternalReplica({replica1A});
+		handler.updateInternalPayload();
+		REQUIRE(handler.queryPayload() == 23);
+	}
 }
