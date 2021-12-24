@@ -32,7 +32,8 @@ enum CrdtType
     CounterOBType,
     GCounterOBType,
     GCounterSBType,
-    PNCounterSBType
+    PNCounterSBType,
+    GMapSBType
 };
 
 class CrdtMetaData
