@@ -49,6 +49,11 @@ class GMapMetadata : CrdtMetaData
         this->id = id;
         this->payload[key] = value;
     }
+    GMapMetadata(uint32_t id, std::map<K,T> payload)
+    {
+        this->id = id;
+        this->payload = payload;
+    }
     ~GMapMetadata()
     {
         ;
@@ -57,7 +62,7 @@ class GMapMetadata : CrdtMetaData
     {
         return this->id;
     }
-    const T& queryPayload(K key) const
+    const T& queryPayloadValue(K key) const
     {
         return this->payload[key];
     }
@@ -65,6 +70,11 @@ class GMapMetadata : CrdtMetaData
     void insert(K key, T value) 
     {
         this->payload[key]=value;
+    }
+
+    const std::map<K,T> queryPayload() const
+    {
+        return this->payload;
     }
 
     const K& getKey(T value)
@@ -83,8 +93,9 @@ class GMapMetadata : CrdtMetaData
 template<typename K = int32_t, typename T=int32_t>
 class GMapSB : CrdtObject<T>
 {
-    uint32_t id;
-    T payload;
+    uint32_t id; // Represents the server id
+
+    std::unordered_map<uint32_t,std::map<K,T>> payload; 
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
     protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -111,12 +122,61 @@ class GMapSB : CrdtObject<T>
         return false;
     }
     public:
-    GMapSB(uint32_t id, K key, T value)
+    GMapSB(uint32_t id)
     {
         this->id = id;
-        this->replica_metadata.insert(std::pair<uint32_t, GMapMetadata<K,T>>(this->id, GMapMetadata<K,T>(this->id, key, value));
+    }
+    ~GMapSB()
+    {
+        ;
+    }
+    bool updateInternalPayload(GMapMetadata<K,T> metadata)
+    {
+        this->payload[metadata.queryId()] = metadata.queryPayload();
+        return true;
     }
 
+#ifdef BUILD_TESTING
+    const T& queryId() const
+    {
+        return this->id;
+    }
+
+    T queryPayload(K mapId, K key) 
+    {
+        T val = T();
+        auto metadata_it = this->payload[mapId].find(key);
+        if (metadata_it != this->payload[mapId].end())
+        {
+            return metadata_it->second;
+        }
+        return val;
+    }
+
+   
+
+    void addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)
+    {
+        for (auto &metadata: external_replica_metadata)
+        {
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GMapMetadata<K,T>>(metadata.queryId(), metadata));
+            if (!replica.second) replica.first->second = metadata;
+            updateInternalPayload(metadata);
+        }
+    }
+    void updateLocalExternalPayload(std::vector<GMapSB> handlers)
+    {
+    
+        for (auto handler: handlers)
+        {
+            for (auto &iter: handler.replica_metadata)
+            {
+                ;
+            }
+        }
+       
+    }
+#endif
 
 };
 

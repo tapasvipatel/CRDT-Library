@@ -7,6 +7,7 @@
 #include "../src/operation_based/CounterOB.hpp"
 #include "../src/state_based/GCounterSB.hpp"
 #include "../src/state_based/PNCounterSB.hpp"
+#include "../src/state_based/GMapSB.hpp"
 
 TEST_CASE("Test CounterOB", "[classic]")
 {
@@ -302,4 +303,26 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
+}
+
+TEST_CASE("Test GMapSB", "[classic]")
+{
+	SECTION("Test Insert Operation")
+	{
+			crdt::state::GMapSB<uint32_t, uint32_t> handler(1); //Represents Server 1
+			/* Create 3 different hashmaps*/
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1A(1,0,1);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1B(2,1,5);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1C(3,2,7);
+			handler.addExternalReplica({replica1A,replica1B,replica1C});
+			REQUIRE(handler.queryPayload(2,1) == 5);
+			replica1B.insert(1,25);
+			handler.addExternalReplica({replica1A,replica1B,replica1C});
+			REQUIRE(handler.queryPayload(2,1) == 25);
+			
+	}
+
+
+
+
 }
