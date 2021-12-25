@@ -33,7 +33,8 @@ enum CrdtType
     GCounterOBType,
     GCounterSBType,
     PNCounterSBType,
-    GMapSBType
+    GMapSBType,
+    PriorityQueueSBType
 };
 
 class CrdtMetaData

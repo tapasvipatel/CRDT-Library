@@ -8,6 +8,7 @@
 #include "../src/state_based/GCounterSB.hpp"
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/GMapSB.hpp"
+#include "../src/state_based/PriorityQueueSB.hpp"
 
 TEST_CASE("Test CounterOB", "[classic]")
 {
@@ -438,5 +439,41 @@ TEST_CASE("Test GMapSB", "[classic]")
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayload(2,10) == handler2.queryPayload(2,10));
 		REQUIRE(handler2.queryPayload(2,10) == handler3.queryPayload(2,10));
+	}
+}
+
+TEST_CASE("Test PriorityQueueSB", "[classic]")
+{
+	SECTION("Test Insert Operation")
+	{
+		crdt::state::PriorityQueueSB<uint32_t> handler(1); //Represents Server 1
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0,5);
+		replica1A.push(7);
+		replica1A.push(2);
+		handler.addExternalReplica({replica1A});
+		std::vector<uint32_t> test1 = {7,5,2};
+		std::vector<uint32_t> test2;
+		auto totalPQ = handler.queryPayload();
+		while (!totalPQ.empty()) {
+			test2.push_back(totalPQ.top());
+			totalPQ.pop();
+		}
+		REQUIRE(test1 == test2);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1B(1,100);
+		replica1B.push(200);
+		replica1B.push(50);
+		replica1B.push(300);
+		replica1B.push(20);
+		replica1B.push(1);
+		handler.addExternalReplica({replica1B});
+		std::vector<uint32_t> test3 = {300,200,100,50,20,7,5,2,1};
+		std::vector<uint32_t> test4;
+		auto query2 = handler.queryPayload();
+		while (!query2.empty())
+		{
+			test4.push_back(query2.top());
+			query2.pop();
+		}
+		REQUIRE(test3 == test4);
 	}
 }

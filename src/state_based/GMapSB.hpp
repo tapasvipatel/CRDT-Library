@@ -31,9 +31,9 @@ namespace crdt
 namespace state
 {
 /*
-* metadata template class for CRDT counter
+* metadata template class for CRDT GMap
 */
-template<typename K, typename T = std::string>
+template<typename K, typename T = uint32_t>
 class GMapMetadata : CrdtMetaData
 {
     private:
