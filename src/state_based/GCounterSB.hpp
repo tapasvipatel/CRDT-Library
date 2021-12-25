@@ -68,7 +68,7 @@ public:
         this->payload = std::max(this->payload, payload);
     }
 
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }
@@ -162,7 +162,7 @@ public:
     }
 
 #ifdef BUILD_TESTING
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }

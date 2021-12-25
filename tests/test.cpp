@@ -158,67 +158,60 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 {
 	SECTION("Test Insert Operation")
 	{
-			crdt::state::PNCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+			crdt::state::PNCounterSB<uint32_t> handler(1); //Represents Server 1
 			/* Belongs to Server 1 */
 			crdt::state::PNCounterMetadata<uint32_t> replica1A(2,6);
 			crdt::state::PNCounterMetadata<uint32_t> replica1B(3,7);
 			crdt::state::PNCounterMetadata<uint32_t> replica1C(4,8);
 			handler.addExternalReplica({replica1A,replica1B,replica1C});
-			handler.updateInternalPayload();
 
-			crdt::state::PNCounterSB<uint32_t> handler2(5, 0); //Represents Server 2
+			crdt::state::PNCounterSB<uint32_t> handler2(5); //Represents Server 2
 			/* Belongs to Server 2 */
 			crdt::state::PNCounterMetadata<uint32_t> replica2A(6,6);
 			crdt::state::PNCounterMetadata<uint32_t> replica2B(7,3);
 			crdt::state::PNCounterMetadata<uint32_t> replica2C(8,5);
 			handler2.addExternalReplica({replica2A,replica2B,replica2C});
-			handler2.updateInternalPayload();
+
 
 			REQUIRE(handler.queryPayload() == 21);
 			REQUIRE(handler2.queryPayload() == 14);
 	}
 	SECTION("Test Add/Subtract Operation")
 	{
-		crdt::state::PNCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::PNCounterSB<uint32_t> handler(1); //Represents Server 1
 		crdt::state::PNCounterMetadata<uint32_t> replica1A(2,6);
 		handler.addExternalReplica({replica1A});
 		replica1A.increasePayload(7);
 		replica1A.increasePayload(16);
 		handler.addExternalReplica({replica1A});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload() == 29);
 		replica1A.increasePayload(2);
 		replica1A.decreasePayload(8);
 		handler.addExternalReplica({replica1A});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload() == 23);
 	}
 	SECTION("Test Handling Same Keys on 1 Server")
 	{
-		crdt::state::PNCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::PNCounterSB<uint32_t> handler(1); //Represents Server 1
 		/* Create several replicas all with key = 1 */
 		crdt::state::PNCounterMetadata<uint32_t> replica1A(1,6);
 		crdt::state::PNCounterMetadata<uint32_t> replica1B(1,15);
 		crdt::state::PNCounterMetadata<uint32_t> replica1C(1,16);
 		crdt::state::PNCounterMetadata<uint32_t> replica1D(1,2);
 		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
-		handler.updateInternalPayload();
 		replica1A.increasePayload(25);
 		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload()== 31);
 		replica1A.decreasePayload(30);
 		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload()== 1);
 	}
-	SECTION("Test Merge on 1 Server")
+	SECTION("Test Conflict on localServer")
 	{
-		crdt::state::PNCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::PNCounterSB<uint32_t> handler(1); //Represents Server 1
 		crdt::state::PNCounterMetadata<uint32_t> replica1A(2,0);
 		crdt::state::PNCounterMetadata<uint32_t> replica1B(3,0);
 		handler.addExternalReplica({replica1A,replica1B});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload() == 0);
 		replica1A.increasePayload(6);
 		replica1A.increasePayload(7);
@@ -227,71 +220,66 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		replica1B.increasePayload(3);
 		replica1B.increasePayload(5);
 		handler.addExternalReplica({replica1A,replica1B}); // Fetch the local replicas that got updated
-		handler.updateInternalPayload(); //Update the server
 		REQUIRE(handler.queryPayload() == 35);
 		replica1A.decreasePayload(6);
 		handler.addExternalReplica({replica1A}); 
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload() == 29);
 		replica1B.decreasePayload(5);
 		handler.addExternalReplica({replica1B}); 
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload() == 24);
-		crdt::state::PNCounterMetadata<uint32_t> replica1C(4,200);
-		replica1A.decreasePayload(4);
-		replica1B.decreasePayload(20);
+		crdt::state::PNCounterMetadata<uint32_t> replica1C(2,200); //Conflict with replica1A
+		replica1C.decreasePayload(4);
+		replica1C.decreasePayload(20);
 		handler.addExternalReplica({replica1A,replica1B,replica1C}); 
-		handler.updateInternalPayload();
-		REQUIRE(handler.queryPayload() == 200);	
+		REQUIRE(handler.queryPayload() == 185);	
 	}
-	SECTION("Test Merge on Multiple Server")
+	SECTION("Test Conflict on Multiple Server")
 	{
-		crdt::state::PNCounterSB<uint32_t> handler1(1, 0); //Represents Server 1
-		crdt::state::PNCounterSB<uint32_t> handler2(2, 0); //Represents Server 2
-		crdt::state::PNCounterSB<uint32_t> handler3(3, 0); //Represents Server 3
-		crdt::state::PNCounterMetadata<uint32_t> replica1A(4,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica1B(5,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica2A(6,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica2B(7,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica3A(8,10);
-		crdt::state::PNCounterMetadata<uint32_t> replica3B(9,10);
+		crdt::state::PNCounterSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::PNCounterSB<uint32_t> handler2(2); //Represents Server 2
+		crdt::state::PNCounterSB<uint32_t> handler3(3); //Represents Server 3
+		crdt::state::PNCounterMetadata<uint32_t> replica1A(1,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica1B(2,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica2A(3,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica2B(4,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica3A(5,10);
+		crdt::state::PNCounterMetadata<uint32_t> replica3B(6,10);
 		handler1.addExternalReplica({replica1A,replica1B});
-		handler1.updateInternalPayload();
 		handler2.addExternalReplica({replica2A,replica2B});
-		handler2.updateInternalPayload();
 		handler3.addExternalReplica({replica3A,replica3B});
-		handler3.updateInternalPayload();
 		replica1A.decreasePayload(5);
 		replica1B.decreasePayload(5);
 		handler1.addExternalReplica({replica1A,replica1B});
-		handler1.updateInternalPayload();
 		replica2A.decreasePayload(5);
 		replica2B.decreasePayload(5);
 		handler2.addExternalReplica({replica2A,replica2B});
-		handler2.updateInternalPayload();
 		replica3A.decreasePayload(5);
 		replica3B.decreasePayload(5);
 		handler3.addExternalReplica({replica3A,replica3B});
-		handler3.updateInternalPayload();
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayload() == 30);
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 		replica1A.increasePayload(20);
-		handler1.addExternalReplica({replica1A,replica1B});
-		handler1.updateInternalPayload();
+		handler1.addExternalReplica({replica1A});
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler2,handler1,handler3});
 		handler3.updateLocalExternalPayload({handler3,handler1,handler2});
+		REQUIRE(handler1.queryPayload() == 50);
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
-		crdt::state::PNCounterMetadata<uint32_t> replicaConflict(5,9);
-		handler2.addExternalReplica({replicaConflict});
-		handler2.updateInternalPayload();
-		handler1.updateLocalExternalPayload({handler2,handler1,handler3});
+		replica1A.increasePayload(50);
+		replica1B.increasePayload(50);
+		replica3A.increasePayload(50);
+		handler1.addExternalReplica({replica3A}); // Server 1 Conflict With Server 3
+		handler2.addExternalReplica({replica1B}); // Server 2 Conflict with Server 1
+		handler3.addExternalReplica({replica1A}); // Server 3 Conflict with Server 1
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayload() == 200);
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}

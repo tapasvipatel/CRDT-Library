@@ -62,7 +62,7 @@ public:
     }
     
 
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }
@@ -145,11 +145,10 @@ protected:
         return false;
     }
 public:
-    PNCounterSB(uint32_t id, T payload)
+    PNCounterSB(uint32_t id)
     {
         this->id = id;
-        this->payload = payload;
-        this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(this->id, PNCounterMetadata<T>(this->id, this->payload)));
+        this->payload = T();
     }
     ~PNCounterSB()
     {
@@ -177,7 +176,7 @@ public:
         return true;
     }
 #ifdef BUILD_TESTING
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }
@@ -206,37 +205,19 @@ public:
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
+        updateInternalPayload();
     }
     void updateLocalExternalPayload(std::vector<PNCounterSB> handlers)
     {
-       
-       T maxPayload = T();
         for (auto handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
-                
-                auto metadata_it = this->replica_metadata.find(metadata.queryId());
-                if (metadata_it != this->replica_metadata.end()) 
-                {
-                    auto newmaxVal = std::max(metadata.queryPayloadT(),metadata_it->second.queryPayloadT());
-                    if (metadata.queryPayloadT() == newmaxVal)
-                    {
-                       auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
-                       replica.first->second = metadata;
-                    }
-                    maxPayload += newmaxVal;
-                }
-                else
-                {
-                    maxPayload += metadata.queryPayloadT();
-                }
-                // std::cout << maxPayload << " ";
+                addExternalReplica({metadata});
             }
         }
-       //  std::cout << std::endl;
-        setPayLoad(maxPayload);
+     
     }
 #endif
 };
