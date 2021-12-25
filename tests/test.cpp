@@ -310,16 +310,66 @@ TEST_CASE("Test GMapSB", "[classic]")
 	SECTION("Test Insert Operation")
 	{
 			crdt::state::GMapSB<uint32_t, uint32_t> handler(1); //Represents Server 1
-			/* Create 3 different hashmaps*/
+			crdt::state::GMapSB<char, uint32_t> handler2(1); //Represents Server 1.2
+			crdt::state::GMapSB<uint32_t, std::string> handler3(1); //Represents Server 1.3
+			/* Create 5 different hashmaps*/
 			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1A(1,0,1);
 			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1B(2,1,5);
 			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1C(3,2,7);
+			crdt::state::GMapMetadata<char, uint32_t> replica1D(4,'a',99);
+			crdt::state::GMapMetadata<uint32_t, std::string> replica1E(5,0,"Hello World");
+
 			handler.addExternalReplica({replica1A,replica1B,replica1C});
 			REQUIRE(handler.queryPayload(2,1) == 5);
 			replica1B.insert(1,25);
 			handler.addExternalReplica({replica1A,replica1B,replica1C});
 			REQUIRE(handler.queryPayload(2,1) == 25);
-			
+			replica1C.insert(4,20);
+			replica1C.insert(0,52);
+			replica1C.insert(2,-500);
+			handler.addExternalReplica({replica1A,replica1B,replica1C});
+			REQUIRE(handler.queryPayload(3,4) == 20);
+			REQUIRE(handler.queryPayload(3,0) == 52);
+			REQUIRE(handler.queryPayload(3,2) == -500);
+			handler2.addExternalReplica({replica1D});
+			handler3.addExternalReplica({replica1E});
+			REQUIRE(handler2.queryPayload(4,'a') == 99);
+			REQUIRE(handler3.queryPayload(5,0) == "Hello World");
+	}
+	SECTION("Test Conflict on localServer")
+	{
+			crdt::state::GMapSB<uint32_t, uint32_t> handler(1); //Represents Server 1
+			crdt::state::GMapSB<uint32_t, std::string> handler2(1); //Represents Server 1.2
+			crdt::state::GMapSBString<uint32_t, std::string> handler3(1); //Represents Server 1.2
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1A(0,10,0);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1B(0,10,2);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1C(0,10,3);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1D(0,10,3);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1E(0,10,4);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1F(0,10,2);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1G(0,10,1);
+			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1H(0,10,0);
+			crdt::state::GMapMetadata<uint32_t, std::string> replica1I(0,10,"Hello World");
+			crdt::state::GMapMetadata<uint32_t, std::string> replica1J(0,10,"Hello World how are ya");
+			crdt::state::GMapMetadata<uint32_t, std::string> replica1K(0,10,"Hello World how are");
+			handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D,replica1E,replica1F,replica1G,replica1H});
+			handler2.addExternalReplica({replica1I,replica1J,replica1K});
+			REQUIRE(handler.queryPayload(0,10) == 4);
+			REQUIRE(handler2.queryPayload(0,10) == "Hello World how are ya");
+			crdt::state::GMapMetadata<uint32_t, std::string> replica1L(0,10,"Z");
+			handler2.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
+			handler3.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
+			REQUIRE(handler2.queryPayload(0,10) == "Z");
+			REQUIRE(handler3.queryPayload(0,10) == "Hello World Z are how ya");
+			replica1I.insert(11,"dfojsfsdojfiod");
+			replica1J.insert(11,"fgklfgkfd;");
+			replica1K.insert(11,"zzzzzzzzzzzz");
+			replica1L.insert(11,"#$#%#$%$^$^^");
+			handler2.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
+			handler3.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
+			REQUIRE(handler2.queryPayload(0,11) == "zzzzzzzzzzzz");
+			REQUIRE(handler3.queryPayload(0,11) == "#$#%#$%$^$^^ dfojsfsdojfiod fgklfgkfd; zzzzzzzzzzzz");
+
 	}
 
 

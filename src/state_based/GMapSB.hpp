@@ -25,15 +25,21 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
+#include <type_traits>
+#include <sstream> 
+#include <functional>
 namespace crdt
 {
 namespace state
 {
 
+
+
+
 /*
 * metadata template class for CRDT counter
 */
-template<typename K = int32_t, typename T=int32_t>
+template<typename K, typename T = std::string>
 class GMapMetadata : CrdtMetaData
 {
     private:
@@ -58,7 +64,7 @@ class GMapMetadata : CrdtMetaData
     {
         ;
     }
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }
@@ -90,7 +96,7 @@ class GMapMetadata : CrdtMetaData
 
 };
 
-template<typename K = int32_t, typename T=int32_t>
+template<typename K, typename T = uint32_t>
 class GMapSB : CrdtObject<T>
 {
     uint32_t id; // Represents the server id
@@ -137,7 +143,7 @@ class GMapSB : CrdtObject<T>
     }
 
 #ifdef BUILD_TESTING
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }
@@ -153,6 +159,18 @@ class GMapSB : CrdtObject<T>
         return val;
     }
 
+   void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
+   {
+       for (auto &iter: metadata.queryPayload())
+       {
+           auto key = iter.first;
+           auto value = iter.second;
+           auto metadata_it = this->payload[metadata.queryId()].find(key);
+           if (metadata_it == this->payload[metadata.queryId()].end()) continue;
+           metadata_it->second = std::max(value,metadata_it->second);
+           metadata.insert(key,metadata_it->second);
+        }
+   }
    
 
     void addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)
@@ -161,10 +179,127 @@ class GMapSB : CrdtObject<T>
         {
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, GMapMetadata<K,T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
+            fixSameKeyConflict(metadata);
             updateInternalPayload(metadata);
         }
     }
     void updateLocalExternalPayload(std::vector<GMapSB> handlers)
+    {
+    
+        for (auto handler: handlers)
+        {
+            for (auto &iter: handler.replica_metadata)
+            {
+                ;
+            }
+        }
+       
+    }
+#endif
+
+};
+
+template<typename K, typename T = std::string>
+class GMapSBString : CrdtObject<T>
+{
+    uint32_t id; // Represents the server id
+
+    std::unordered_map<uint32_t,std::map<K,T>> payload; 
+    std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
+    protected:
+    bool merge(std::vector<uint32_t> replica_ids)
+    {
+        return false;
+    }
+    bool serialize(std::string& buffer)
+    {
+        return false;
+    }
+
+    bool deserialize(std::string& buffer)
+    {
+        return false;
+    }
+
+    bool exportDB()
+    {
+        return false;
+    }
+
+    bool importDB()
+    {
+        return false;
+    }
+    public:
+    GMapSBString(uint32_t id)
+    {
+        this->id = id;
+    }
+    ~GMapSBString()
+    {
+        ;
+    }
+    bool updateInternalPayload(GMapMetadata<K,T> metadata)
+    {
+        this->payload[metadata.queryId()] = metadata.queryPayload();
+        return true;
+    }
+
+#ifdef BUILD_TESTING
+    const uint32_t& queryId() const
+    {
+        return this->id;
+    }
+
+    T queryPayload(K mapId, K key) 
+    {
+        T val = T();
+        auto metadata_it = this->payload[mapId].find(key);
+        if (metadata_it != this->payload[mapId].end())
+        {
+            return metadata_it->second;
+        }
+        return val;
+    }
+
+   void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
+   {
+       for (auto &iter: metadata.queryPayload())
+       {
+           auto key = iter.first;
+           auto value = iter.second;
+           auto metadata_it = this->payload[metadata.queryId()].find(key);
+           if (metadata_it == this->payload[metadata.queryId()].end()) continue;
+         
+            std::set<std::string> mergeStringSet;
+            std::istringstream streamA(metadata_it->second);
+            std::istringstream streamB(value);
+            std::string mergeString = "";
+            while (streamA >> mergeString) mergeStringSet.insert(mergeString);
+            while (streamB >> mergeString) mergeStringSet.insert(mergeString);;
+            mergeString = "";
+            for (std::string curr: mergeStringSet)
+            {
+                mergeString+=curr + " ";
+            }
+            mergeString.pop_back();
+            metadata_it->second = mergeString;
+            metadata.insert(key,metadata_it->second);   
+    }
+   }
+   
+
+    void addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)
+    {
+        for (auto &metadata: external_replica_metadata)
+        {
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GMapMetadata<K,T>>(metadata.queryId(), metadata));
+            if (!replica.second) replica.first->second = metadata;
+            fixSameKeyConflict(metadata);
+            updateInternalPayload(metadata);
+        }
+    }
+    void updateLocalExternalPayload(std::vector<GMapSBString> handlers)
     {
     
         for (auto handler: handlers)
