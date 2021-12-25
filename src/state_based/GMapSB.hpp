@@ -25,17 +25,11 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <type_traits>
 #include <sstream> 
-#include <functional>
 namespace crdt
 {
 namespace state
 {
-
-
-
-
 /*
 * metadata template class for CRDT counter
 */
@@ -177,6 +171,7 @@ class GMapSB : CrdtObject<T>
     {
         for (auto &metadata: external_replica_metadata)
         {
+            
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, GMapMetadata<K,T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
             fixSameKeyConflict(metadata);
@@ -190,7 +185,25 @@ class GMapSB : CrdtObject<T>
         {
             for (auto &iter: handler.replica_metadata)
             {
-                ;
+                auto metadata = iter.second;
+                auto metadata_it = this->payload.find(metadata.queryId());
+                if (metadata_it != this->payload.end()) 
+                {
+                    for (auto &serverPayload: metadata.queryPayload())
+                    {
+                        auto key = serverPayload.first;
+                        auto value = serverPayload.second;
+                        auto metadata_update = this->payload[metadata.queryId()].find(key);
+                        if (metadata_update == this->payload[metadata.queryId()].end()) {
+                            this->payload[metadata.queryId()].insert({key,value});
+                        } else {
+                            metadata_update->second = std::max(value,metadata_update->second);
+                        }
+                    }
+                } else 
+                {
+                    addExternalReplica({metadata});  
+                }
             }
         }
        
@@ -301,15 +314,53 @@ class GMapSBString : CrdtObject<T>
     }
     void updateLocalExternalPayload(std::vector<GMapSBString> handlers)
     {
-    
         for (auto handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
             {
-                ;
+                auto metadata = iter.second;
+                auto metadata_it = this->payload.find(metadata.queryId());
+                if (metadata_it != this->payload.end()) 
+                {
+                    for (auto &serverPayload: metadata.queryPayload())
+                    {
+                        auto key = serverPayload.first;
+                        auto value = serverPayload.second;
+                        auto metadata_update = this->payload[metadata.queryId()].find(key);
+                        if (metadata_update == this->payload[metadata.queryId()].end()) {
+                            std::set<std::string> mergeStringSet;
+                            std::istringstream streamB(value);
+                            std::string mergeString = "";
+                            while (streamB >> mergeString) mergeStringSet.insert(mergeString);
+                            mergeString = "";
+                            for (std::string curr: mergeStringSet)
+                            {
+                                mergeString+=curr + " ";
+                            }
+                            mergeString.pop_back();
+                            this->payload[metadata.queryId()].insert({key,mergeString});
+                        } else {
+                            std::set<std::string> mergeStringSet;
+                            std::istringstream streamA(metadata_update->second);
+                            std::istringstream streamB(value);
+                            std::string mergeString = "";
+                            while (streamA >> mergeString) mergeStringSet.insert(mergeString);
+                            while (streamB >> mergeString) mergeStringSet.insert(mergeString);
+                            mergeString = "";
+                            for (std::string curr: mergeStringSet)
+                            {
+                                mergeString+=curr + " ";
+                            }
+                            mergeString.pop_back();
+                            metadata_update->second = mergeString;
+                        }
+                    }
+                } else 
+                {
+                    addExternalReplica({metadata});  
+                }
             }
         }
-       
     }
 #endif
 
