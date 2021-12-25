@@ -127,11 +127,11 @@ protected:
     }
 
 public:
-    GCounterSB(uint32_t id, T payload)
+    GCounterSB(uint32_t id)
     {
         this->id = id;
-        this->payload = payload;
-        this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(this->id, GCounterMetadata<T>(this->id, this->payload)));
+        this->payload = T();
+        // this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(this->id, GCounterMetadata<T>(this->id, this->payload)));
     }
     
     ~GCounterSB()
@@ -190,34 +190,21 @@ public:
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
+        updateInternalPayload();
+
     }
     void updateLocalExternalPayload(std::vector<GCounterSB> handlers)
     {
-        T maxPayload = T();
+        
         for (auto handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
-                auto metadata_it = this->replica_metadata.find(metadata.queryId());
-                if (metadata_it != this->replica_metadata.end()) //If there two replicas with the same ids, we take the max of the two
-                {
-                    auto newmaxVal = std::max(metadata.queryPayload(),metadata_it->second.queryPayload());
-                    if (metadata_it->second.queryPayload() != newmaxVal)
-                    {
-                        //If it found a conflict, aka, found the same replica id, but another server has higher value
-                        //the server will update its own replica to become this higher value
-                        auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
-                        if (!replica.second) replica.first->second = metadata;
-                    } 
-                    maxPayload += newmaxVal;
-                } else
-                {
-                    maxPayload += metadata.queryPayload();
-                }
+                addExternalReplica({metadata});
             }
         }
-        setPayLoad(maxPayload);
+        
     }
 #endif
 };

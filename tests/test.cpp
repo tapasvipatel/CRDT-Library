@@ -58,75 +58,72 @@ TEST_CASE("Test GCounterSB", "[classic]")
 {
 	SECTION("Test Insert Operation")
 	{
-		crdt::state::GCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::GCounterSB<uint32_t> handler(1); //Represents Server 1
 		/* Belongs to Server 1 */
-		crdt::state::GCounterMetadata<uint32_t> replica1A(2,6);
-		crdt::state::GCounterMetadata<uint32_t> replica1B(3,7);
-		crdt::state::GCounterMetadata<uint32_t> replica1C(4,8);
+		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica1B(2,7);
+		crdt::state::GCounterMetadata<uint32_t> replica1C(3,8);
 		handler.addExternalReplica({replica1A,replica1B,replica1C});
-		handler.updateInternalPayload();
-
-		crdt::state::GCounterSB<uint32_t> handler2(5, 0); //Represents Server 2
+		crdt::state::GCounterSB<uint32_t> handler2(2); //Represents Server 2
 		/* Belongs to Server 2 */
-		crdt::state::GCounterMetadata<uint32_t> replica2A(6,6);
-		crdt::state::GCounterMetadata<uint32_t> replica2B(7,3);
-		crdt::state::GCounterMetadata<uint32_t> replica2C(8,5);
+		crdt::state::GCounterMetadata<uint32_t> replica2A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica2B(2,3);
+		crdt::state::GCounterMetadata<uint32_t> replica2C(3,5);
 		handler2.addExternalReplica({replica2A,replica2B,replica2C});
-		handler2.updateInternalPayload();
-
 		REQUIRE(handler.queryPayload() == 21);
 		REQUIRE(handler2.queryPayload() == 14);
 	}
-	SECTION("Test Handling Same Keys on 1 Server")
+	SECTION("Test Conflict on LocalServer")
 	{
-		crdt::state::GCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::GCounterSB<uint32_t> handler(1); //Represents Server 1
 		/* Create several replicas all with key = 1 */
 		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
 		crdt::state::GCounterMetadata<uint32_t> replica1B(1,15);
 		crdt::state::GCounterMetadata<uint32_t> replica1C(1,8);
 		crdt::state::GCounterMetadata<uint32_t> replica1D(1,2);
 		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
-		handler.updateInternalPayload();
+		REQUIRE(handler.queryPayload()== 15); 
 		replica1A.updatePayload(25);
 		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload()== 31);
+		replica1C.updatePayload(100);
+		handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D});
+		REQUIRE(handler.queryPayload()== 108);
 	}
 
 	SECTION("Test Merge Operation")
 	{
-		crdt::state::GCounterSB<uint32_t> handler(1, 0); //Represents Server 1
+		crdt::state::GCounterSB<uint32_t> handler(1); //Represents Server 1
 		/* Belongs to Server 1 */
 		crdt::state::GCounterMetadata<uint32_t> replica1A(2,6);
 		replica1A.updatePayload(7);
 		replica1A.updatePayload(8);
 		
 		handler.addExternalReplica({replica1A});
-		handler.updateInternalPayload();
 		REQUIRE(handler.queryPayload() == 21);
 
-		crdt::state::GCounterSB<uint32_t> handler2(3, 0); //Represents Server 2
+		crdt::state::GCounterSB<uint32_t> handler2(3); //Represents Server 2
 		/* Belongs to Server 2 */
 		crdt::state::GCounterMetadata<uint32_t> replica2A(4,6);
 		replica2A.updatePayload(3);
 		replica2A.updatePayload(5);
 
 		handler2.addExternalReplica({replica2A});
-		handler2.updateInternalPayload();
 		REQUIRE(handler2.queryPayload() == 14);
 
-		crdt::state::GCounterSB<uint32_t> handler3(5, 100); //Represents Server 3
-		crdt::state::GCounterSB<uint32_t> handler4(6, 5); //Represents Server 4
+		crdt::state::GCounterSB<uint32_t> handler3(5); //Represents Server 3
+		crdt::state::GCounterSB<uint32_t> handler4(6); //Represents Server 4
 		crdt::state::GCounterMetadata<uint32_t> replica4A(7,10);
 		crdt::state::GCounterMetadata<uint32_t> replica4B(8,10);
 		replica4B.updatePayload(300);
 		crdt::state::GCounterMetadata<uint32_t> replica4C(9,15);
 		handler4.addExternalReplica({replica4A,replica4B,replica4C});
-		handler4.updateInternalPayload();
+		REQUIRE(handler4.queryPayload() == 335);
 		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler2.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler3.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler4.updateLocalExternalPayload({handler,handler2,handler3,handler4});
+		REQUIRE(handler.queryPayload() == 370);
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
@@ -134,7 +131,6 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		// replica on server A decides to update
 		replica1A.updatePayload(7);
 		handler.addExternalReplica({replica1A});
-		handler.updateInternalPayload();
 		//30 s have passed and now we poll from all servers
 		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler2.updateLocalExternalPayload({handler,handler2,handler3,handler4});
@@ -145,17 +141,13 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
 		replica2A.updatePayload(3);
 		
-		handler.addExternalReplica({replica2A}); //Server one will now cause conflict with server two
-		handler.updateInternalPayload();
+		handler3.addExternalReplica({replica2A}); //Server 3 will now cause conflict with server 2
 		//30 s have passed and now we poll from all servers
 		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler2.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler3.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler4.updateLocalExternalPayload({handler,handler2,handler3,handler4});
-		INFO(handler.queryPayload());
-		INFO(handler2.queryPayload());
-		INFO(handler3.queryPayload());
-		INFO(handler4.queryPayload());
+		REQUIRE(handler2.queryPayload() == 380);
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
