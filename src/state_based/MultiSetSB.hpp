@@ -20,42 +20,44 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __PRIORITYQUEUESB_H__
-#define __PRIORITYQUEUESB_H__
+#ifndef __MULTISETSB_H__
+#define __MULTISETSB_H__
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <queue>
+#include <set>
+#include <algorithm>
 
 namespace crdt
 {
 namespace state
 {
+
 /*
-* metadata template class for CRDT PQ
+* metadata template class for CRDT Multiset
 */
 template<typename T=int32_t>
-class PriorityQueueMetadata : CrdtMetaData
+class MultiSetMetadata : CrdtMetaData
 {
     private:
     uint32_t id;
-    std::priority_queue<T> payload;
+    std::multiset<T> payload;
     public:
-    PriorityQueueMetadata(uint32_t id) : CrdtMetaData(CrdtType::PriorityQueueSBType)
+    MultiSetMetadata(uint32_t id) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
     }
-    PriorityQueueMetadata(uint32_t id, T value) : CrdtMetaData(CrdtType::PriorityQueueSBType)
+    MultiSetMetadata(uint32_t id, T value) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
-        this->payload.push(value);
+        this->payload.insert(value);
     }
-    PriorityQueueMetadata(uint32_t id, std::priority_queue<T> payload) : CrdtMetaData(CrdtType::PriorityQueueSBType)
+    MultiSetMetadata(uint32_t id, std::multiset<T> payload) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
         this->payload = payload;
     }
-    ~PriorityQueueMetadata()
+    ~MultiSetMetadata()
     {
         ;
     }
@@ -63,37 +65,37 @@ class PriorityQueueMetadata : CrdtMetaData
     {
         return this->id;
     }
-    void push(T value) 
+    void insert(T value)
     {
-        this->payload.push(value);
+        this->payload.insert(value);
     }
-    void push(std::vector<T> value) 
+    void insert(std::vector<T> value)
     {
-        for (auto iter: value)
+        for (auto iter:value)
         {
-            this->payload.push(iter);
+            this->payload.insert(iter);
         }
     }
-    void setPayload(std::priority_queue<T> payload) 
+    void setPayload(std::multiset<T> payload)
     {
         this->payload = payload;
     }
-    std::priority_queue<T> queryPayload()
+    std::multiset<T> queryPayload()
     {
         return this->payload;
     }
 };
 
 /*
-* template class for CRDT PQ
+* template class for CRDT Mutliset
 */
 template<typename T=int32_t>
-class PriorityQueueSB : CrdtObject<T>
+class MultiSetSB : CrdtObject<T> 
 {
 private:
     uint32_t id;
-    std::priority_queue<T> payload;
-    std::unordered_map<uint32_t,PriorityQueueMetadata<T>> replica_metadata;
+    std::multiset<T> payload;
+    std::unordered_map<uint32_t,MultiSetMetadata<T>> replica_metadata;
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
     {
@@ -119,104 +121,74 @@ protected:
         return false;
     }
 public:
-    PriorityQueueSB(uint32_t id)
+    MultiSetSB(uint32_t id)
     {
         this->id = id;
     }
-    ~PriorityQueueSB()
+    ~MultiSetSB()
     {
         ;
     }
     bool updateInternalPayload()
     {
-        std::priority_queue<T> curr;
-        typename std::unordered_map<uint32_t,PriorityQueueMetadata<T>>::iterator metadata_it;
+        std::multiset<T> curr;
+        typename std::unordered_map<uint32_t,MultiSetMetadata<T>>::iterator metadata_it;
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
             auto temp_data = metadata_it->second.queryPayload();
-            while (!temp_data.empty())
+            for (auto iter: temp_data)
             {
-                curr.push(temp_data.top());
-                temp_data.pop();
+                curr.insert(iter);
             }
         }
         this->payload = curr;
         return true;
     }
-    bool updateExternalPayload()
+     bool updateExternalPayload()
     {
-        typename std::unordered_map<uint32_t,PriorityQueueMetadata<T>>::iterator metadata_it;
+        typename std::unordered_map<uint32_t,MultiSetMetadata<T>>::iterator metadata_it;
         metadata_it = this->replica_metadata.find(this->id);
         metadata_it->second.payload = this->payload;
         return true;
     }
 #ifdef BUILD_TESTING
-    
     const uint32_t& queryId() const
     {
         return this->id;
     }
 
-    std::priority_queue<T> queryPayload() 
+    std::multiset<T> queryPayload()
     {
         return this->payload;
     }
 
-    std::priority_queue<T> queryPayloadwithID(uint32_t replicaID) 
+    std::multiset<T> queryPayloadwithID(uint32_t replicaID)
     {
-        std::priority_queue<T> queryResult;
-        auto findPQ = replica_metadata.find(replicaID);
-        if (findPQ == replica_metadata.end()) return queryResult;
-        return findPQ->second.queryPayload();
+        std::multiset<T> queryResult;
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return queryResult;
+        return findMS->second.queryPayload();
     }
-
-    std::vector<T> queryPayloadVector()
-    {
-        std::vector<T> queryResult;
-        auto query = this->payload;
-        while (!query.empty())
-        {
-            queryResult.push_back(query.top());
-            query.pop();
-        }
-        return queryResult;
-    }
-    
-    void addExternalReplica(std::vector<PriorityQueueMetadata<T>> external_replica_metadata)
+    void addExternalReplica(std::vector<MultiSetMetadata<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
         {
             auto metadata_it = this->replica_metadata.find(metadata.queryId());
             if (metadata_it != this->replica_metadata.end())
             {
-               std::priority_queue<T> fixConflict;
+               std::multiset<T> fixConflict;
                std::unordered_map<T,T> freq;
-               auto pq1 = metadata_it->second.queryPayload();
-               auto pq2 = metadata.queryPayload(); 
-               
-               while (!pq1.empty())
-               {
-                   freq[pq1.top()]++;
-                   fixConflict.push(pq1.top());
-                   pq1.pop();
-               }
-               while (!pq2.empty())
-               {
-                   
-                    if (freq[pq2.top()] == 0)
-                        fixConflict.push(pq2.top());
-                    else
-                        freq[pq2.top()]--;
-                   pq2.pop();
-               }
+               auto multisetA = metadata_it->second.queryPayload();
+               auto multisetB = metadata.queryPayload(); 
+               std::set_union(multisetA.begin(),multisetA.end(),multisetB.begin(),multisetB.end(),std::inserter(fixConflict,fixConflict.begin()));
                metadata.setPayload(fixConflict);
             } 
-            auto replica = this->replica_metadata.insert(std::pair<uint32_t, PriorityQueueMetadata<T>>(metadata.queryId(), metadata));
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, MultiSetMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
         updateInternalPayload();
     }
-    void updateLocalExternalPayload(std::vector<PriorityQueueSB> handlers)
+    void updateLocalExternalPayload(std::vector<MultiSetSB> handlers)
     {
         for (auto handler: handlers)
         {
@@ -231,8 +203,6 @@ public:
 };
 
 
-
-
 }   // namespace state
 }   // namespace crdt
-#endif // __PRIORITYQUEUESB_H__
+#endif // __MULTISETSB_H__

@@ -34,7 +34,8 @@ enum CrdtType
     GCounterSBType,
     PNCounterSBType,
     GMapSBType,
-    PriorityQueueSBType
+    PriorityQueueSBType,
+    MultiSetSBType
 };
 
 class CrdtMetaData

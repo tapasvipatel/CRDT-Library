@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <set>
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch_all.hpp>
@@ -9,6 +10,7 @@
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/GMapSB.hpp"
 #include "../src/state_based/PriorityQueueSB.hpp"
+#include "../src/state_based/MultiSetSB.hpp"
 
 TEST_CASE("Test CounterOB", "[classic]")
 {
@@ -512,7 +514,7 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		REQUIRE(handler1.queryPayloadVector() == test1);
 	}
 
-	SECTION("Test Delta Merge")
+	SECTION("Test Union Merge")
 	{
 		crdt::state::PriorityQueueSB<uint32_t> handler1(1);
 		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0);
@@ -597,5 +599,25 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
+	}
+}
+
+TEST_CASE("Test MultiSetSB", "[classic]")
+{
+	SECTION("Test Insertion")
+	{
+		crdt::state::MultiSetSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::MultiSetMetadata<uint32_t> replica1A(0,5);
+		replica1A.insert({2,6,4,6,2,16,2,1,6,7});
+		crdt::state::MultiSetMetadata<uint32_t> replica1B(0,7);
+		replica1B.insert({9,9,9,9});
+		std::multiset<uint32_t> test1 = {1,2,2,2,4,5,6,6,6,7,9,9,9,9,16};
+		handler1.addExternalReplica({replica1A,replica1B});
+		REQUIRE(handler1.queryPayload() == test1);
+		crdt::state::MultiSetMetadata<uint32_t> replica1C(1,2);
+		replica1C.insert({10,10,10});
+		handler1.addExternalReplica({replica1C});
+		std::multiset<uint32_t> test2 = {2,10,10,10};
+		REQUIRE(handler1.queryPayloadwithID(1) == test2);
 	}
 }
