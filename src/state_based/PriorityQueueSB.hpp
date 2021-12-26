@@ -182,16 +182,22 @@ public:
             if (metadata_it != this->replica_metadata.end())
             {
                std::priority_queue<T> fixConflict;
+               std::unordered_map<T,T> freq;
                auto pq1 = metadata_it->second.queryPayload();
                auto pq2 = metadata.queryPayload(); 
                while (!pq1.empty())
                {
+                   freq[pq1.top()]++;
                    fixConflict.push(pq1.top());
                    pq1.pop();
                }
                while (!pq2.empty())
                {
-                   fixConflict.push(pq2.top());
+                   
+                    if (freq[pq2.top()] == 0)
+                        fixConflict.push(pq2.top());
+                    else
+                        freq[pq2.top()]--;
                    pq2.pop();
                }
                metadata.setPayload(fixConflict);

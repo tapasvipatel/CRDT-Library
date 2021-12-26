@@ -489,10 +489,41 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		replica1C.push(40);
 		replica1C.push(45);
 		replica1C.push(30);
+		replica1C.push(30);
 		handler1.addExternalReplica({replica1A,replica1B,replica1C});
 		std::vector<uint32_t> test1 = {45,40,35,30, 30, 25,20,5};
 		REQUIRE(handler1.queryPayloadVector() == test1);
 	}
+
+	SECTION("Test Delta Merge")
+	{
+		crdt::state::PriorityQueueSB<uint32_t> handler1(1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1B(0);
+		replica1A.push({5,5,5});
+		replica1B.push({5,5,5,5,5});
+		handler1.addExternalReplica({replica1A,replica1B});
+		std::vector<uint32_t> test1 = {5,5,5,5,5};
+		REQUIRE(handler1.queryPayloadVector() == test1);
+		crdt::state::PriorityQueueSB<uint32_t> handler2(2);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1C(1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1D(1);
+		replica1C.push({5,5,5,5,5});
+		replica1D.push({5,5,5});
+		handler2.addExternalReplica({replica1C,replica1D});
+		REQUIRE(handler2.queryPayloadVector() == test1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1E(2);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1F(2);
+		replica1E.push({5,2,3});
+		replica1F.push({7,1,2});
+		std::vector<uint32_t> test2 = {7,5,3,2,1};
+		crdt::state::PriorityQueueSB<uint32_t> handler3(3);
+		handler3.addExternalReplica({replica1E,replica1F});
+		REQUIRE(handler3.queryPayloadVector() == test2);
+
+
+	}
+
 	SECTION("Test Conflict on multiple Servers")
 	{
 		crdt::state::PriorityQueueSB<uint32_t> handler1(2);
@@ -507,8 +538,6 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler1.addExternalReplica({replica1A,replica1B,replica1C});
 		std::vector<uint32_t> test1 = {9,8,7,6,5,4,3,2,1};
 		REQUIRE(handler1.queryPayloadVector() == test1);
-
-
 		crdt::state::PriorityQueueMetadata<uint32_t> replica2A(0);
 		crdt::state::PriorityQueueMetadata<uint32_t> replica2B(1);
 		crdt::state::PriorityQueueMetadata<uint32_t> replica2C(2);
@@ -518,7 +547,6 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler2.addExternalReplica({replica2A,replica2B,replica2C});
 		std::vector<uint32_t> test2 = {18,17,16,15,14,13,12,11,10};
 		REQUIRE(handler2.queryPayloadVector() == test2);
-
 		crdt::state::PriorityQueueMetadata<uint32_t> replica3A(0);
 		crdt::state::PriorityQueueMetadata<uint32_t> replica3B(1);
 		crdt::state::PriorityQueueMetadata<uint32_t> replica3C(2);
@@ -528,23 +556,17 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler3.addExternalReplica({replica3A,replica3B,replica3C});
 		std::vector<uint32_t> test3 = {27,26,25,24,23,22,21,20,19};
 		REQUIRE(handler3.queryPayloadVector() == test3);
-		auto server1 = handler1;
-		auto server2 = handler2;
-		auto server3 = handler3;
-		handler1.updateLocalExternalPayload({server2,server3});
-		handler2.updateLocalExternalPayload({server1,server3});
-		handler3.updateLocalExternalPayload({server1,server2});
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 		crdt::state::PriorityQueueMetadata<uint32_t> replica3D(3);
 		replica3D.push({100,200,300});
 		handler3.addExternalReplica({replica3D});
-		server1 = handler1;
-		server2 = handler2;
-		server3 = handler3;
-		handler1.updateLocalExternalPayload({server2,server3});
-		handler2.updateLocalExternalPayload({server1,server3});
-		handler3.updateLocalExternalPayload({server1,server2});
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 		replica3D.push({400,500});
@@ -553,12 +575,9 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler2.addExternalReplica({replica3D});
 		REQUIRE(handler1.queryPayloadVector() != handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() != handler3.queryPayloadVector());
-		server1 = handler1;
-		server2 = handler2;
-		server3 = handler3;
-		handler1.updateLocalExternalPayload({server2,server3});
-		handler2.updateLocalExternalPayload({server1,server3});
-		handler3.updateLocalExternalPayload({server1,server2});
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 	}
