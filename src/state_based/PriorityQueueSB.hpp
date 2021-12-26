@@ -127,6 +127,28 @@ public:
     {
         ;
     }
+
+    std::priority_queue<T> fixlocalConflict(std::priority_queue<T> pq1, std::priority_queue<T> pq2)
+    {
+        std::priority_queue<T> fixConflict;
+        std::unordered_map<T,int> freq; //We use this for set union
+        while (!pq1.empty())
+        {
+            freq[pq1.top()]++;
+            fixConflict.push(pq1.top());
+            pq1.pop();
+        }
+        while (!pq2.empty())
+        {
+            if (freq[pq2.top()] == 0)
+                fixConflict.push(pq2.top());
+            else
+                freq[pq2.top()]--;
+            pq2.pop();
+        }
+        return fixConflict;
+    }
+
     bool updateInternalPayload()
     {
         std::priority_queue<T> curr;
@@ -181,35 +203,26 @@ public:
         }
         return queryResult;
     }
+
+    std::vector<T> convertPQtoVector(std::priority_queue<T> replica)
+    {
+        std::vector<T> queryResult;
+        while (!replica.empty())
+        {
+            queryResult.push_back(replica.top());
+            replica.pop();
+        }
+        return queryResult;
+    }
     
     void addExternalReplica(std::vector<PriorityQueueMetadata<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
         {
             auto metadata_it = this->replica_metadata.find(metadata.queryId());
-            if (metadata_it != this->replica_metadata.end())
+            if (metadata_it != this->replica_metadata.end()) //Found a conflict
             {
-               std::priority_queue<T> fixConflict;
-               std::unordered_map<T,int> freq;
-               auto pq1 = metadata_it->second.queryPayload();
-               auto pq2 = metadata.queryPayload(); 
-               
-               while (!pq1.empty())
-               {
-                   freq[pq1.top()]++;
-                   fixConflict.push(pq1.top());
-                   pq1.pop();
-               }
-               while (!pq2.empty())
-               {
-                   
-                    if (freq[pq2.top()] == 0)
-                        fixConflict.push(pq2.top());
-                    else
-                        freq[pq2.top()]--;
-                   pq2.pop();
-               }
-               metadata.setPayload(fixConflict);
+               metadata.setPayload(fixlocalConflict(metadata_it->second.queryPayload(), metadata.queryPayload()));
             } 
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, PriorityQueueMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
@@ -229,9 +242,6 @@ public:
     }
 #endif
 };
-
-
-
 
 }   // namespace state
 }   // namespace crdt

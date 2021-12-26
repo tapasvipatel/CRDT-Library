@@ -132,7 +132,7 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
 
 		// replica on server A decides to update
-		replica1A.updatePayload(7);
+		replica1A.updatePayload(7); // value == 28
 		handler.addExternalReplica({replica1A});
 		//30 s have passed and now we poll from all servers
 		handler.updateLocalExternalPayload({handler,handler2,handler3,handler4});
@@ -151,6 +151,7 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		handler3.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		handler4.updateLocalExternalPayload({handler,handler2,handler3,handler4});
 		REQUIRE(handler2.queryPayload() == 380);
+		REQUIRE(handler.queryPayloadwithID(2) == handler2.queryPayloadwithID(2));
 		REQUIRE(handler.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
@@ -174,7 +175,6 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 			crdt::state::PNCounterMetadata<uint32_t> replica2B(7,3);
 			crdt::state::PNCounterMetadata<uint32_t> replica2C(8,5);
 			handler2.addExternalReplica({replica2A,replica2B,replica2C});
-
 
 			REQUIRE(handler.queryPayload() == 21);
 			REQUIRE(handler2.queryPayload() == 14);
@@ -282,6 +282,8 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayloadwithID(1) == handler2.queryPayloadwithID(1));
+		REQUIRE(handler2.queryPayloadwithID(1) == handler3.queryPayloadwithID(1));
 		REQUIRE(handler1.queryPayload() == 200);
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
@@ -303,23 +305,23 @@ TEST_CASE("Test GMapSB", "[classic]")
 			crdt::state::GMapMetadata<uint32_t, std::string> replica1E(5,0,"Hello World");
 
 			handler.addExternalReplica({replica1A,replica1B,replica1C});
-			REQUIRE(handler.queryPayload(2,1) == 5);
+			REQUIRE(handler.queryPayloadwithID(2,1) == 5);
 			replica1B.insert(1,25);
 			handler.addExternalReplica({replica1A,replica1B,replica1C});
-			REQUIRE(handler.queryPayload(2,1) == 25);
+			REQUIRE(handler.queryPayloadwithID(2,1) == 25);
 			replica1C.insert(4,20);
 			replica1C.insert(0,52);
 			replica1C.insert(2,-500);
 			handler.addExternalReplica({replica1A,replica1B,replica1C});
-			REQUIRE(handler.queryPayload(3,4) == 20);
-			REQUIRE(handler.queryPayload(3,0) == 52);
-			REQUIRE(handler.queryPayload(3,2) == -500);
+			REQUIRE(handler.queryPayloadwithID(3,4) == 20);
+			REQUIRE(handler.queryPayloadwithID(3,0) == 52);
+			REQUIRE(handler.queryPayloadwithID(3,2) == -500);
 			handler2.addExternalReplica({replica1D});
 			handler3.addExternalReplica({replica1E});
-			REQUIRE(handler2.queryPayload(4,'a') == 99);
-			REQUIRE(handler3.queryPayload(5,0) == "Hello World");
+			REQUIRE(handler2.queryPayloadwithID(4,'a') == 99);
+			REQUIRE(handler3.queryPayloadwithID(5,0) == "Hello World");
 	}
-	SECTION("Test Conflict on localServer")
+	SECTION("Test Conflict on localServer String")
 	{
 			crdt::state::GMapSB<uint32_t, uint32_t> handler(1); //Represents Server 1
 			crdt::state::GMapSB<uint32_t, std::string> handler2(1); //Represents Server 1.2
@@ -337,21 +339,21 @@ TEST_CASE("Test GMapSB", "[classic]")
 			crdt::state::GMapMetadata<uint32_t, std::string> replica1K(0,10,"Hello World how are");
 			handler.addExternalReplica({replica1A,replica1B,replica1C,replica1D,replica1E,replica1F,replica1G,replica1H});
 			handler2.addExternalReplica({replica1I,replica1J,replica1K});
-			REQUIRE(handler.queryPayload(0,10) == 4);
-			REQUIRE(handler2.queryPayload(0,10) == "Hello World how are ya");
+			REQUIRE(handler.queryPayloadwithID(0,10) == 4);
+			REQUIRE(handler2.queryPayloadwithID(0,10) == "Hello World how are ya");
 			crdt::state::GMapMetadata<uint32_t, std::string> replica1L(0,10,"Z");
 			handler2.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
 			handler3.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
-			REQUIRE(handler2.queryPayload(0,10) == "Z");
-			REQUIRE(handler3.queryPayload(0,10) == "Hello World Z are how ya");
+			REQUIRE(handler2.queryPayloadwithID(0,10) == "Z");
+			REQUIRE(handler3.queryPayloadwithID(0,10) == "Hello World Z are how ya");
 			replica1I.insert(11,"dfojsfsdojfiod");
 			replica1J.insert(11,"fgklfgkfd;");
 			replica1K.insert(11,"zzzzzzzzzzzz");
 			replica1L.insert(11,"#$#%#$%$^$^^");
 			handler2.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
 			handler3.addExternalReplica({replica1I,replica1J,replica1K,replica1L});
-			REQUIRE(handler2.queryPayload(0,11) == "zzzzzzzzzzzz");
-			REQUIRE(handler3.queryPayload(0,11) == "#$#%#$%$^$^^ dfojsfsdojfiod fgklfgkfd; zzzzzzzzzzzz");
+			REQUIRE(handler2.queryPayloadwithID(0,11) == "zzzzzzzzzzzz");
+			REQUIRE(handler3.queryPayloadwithID(0,11) == "#$#%#$%$^$^^ dfojsfsdojfiod fgklfgkfd; zzzzzzzzzzzz");
 	}
 	SECTION("Test Conflict Non-String on Multiple Servers")
 	{
@@ -363,38 +365,41 @@ TEST_CASE("Test GMapSB", "[classic]")
 			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1C(0,10,3);
 			replica1A.insert(25,100);
 			handler.addExternalReplica({replica1A});
-			REQUIRE(handler.queryPayload(0,25) == 100);
+			REQUIRE(handler.queryPayloadwithID(0,25) == 100);
 			handler2.addExternalReplica({replica1B});
 			handler3.addExternalReplica({replica1C});
 			
-			REQUIRE(handler2.queryPayload(0,10) != handler.queryPayload(0,10));
-			REQUIRE(handler3.queryPayload(0,10) != handler2.queryPayload(0,10));
+			REQUIRE(handler2.queryPayloadwithID(0,10) != handler.queryPayloadwithID(0,10));
+			REQUIRE(handler3.queryPayloadwithID(0,10) != handler2.queryPayloadwithID(0,10));
 			handler.updateLocalExternalPayload({handler,handler2,handler3});
 			handler2.updateLocalExternalPayload({handler,handler2,handler3});
 			handler3.updateLocalExternalPayload({handler,handler2,handler3});
-			REQUIRE(handler2.queryPayload(0,10) == handler.queryPayload(0,10));
-			REQUIRE(handler3.queryPayload(0,10) == handler2.queryPayload(0,10));
+			REQUIRE(handler2.queryPayloadwithID(0,10) == handler.queryPayloadwithID(0,10));
+			REQUIRE(handler3.queryPayloadwithID(0,10) == handler2.queryPayloadwithID(0,10));
 			
-			REQUIRE(handler.queryPayload(0,25) == 100);
-			REQUIRE(handler2.queryPayload(0,25) == 100);
-			REQUIRE(handler3.queryPayload(0,25) == 100);
+			REQUIRE(handler.queryPayloadwithID(0,25) == 100);
+			REQUIRE(handler2.queryPayloadwithID(0,25) == 100);
+			REQUIRE(handler3.queryPayloadwithID(0,25) == 100);
 			replica1B.insert(3,200);
 			replica1B.insert(75,350);
 			handler2.addExternalReplica({replica1B});
 			handler.updateLocalExternalPayload({handler,handler2,handler3});
 			handler2.updateLocalExternalPayload({handler,handler2,handler3});
 			handler3.updateLocalExternalPayload({handler,handler2,handler3});
-			REQUIRE(handler.queryPayload(0,3) == 200);
-			REQUIRE(handler3.queryPayload(0,75) == 350);
-			REQUIRE(handler.queryPayload(0,3) == handler3.queryPayload(0,3));
+			REQUIRE(handler.queryPayloadwithID(0,3) == 200);
+			REQUIRE(handler3.queryPayloadwithID(0,75) == 350);
+			REQUIRE(handler.queryPayloadwithID(0,3) == handler3.queryPayloadwithID(0,3));
 			crdt::state::GMapMetadata<uint32_t, uint32_t> replica1D(1,0,5000);
 			handler3.addExternalReplica({replica1D});
 			handler.updateLocalExternalPayload({handler,handler2,handler3});
 			handler2.updateLocalExternalPayload({handler,handler2,handler3});
 			handler3.updateLocalExternalPayload({handler,handler2,handler3});
-			REQUIRE(handler3.queryPayload(1,0) == 5000);
-			REQUIRE(handler2.queryPayload(1,0) == handler.queryPayload(1,0));
-			REQUIRE(handler3.queryPayload(1,0) == handler2.queryPayload(1,0));
+			REQUIRE(handler3.queryPayloadwithID(1,0) == 5000);
+			REQUIRE(handler2.queryPayloadwithID(1,0) == handler.queryPayloadwithID(1,0));
+			REQUIRE(handler3.queryPayloadwithID(1,0) == handler2.queryPayloadwithID(1,0));
+			REQUIRE(handler.queryPayload(0) == 5000);
+			REQUIRE(handler.queryPayload(0) == handler2.queryPayload(0));
+			REQUIRE(handler2.queryPayload(0) == handler3.queryPayload(0));
 			std::vector<uint32_t> test1 = {0,3,10,25,75};
 			REQUIRE(handler.queryAllKeys() == test1);
 			REQUIRE(handler2.queryAllKeys() == test1);
@@ -416,21 +421,21 @@ TEST_CASE("Test GMapSB", "[classic]")
 		handler1.addExternalReplica({replica1A});
 		handler2.addExternalReplica({replica1B});
 		handler3.addExternalReplica({replica1C});
-		REQUIRE(handler2.queryPayload(0,10) != handler1.queryPayload(0,10));
-		REQUIRE(handler3.queryPayload(0,10) != handler2.queryPayload(0,10));
+		REQUIRE(handler2.queryPayloadwithID(0,10) != handler1.queryPayloadwithID(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) != handler2.queryPayloadwithID(0,10));
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
-		REQUIRE(handler3.queryPayload(0,10) == "Hello HelloMelo");
-		REQUIRE(handler2.queryPayload(0,10) == handler1.queryPayload(0,10));
-		REQUIRE(handler3.queryPayload(0,10) == handler2.queryPayload(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) == "Hello Hello HelloMelo");
+		REQUIRE(handler2.queryPayloadwithID(0,10) == handler1.queryPayloadwithID(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) == handler2.queryPayloadwithID(0,10));
 		replica1A.insert(1,"Hello, my name is Bob!");
 		handler1.addExternalReplica({replica1A});
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
-		REQUIRE(handler1.queryPayload(0,1) == handler2.queryPayload(0,1));
-		REQUIRE(handler2.queryPayload(0,1) == handler3.queryPayload(0,1));
+		REQUIRE(handler1.queryPayloadwithID(0,1) == handler2.queryPayloadwithID(0,1));
+		REQUIRE(handler2.queryPayloadwithID(0,1) == handler3.queryPayloadwithID(0,1));
 		crdt::state::GMapMetadata<uint32_t, std::string> replica1D(1,10,"ABC");
 		handler3.addExternalReplica({replica1D});
 		replica1D.insert(10,"DEF");
@@ -440,21 +445,23 @@ TEST_CASE("Test GMapSB", "[classic]")
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
-		REQUIRE(handler1.queryPayload(1,10) == "ABC DEF U");
-		REQUIRE(handler1.queryPayload(1,10) == handler2.queryPayload(1,10));
-		REQUIRE(handler2.queryPayload(1,10) == handler3.queryPayload(1,10));
+		REQUIRE(handler1.queryPayloadwithID(1,10) == "ABC DEF U");
+		REQUIRE(handler1.queryPayloadwithID(1,10) == handler2.queryPayloadwithID(1,10));
+		REQUIRE(handler2.queryPayloadwithID(1,10) == handler3.queryPayloadwithID(1,10));
 		crdt::state::GMapMetadata<uint32_t, std::string> replica1E(2,10,"ASDHUIFDHIUSDHFUI");
 		handler2.addExternalReplica({replica1E});
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
-		REQUIRE(handler1.queryPayload(2,10) == handler2.queryPayload(2,10));
-		REQUIRE(handler2.queryPayload(2,10) == handler3.queryPayload(2,10));
+		REQUIRE(handler1.queryPayloadwithID(2,10) == handler2.queryPayloadwithID(2,10));
+		REQUIRE(handler2.queryPayloadwithID(2,10) == handler3.queryPayloadwithID(2,10));
+		REQUIRE(handler1.queryPayload(1) == handler2.queryPayload(1));
+		REQUIRE(handler2.queryPayload(1) == handler3.queryPayload(1));
 		std::vector<uint32_t> test1 = {1,10};
 		REQUIRE(handler1.queryAllKeys() == test1);
 		REQUIRE(handler2.queryAllKeys() == test1);
 		REQUIRE(handler3.queryAllKeys() == test1);
-		std::vector<std::string> test2 = { "Bob! Hello, is my name", "ABC ASDHUIFDHIUSDHFUI DEF Hello HelloMelo U" };
+		std::vector<std::string> test2 = { "Bob! Hello, is my name", "ABC ASDHUIFDHIUSDHFUI DEF Hello Hello HelloMelo U"};
 		REQUIRE(handler1.queryAllValues() == test2);
 		REQUIRE(handler2.queryAllValues() == test2);
 		REQUIRE(handler3.queryAllValues() == test2);
@@ -597,6 +604,8 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.convertPQtoVector(handler1.queryPayloadwithID(0)) == handler2.convertPQtoVector(handler2.queryPayloadwithID(0)));
+		REQUIRE(handler2.convertPQtoVector(handler2.queryPayloadwithID(0)) == handler3.convertPQtoVector(handler3.queryPayloadwithID(0)));
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 	}
@@ -692,6 +701,10 @@ TEST_CASE("Test MultiSetSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == test4);
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
+		std::multiset<uint32_t> test5 =  {1,2,3,10,11,12,19,20,21};
+		REQUIRE(handler1.queryPayloadwithID(0) == test5);
+		REQUIRE(handler1.queryPayloadwithID(0) == handler2.queryPayloadwithID(0));
+		REQUIRE(handler2.queryPayloadwithID(0) == handler3.queryPayloadwithID(0));
 	}
 
 }

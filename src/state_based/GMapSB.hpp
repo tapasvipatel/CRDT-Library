@@ -26,6 +26,7 @@
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
 #include <sstream> 
+#include <algorithm>
 namespace crdt
 {
 namespace state
@@ -72,6 +73,16 @@ class GMapMetadata : CrdtMetaData
         this->payload[key]=value;
     }
 
+    void updateIncrease(K key, T increment)
+    {
+        this->payload[key]+=increment;
+    }
+
+    void updateDecrease(K key, T decrement)
+    {
+        this->payload[key]-=decrement;
+    }
+
     const std::map<K,T> queryPayload() const
     {
         return this->payload;
@@ -90,11 +101,12 @@ class GMapMetadata : CrdtMetaData
 
 };
 
-template<typename K, typename T = uint32_t>
+template<typename K = uint32_t, typename T = uint32_t>
 class GMapSB : CrdtObject<T>
 {
     uint32_t id; // Represents the server id
-
+    //unnecessary but makes it so much easier to acess the replicas for each GMap in local Server
+    //key reprents the id of the replica
     std::unordered_map<uint32_t,std::map<K,T>> payload; 
 
     std::map<K,T> totalPayload;
@@ -133,6 +145,18 @@ class GMapSB : CrdtObject<T>
     {
         ;
     }
+
+    void fixlocalConflict(K key, T value)
+    {
+        if (this->totalPayload.find(key) == this->totalPayload.end()) 
+        {
+            this->totalPayload.insert({key,value});
+        } 
+        else 
+        {
+            this->totalPayload[key] = std::max(this->totalPayload[key],value);
+        }
+    }
     bool updateInternalPayload(GMapMetadata<K,T> metadata , bool externalCall = false)
     {
         if (externalCall == false)
@@ -143,27 +167,13 @@ class GMapSB : CrdtObject<T>
             auto tempData = metadata_it->second.queryPayload();
             for (auto iter: tempData)
             {
-                auto key = iter.first;
-                auto value = iter.second;
-                if (this->totalPayload.find(key) == this->totalPayload.end()) {
-                    this->totalPayload.insert({key,value});
-                } else {
-                    this->totalPayload[key] = std::max(this->totalPayload[key],value);
-                }
-                
+                fixlocalConflict(iter.first,iter.second);  
             }
         }
         for (auto iter: metadata.queryPayload())
         {
-            auto key = iter.first;
-            auto value = iter.second;
-            if (this->totalPayload.find(key) == this->totalPayload.end()) {
-                this->totalPayload.insert({key,value});
-            } else {
-                this->totalPayload[key] = std::max(this->totalPayload[key],value);
-            }   
+            fixlocalConflict(iter.first,iter.second);     
         }
-
         return true;
     }
 
@@ -173,7 +183,12 @@ class GMapSB : CrdtObject<T>
         return this->id;
     }
 
-    T queryPayload(K mapId, K key) 
+    T queryPayload(K key)
+    {
+        return this->totalPayload[key];
+    }
+
+    T queryPayloadwithID(K mapId, K key) 
     {
         T val = T();
         auto metadata_it = this->payload[mapId].find(key);
@@ -183,6 +198,7 @@ class GMapSB : CrdtObject<T>
         }
         return val;
     }
+    
 
     std::vector<K> queryAllKeys()
     {
@@ -224,7 +240,6 @@ class GMapSB : CrdtObject<T>
     {
         for (auto &metadata: external_replica_metadata)
         {
-            
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, GMapMetadata<K,T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
             fixSameKeyConflict(metadata);
@@ -233,14 +248,13 @@ class GMapSB : CrdtObject<T>
     }
     void updateLocalExternalPayload(std::vector<GMapSB> handlers)
     {
-    
-        for (auto handler: handlers)
+        for (auto& handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
-                auto metadata_it = this->payload.find(metadata.queryId());
                 updateInternalPayload(metadata, true);
+                auto metadata_it = this->payload.find(metadata.queryId());
                 if (metadata_it != this->payload.end()) 
                 {
                     for (auto &serverPayload: metadata.queryPayload())
@@ -306,6 +320,29 @@ class GMapSBString : CrdtObject<T>
     {
         ;
     }
+    std::string fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)
+    {
+        std::multiset<std::string> mergeStringA;
+        std::multiset<std::string> mergeStringB;
+        std::multiset<std::string> mergeStringAns;
+        std::istringstream streamA(StringA);
+        std::istringstream streamB(StringB);
+        std::string mergeString = "";
+        while (streamA >> mergeString) mergeStringA.insert(mergeString);
+        while (streamB >> mergeString) mergeStringB.insert(mergeString);
+        std::set_union(mergeStringA.begin(),mergeStringA.end(),mergeStringB.begin(),
+        mergeStringB.end(),inserter(mergeStringAns,mergeStringAns.begin()));
+        mergeString = "";
+        for (std::string curr: mergeStringAns)
+        {
+            mergeString+=curr + " ";
+        }
+        mergeString.pop_back();
+        if (sysCall == 1)
+            this->totalPayload[key] = mergeString; 
+        return mergeString;
+    }
+
     bool updateInternalPayload(GMapMetadata<K,T> metadata, bool externalCall = false)
     {
         if (externalCall == false)
@@ -318,22 +355,13 @@ class GMapSBString : CrdtObject<T>
             {
                 auto key = iter.first;
                 auto value = iter.second;
-                if (this->totalPayload.find(key) == this->totalPayload.end()) {
+                if (this->totalPayload.find(key) == this->totalPayload.end()) 
+                {
                     this->totalPayload.insert({key,value});
-                } else {
-                    std::set<std::string> mergeStringSet;
-                    std::istringstream streamA(this->totalPayload[key]);
-                    std::istringstream streamB(value);
-                    std::string mergeString = "";
-                    while (streamA >> mergeString) mergeStringSet.insert(mergeString);
-                    while (streamB >> mergeString) mergeStringSet.insert(mergeString);;
-                    mergeString = "";
-                    for (std::string curr: mergeStringSet)
-                    {
-                        mergeString+=curr + " ";
-                    }
-                    mergeString.pop_back();
-                    this->totalPayload[key] = mergeString; 
+                } 
+                else 
+                {
+                    fixlocalConflict(this->totalPayload[key],value,key,1);
                 }
             }
         }
@@ -344,19 +372,7 @@ class GMapSBString : CrdtObject<T>
             if (this->totalPayload.find(key) == this->totalPayload.end()) {
                 this->totalPayload.insert({key,value});
             } else {
-                std::set<std::string> mergeStringSet;
-                std::istringstream streamA(this->totalPayload[key]);
-                std::istringstream streamB(value);
-                std::string mergeString = "";
-                while (streamA >> mergeString) mergeStringSet.insert(mergeString);
-                while (streamB >> mergeString) mergeStringSet.insert(mergeString);;
-                mergeString = "";
-                for (std::string curr: mergeStringSet)
-                {
-                    mergeString+=curr + " ";
-                }
-                mergeString.pop_back();
-                this->totalPayload[key] = mergeString; 
+                fixlocalConflict(this->totalPayload[key],value,key,1) ;
             }   
         }
         return true;
@@ -391,7 +407,7 @@ class GMapSBString : CrdtObject<T>
     }
 
 
-    T queryPayload(K mapId, K key) 
+    T queryPayloadwithID(K mapId, K key) 
     {
         T val = T();
         auto metadata_it = this->payload[mapId].find(key);
@@ -402,30 +418,23 @@ class GMapSBString : CrdtObject<T>
         return val;
     }
 
+    T queryPayload(K key)
+    {
+        return this->totalPayload[key];
+    }
+
+
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
    {
-       for (auto &iter: metadata.queryPayload())
-       {
+        for (auto &iter: metadata.queryPayload())
+        {
            auto key = iter.first;
            auto value = iter.second;
            auto metadata_it = this->payload[metadata.queryId()].find(key);
            if (metadata_it == this->payload[metadata.queryId()].end()) continue;
-         
-            std::set<std::string> mergeStringSet;
-            std::istringstream streamA(metadata_it->second);
-            std::istringstream streamB(value);
-            std::string mergeString = "";
-            while (streamA >> mergeString) mergeStringSet.insert(mergeString);
-            while (streamB >> mergeString) mergeStringSet.insert(mergeString);;
-            mergeString = "";
-            for (std::string curr: mergeStringSet)
-            {
-                mergeString+=curr + " ";
-            }
-            mergeString.pop_back();
-            metadata_it->second = mergeString;
-            metadata.insert(key,metadata_it->second);   
-    }
+           metadata_it->second = fixlocalConflict(metadata_it->second,value,-1,-1);
+           metadata.insert(key,metadata_it->second);   
+        }
    }
    
 
@@ -455,35 +464,17 @@ class GMapSBString : CrdtObject<T>
                         auto key = serverPayload.first;
                         auto value = serverPayload.second;
                         auto metadata_update = this->payload[metadata.queryId()].find(key);
-                        if (metadata_update == this->payload[metadata.queryId()].end()) {
-                            std::set<std::string> mergeStringSet;
-                            std::istringstream streamB(value);
-                            std::string mergeString = "";
-                            while (streamB >> mergeString) mergeStringSet.insert(mergeString);
-                            mergeString = "";
-                            for (std::string curr: mergeStringSet)
-                            {
-                                mergeString+=curr + " ";
-                            }
-                            mergeString.pop_back();
-                            this->payload[metadata.queryId()].insert({key,mergeString});
-                        } else {
-                            std::set<std::string> mergeStringSet;
-                            std::istringstream streamA(metadata_update->second);
-                            std::istringstream streamB(value);
-                            std::string mergeString = "";
-                            while (streamA >> mergeString) mergeStringSet.insert(mergeString);
-                            while (streamB >> mergeString) mergeStringSet.insert(mergeString);
-                            mergeString = "";
-                            for (std::string curr: mergeStringSet)
-                            {
-                                mergeString+=curr + " ";
-                            }
-                            mergeString.pop_back();
-                            metadata_update->second = mergeString;
+                        if (metadata_update == this->payload[metadata.queryId()].end()) 
+                        {
+                            this->payload[metadata.queryId()].insert({key,fixlocalConflict(value,"",-1,-1)});
+                        } 
+                        else 
+                        {
+                            metadata_update->second = fixlocalConflict(metadata_update->second,value,-1,-1);
                         }
                     }
-                } else 
+                } 
+                else 
                 {
                     addExternalReplica({metadata});  
                 }

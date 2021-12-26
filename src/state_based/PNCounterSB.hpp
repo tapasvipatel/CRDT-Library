@@ -30,9 +30,8 @@ namespace crdt
 {
 namespace state
 {
-
 /*
-* metadata template class for CRDT counter
+* metadata template class for CRDT PNCounter
 */
 template<typename T=int32_t>
 class PNCounterMetadata : CrdtMetaData
@@ -111,7 +110,7 @@ public:
 
 
 /*
-* template class for CRDT PNcounter
+* template class for CRDT PNCounter
 */
 template<typename T=int32_t>
 class PNCounterSB : CrdtObject<T>
@@ -205,7 +204,7 @@ public:
         for (auto &metadata: external_replica_metadata)
         {
             auto metadata_it = this->replica_metadata.find(metadata.queryId());
-            if (metadata_it != this->replica_metadata.end())
+            if (metadata_it != this->replica_metadata.end()) //Fixes the Conflict
             {
                auto metadata_it = this->replica_metadata.find(metadata.queryId());
                metadata.setPayloadP(std::max(metadata_it->second.queryPayloadP(), metadata.queryPayloadP()));

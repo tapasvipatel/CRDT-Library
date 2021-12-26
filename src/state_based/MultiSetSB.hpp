@@ -129,6 +129,13 @@ public:
     {
         ;
     }
+    std::multiset<T> fixlocalConflict(std::multiset<T> multisetA, std::multiset<T> multisetB)
+    {
+        std::multiset<T> fixConflict;
+        std::set_union(multisetA.begin(),multisetA.end(),multisetB.begin(),multisetB.end(),std::inserter(fixConflict,fixConflict.begin()));
+        return fixConflict;
+    }
+
     bool updateInternalPayload()
     {
         std::multiset<T> curr;
@@ -176,12 +183,7 @@ public:
             auto metadata_it = this->replica_metadata.find(metadata.queryId());
             if (metadata_it != this->replica_metadata.end())
             {
-               std::multiset<T> fixConflict;
-               std::unordered_map<T,T> freq;
-               auto multisetA = metadata_it->second.queryPayload();
-               auto multisetB = metadata.queryPayload(); 
-               std::set_union(multisetA.begin(),multisetA.end(),multisetB.begin(),multisetB.end(),std::inserter(fixConflict,fixConflict.begin()));
-               metadata.setPayload(fixConflict);
+               metadata.setPayload(fixlocalConflict(metadata_it->second.queryPayload(), metadata.queryPayload()));
             } 
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, MultiSetMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;

@@ -25,10 +25,6 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <unordered_map>
-#include <vector>
-#include <iterator>
-
 
 namespace crdt
 {
@@ -63,11 +59,6 @@ public:
         ;
     }
     
-    void merge(T payload)
-    {
-        this->payload = std::max(this->payload, payload);
-    }
-
     const uint32_t& queryId() const
     {
         return this->id;
@@ -131,7 +122,6 @@ public:
     {
         this->id = id;
         this->payload = T();
-        // this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(this->id, GCounterMetadata<T>(this->id, this->payload)));
     }
     
     ~GCounterSB()
@@ -172,11 +162,6 @@ public:
         return this->payload;
     }
 
-    void setPayLoad(T payload)
-    {
-        this->payload = payload;
-    }
-
     T queryPayloadwithID(uint32_t replicaID) 
     {
         T queryResult = T();
@@ -190,16 +175,14 @@ public:
         for (auto &metadata: external_replica_metadata)
         {
             auto metadata_it = this->replica_metadata.find(metadata.queryId());
-            if (metadata_it != this->replica_metadata.end())
+            if (metadata_it != this->replica_metadata.end()) //Found a conflict
             {
-               auto metadata_it = this->replica_metadata.find(metadata.queryId());
                metadata.setPayload(std::max(metadata_it->second.queryPayload(), metadata.queryPayload()));
             } 
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
         updateInternalPayload();
-
     }
     void updateLocalExternalPayload(std::vector<GCounterSB> handlers)
     {
