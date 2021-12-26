@@ -620,4 +620,78 @@ TEST_CASE("Test MultiSetSB", "[classic]")
 		std::multiset<uint32_t> test2 = {2,10,10,10};
 		REQUIRE(handler1.queryPayloadwithID(1) == test2);
 	}
+	SECTION("Test Conflict on localServer")
+	{
+		crdt::state::MultiSetSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::MultiSetMetadata<uint32_t> replica1A(0,5);
+		crdt::state::MultiSetMetadata<uint32_t> replica1B(0);
+		crdt::state::MultiSetMetadata<uint32_t> replica1C(0);
+		replica1A.insert({20,25,30});
+		replica1B.insert({30,35});
+		replica1C.insert({40,45,30,30});
+		handler1.addExternalReplica({replica1A,replica1B,replica1C});
+		std::multiset<uint32_t> test1 = {5,20,25,30,30,35,40,45};
+		REQUIRE(handler1.queryPayload() == test1);
+	}
+	SECTION("Test Conflict on multiple Servers")
+	{
+		crdt::state::MultiSetSB<uint32_t> handler1(2);
+		crdt::state::MultiSetSB<uint32_t> handler2(2);
+		crdt::state::MultiSetSB<uint32_t> handler3(3);
+		crdt::state::MultiSetMetadata<uint32_t> replica1A(0);
+		crdt::state::MultiSetMetadata<uint32_t> replica1B(1);
+		crdt::state::MultiSetMetadata<uint32_t> replica1C(2);
+		replica1A.insert({1,2,3});
+		replica1B.insert({4,5,6});
+		replica1C.insert({7,8,9});
+		handler1.addExternalReplica({replica1A,replica1B,replica1C});
+		std::multiset<uint32_t> test1 = {1,2,3,4,5,6,7,8,9};
+		REQUIRE(handler1.queryPayload() == test1);
+		crdt::state::MultiSetMetadata<uint32_t> replica2A(0);
+		crdt::state::MultiSetMetadata<uint32_t> replica2B(1);
+		crdt::state::MultiSetMetadata<uint32_t> replica2C(2);
+		replica2A.insert({10,11,12});
+		replica2B.insert({13,14,15});
+		replica2C.insert({16,17,18});
+		handler2.addExternalReplica({replica2A,replica2B,replica2C});
+		std::multiset<uint32_t> test2 = {10,11,12,13,14,15,16,17,18};
+		REQUIRE(handler2.queryPayload() == test2);
+		crdt::state::MultiSetMetadata<uint32_t> replica3A(0);
+		crdt::state::MultiSetMetadata<uint32_t> replica3B(1);
+		crdt::state::MultiSetMetadata<uint32_t> replica3C(2);
+		replica3A.insert({19,20,21});
+		replica3B.insert({22,23,24});
+		replica3C.insert({25,26,27});
+		handler3.addExternalReplica({replica3A,replica3B,replica3C});
+		std::multiset<uint32_t> test3 = {19,20,21,22,23,24,25,26,27};
+		REQUIRE(handler3.queryPayload() == test3);
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayload()  == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload()  == handler3.queryPayload());
+		crdt::state::MultiSetMetadata<uint32_t>  replica3D(3);
+		replica3D.insert({100,200,300});
+		handler3.addExternalReplica({replica3D});
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayload()  == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload()  == handler3.queryPayload());
+		replica3D.insert({400,500});
+		handler1.addExternalReplica({replica3D});
+		replica3D.insert({1000,2000,564});
+		handler2.addExternalReplica({replica3D});
+		REQUIRE(handler1.queryPayload() != handler2.queryPayload());
+		REQUIRE(handler2.queryPayload() != handler3.queryPayload());
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		std::multiset<uint32_t> test4 =  { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+  		22, 23, 24, 25, 26, 27, 100, 200, 300 , 400 , 500 , 564, 1000 , 2000 }; 
+		REQUIRE(handler1.queryPayload() == test4);
+		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
+	}
+
 }
