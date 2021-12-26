@@ -96,6 +96,9 @@ class GMapSB : CrdtObject<T>
     uint32_t id; // Represents the server id
 
     std::unordered_map<uint32_t,std::map<K,T>> payload; 
+
+    std::map<K,T> totalPayload;
+
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
     protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -130,9 +133,37 @@ class GMapSB : CrdtObject<T>
     {
         ;
     }
-    bool updateInternalPayload(GMapMetadata<K,T> metadata)
+    bool updateInternalPayload(GMapMetadata<K,T> metadata , bool externalCall = false)
     {
-        this->payload[metadata.queryId()] = metadata.queryPayload();
+        if (externalCall == false)
+            this->payload[metadata.queryId()] = metadata.queryPayload();
+        typename std::unordered_map<uint32_t,GMapMetadata<K,T>>::iterator metadata_it;
+        for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
+        {
+            auto tempData = metadata_it->second.queryPayload();
+            for (auto iter: tempData)
+            {
+                auto key = iter.first;
+                auto value = iter.second;
+                if (this->totalPayload.find(key) == this->totalPayload.end()) {
+                    this->totalPayload.insert({key,value});
+                } else {
+                    this->totalPayload[key] = std::max(this->totalPayload[key],value);
+                }
+                
+            }
+        }
+        for (auto iter: metadata.queryPayload())
+        {
+            auto key = iter.first;
+            auto value = iter.second;
+            if (this->totalPayload.find(key) == this->totalPayload.end()) {
+                this->totalPayload.insert({key,value});
+            } else {
+                this->totalPayload[key] = std::max(this->totalPayload[key],value);
+            }   
+        }
+
         return true;
     }
 
@@ -151,6 +182,28 @@ class GMapSB : CrdtObject<T>
             return metadata_it->second;
         }
         return val;
+    }
+
+    std::vector<K> queryAllKeys()
+    {
+        std::vector<K> queryResults;
+        for (auto iter: this->totalPayload)
+        {
+            auto key = iter.first;
+            queryResults.push_back(key);
+        }
+        return queryResults;
+    }
+
+    std::vector<T> queryAllValues()
+    {
+        std::vector<T> queryResults;
+        for (auto iter: this->totalPayload)
+        {
+            auto value = iter.second;
+            queryResults.push_back(value);
+        }
+        return queryResults;
     }
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
@@ -187,6 +240,7 @@ class GMapSB : CrdtObject<T>
             {
                 auto metadata = iter.second;
                 auto metadata_it = this->payload.find(metadata.queryId());
+                updateInternalPayload(metadata, true);
                 if (metadata_it != this->payload.end()) 
                 {
                     for (auto &serverPayload: metadata.queryPayload())
@@ -216,7 +270,7 @@ template<typename K, typename T = std::string>
 class GMapSBString : CrdtObject<T>
 {
     uint32_t id; // Represents the server id
-
+    std::map<K,T> totalPayload;
     std::unordered_map<uint32_t,std::map<K,T>> payload; 
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
     protected:
@@ -252,9 +306,59 @@ class GMapSBString : CrdtObject<T>
     {
         ;
     }
-    bool updateInternalPayload(GMapMetadata<K,T> metadata)
+    bool updateInternalPayload(GMapMetadata<K,T> metadata, bool externalCall = false)
     {
-        this->payload[metadata.queryId()] = metadata.queryPayload();
+        if (externalCall == false)
+            this->payload[metadata.queryId()] = metadata.queryPayload();
+        typename std::unordered_map<uint32_t,GMapMetadata<K,T>>::iterator metadata_it;
+        for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
+        {
+            auto tempData = metadata_it->second.queryPayload();
+            for (auto iter: tempData)
+            {
+                auto key = iter.first;
+                auto value = iter.second;
+                if (this->totalPayload.find(key) == this->totalPayload.end()) {
+                    this->totalPayload.insert({key,value});
+                } else {
+                    std::set<std::string> mergeStringSet;
+                    std::istringstream streamA(this->totalPayload[key]);
+                    std::istringstream streamB(value);
+                    std::string mergeString = "";
+                    while (streamA >> mergeString) mergeStringSet.insert(mergeString);
+                    while (streamB >> mergeString) mergeStringSet.insert(mergeString);;
+                    mergeString = "";
+                    for (std::string curr: mergeStringSet)
+                    {
+                        mergeString+=curr + " ";
+                    }
+                    mergeString.pop_back();
+                    this->totalPayload[key] = mergeString; 
+                }
+            }
+        }
+        for (auto iter: metadata.queryPayload())
+        {
+            auto key = iter.first;
+            auto value = iter.second;
+            if (this->totalPayload.find(key) == this->totalPayload.end()) {
+                this->totalPayload.insert({key,value});
+            } else {
+                std::set<std::string> mergeStringSet;
+                std::istringstream streamA(this->totalPayload[key]);
+                std::istringstream streamB(value);
+                std::string mergeString = "";
+                while (streamA >> mergeString) mergeStringSet.insert(mergeString);
+                while (streamB >> mergeString) mergeStringSet.insert(mergeString);;
+                mergeString = "";
+                for (std::string curr: mergeStringSet)
+                {
+                    mergeString+=curr + " ";
+                }
+                mergeString.pop_back();
+                this->totalPayload[key] = mergeString; 
+            }   
+        }
         return true;
     }
 
@@ -263,6 +367,29 @@ class GMapSBString : CrdtObject<T>
     {
         return this->id;
     }
+
+    std::vector<K> queryAllKeys()
+    {
+        std::vector<K> queryResults;
+        for (auto iter: this->totalPayload)
+        {
+            auto key = iter.first;
+            queryResults.push_back(key);
+        }
+        return queryResults;
+    }
+
+    std::vector<T> queryAllValues()
+    {
+        std::vector<T> queryResults;
+        for (auto iter: this->totalPayload)
+        {
+            auto value = iter.second;
+            queryResults.push_back(value);
+        }
+        return queryResults;
+    }
+
 
     T queryPayload(K mapId, K key) 
     {
@@ -319,6 +446,7 @@ class GMapSBString : CrdtObject<T>
             for (auto &iter: handler.replica_metadata)
             {
                 auto metadata = iter.second;
+                updateInternalPayload(metadata, true);
                 auto metadata_it = this->payload.find(metadata.queryId());
                 if (metadata_it != this->payload.end()) 
                 {

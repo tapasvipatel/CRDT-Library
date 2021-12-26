@@ -393,7 +393,16 @@ TEST_CASE("Test GMapSB", "[classic]")
 			REQUIRE(handler3.queryPayload(1,0) == 5000);
 			REQUIRE(handler2.queryPayload(1,0) == handler.queryPayload(1,0));
 			REQUIRE(handler3.queryPayload(1,0) == handler2.queryPayload(1,0));
+			std::vector<uint32_t> test1 = {0,3,10,25,75};
+			REQUIRE(handler.queryAllKeys() == test1);
+			REQUIRE(handler2.queryAllKeys() == test1);
+			REQUIRE(handler3.queryAllKeys() == test1);
+			std::vector<uint32_t> test2 = {5000,200,3,100,350};
+			REQUIRE(handler.queryAllValues() == test2);
+			REQUIRE(handler2.queryAllValues() == test2);
+			REQUIRE(handler3.queryAllValues() == test2);
 	}
+	
 	SECTION("Test Conflict String on Multiple Servers")
 	{
 		crdt::state::GMapSBString<uint32_t, std::string> handler1(1);
@@ -439,6 +448,14 @@ TEST_CASE("Test GMapSB", "[classic]")
 		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
 		REQUIRE(handler1.queryPayload(2,10) == handler2.queryPayload(2,10));
 		REQUIRE(handler2.queryPayload(2,10) == handler3.queryPayload(2,10));
+		std::vector<uint32_t> test1 = {1,10};
+		REQUIRE(handler1.queryAllKeys() == test1);
+		REQUIRE(handler2.queryAllKeys() == test1);
+		REQUIRE(handler3.queryAllKeys() == test1);
+		std::vector<std::string> test2 = { "Bob! Hello, is my name", "ABC ASDHUIFDHIUSDHFUI DEF Hello HelloMelo U" };
+		REQUIRE(handler1.queryAllValues() == test2);
+		REQUIRE(handler2.queryAllValues() == test2);
+		REQUIRE(handler3.queryAllValues() == test2);
 	}
 }
 

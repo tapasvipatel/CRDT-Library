@@ -162,6 +162,14 @@ public:
         return this->payload;
     }
 
+    std::priority_queue<T> queryPayloadwithID(uint32_t replicaID) 
+    {
+        std::priority_queue<T> queryResult;
+        auto findPQ = replica_metadata.find(replicaID);
+        if (findPQ == replica_metadata.end()) return queryResult;
+        return findPQ->second.queryPayload();
+    }
+
     std::vector<T> queryPayloadVector()
     {
         std::vector<T> queryResult;

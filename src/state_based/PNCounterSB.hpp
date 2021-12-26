@@ -191,6 +191,15 @@ public:
         this->payload = payload;
     }
 
+    T queryPayloadwithID(uint32_t replicaID) 
+    {
+        T queryResult = T();
+        auto findPQ = replica_metadata.find(replicaID);
+        if (findPQ == replica_metadata.end()) return queryResult;
+        return findPQ->second.queryPayloadT();
+    }
+
+
     void addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
