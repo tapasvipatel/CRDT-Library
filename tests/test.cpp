@@ -547,5 +547,19 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		handler3.updateLocalExternalPayload({server1,server2});
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
+		replica3D.push({400,500});
+		handler1.addExternalReplica({replica3D});
+		replica3D.push({1000,2000,564});
+		handler2.addExternalReplica({replica3D});
+		REQUIRE(handler1.queryPayloadVector() != handler2.queryPayloadVector());
+		REQUIRE(handler2.queryPayloadVector() != handler3.queryPayloadVector());
+		server1 = handler1;
+		server2 = handler2;
+		server3 = handler3;
+		handler1.updateLocalExternalPayload({server2,server3});
+		handler2.updateLocalExternalPayload({server1,server3});
+		handler3.updateLocalExternalPayload({server1,server2});
+		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
+		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 	}
 }
