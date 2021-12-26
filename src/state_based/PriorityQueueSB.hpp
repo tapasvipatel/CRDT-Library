@@ -190,7 +190,7 @@ public:
             if (metadata_it != this->replica_metadata.end())
             {
                std::priority_queue<T> fixConflict;
-               std::unordered_map<T,T> freq;
+               std::unordered_map<T,int> freq;
                auto pq1 = metadata_it->second.queryPayload();
                auto pq2 = metadata.queryPayload(); 
                
