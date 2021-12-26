@@ -67,6 +67,13 @@ class PriorityQueueMetadata : CrdtMetaData
     {
         this->payload.push(value);
     }
+    void push(std::vector<T> value) 
+    {
+        for (auto iter: value)
+        {
+            this->payload.push(iter);
+        }
+    }
     void setPayload(std::priority_queue<T> payload) 
     {
         this->payload = payload;
@@ -144,6 +151,7 @@ public:
         return true;
     }
 #ifdef BUILD_TESTING
+    
     const uint32_t& queryId() const
     {
         return this->id;
@@ -152,6 +160,18 @@ public:
     std::priority_queue<T> queryPayload() 
     {
         return this->payload;
+    }
+
+    std::vector<T> queryPayloadVector()
+    {
+        std::vector<T> queryResult;
+        auto query = this->payload;
+        while (!query.empty())
+        {
+            queryResult.push_back(query.top());
+            query.pop();
+        }
+        return queryResult;
     }
     
     void addExternalReplica(std::vector<PriorityQueueMetadata<T>> external_replica_metadata)
