@@ -35,6 +35,7 @@ enum CrdtType
     PNCounterSBType,
     GSetSBType,
     TwoPSetSBType,
+    ORSetSBType,
     VectorSBType
 };
 
