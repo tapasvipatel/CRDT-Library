@@ -17,8 +17,8 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __GSetSB_H__
-#define __GSetSB_H__
+#ifndef __TwoPSetSB_H__
+#define __TwoPSetSB_H__
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
@@ -36,36 +36,37 @@ namespace state
 * metadata template class for CRDT set
 */
 template<typename T=int32_t>
-class GSetMetadata : CrdtMetaData
+class TwoPSetMetadata : CrdtMetaData
 {
 private:
     uint32_t id;
     std::set<T> payload;  // Set
+    std::set<T> tombstone;  // Removed Set
 
 public:
-    GSetMetadata() : CrdtMetaData(CrdtType::GSetSBType)
+    TwoPSetMetadata() : CrdtMetaData(CrdtType::TwoPSetSBType)
     {
         ;
     }
 
-    GSetMetadata(uint32_t id) : CrdtMetaData(CrdtType::GSetSBType)
+    TwoPSetMetadata(uint32_t id) : CrdtMetaData(CrdtType::TwoPSetSBType)
     {
         this->id = id;
     }
 
-    GSetMetadata(uint32_t id, T value) : CrdtMetaData(CrdtType::GSetSBType)
+    TwoPSetMetadata(uint32_t id, T value) : CrdtMetaData(CrdtType::TwoPSetSBType)
     {
         this->id = id;
         payload.insert(value);
     }
 
-    GSetMetadata(uint32_t id, std::set<T> value) : CrdtMetaData(CrdtType::GSetSBType)
+    TwoPSetMetadata(uint32_t id, std::set<T> value) : CrdtMetaData(CrdtType::TwoPSetSBType)
     {
         this->id = id;
         payload = value;
     }
 
-    ~GSetMetadata()
+    ~TwoPSetMetadata()
     {
         ;
     }
@@ -80,27 +81,43 @@ public:
         this->payload = payload;
     }
 
+    void setTombstone(std::set<T> tombstone)
+    {
+        this->tombstone = tombstone;
+    }
+
     std::set<T> queryPayload() 
     {
         return this->payload;
+    }
+
+    std::set<T> queryTombstone() 
+    {
+        return this->tombstone;
     }
 
     void insert(T value) 
     {
         this->payload.insert(value);
     }
+
+    void remove(T value) 
+    {
+        this->tombstone.insert(value);
+    }
 };
 
 /*
-* template class for CRDT GSetSB
+* template class for CRDT TwoPSetSB
 */
 template<typename T=int32_t>
-class GSetSB : CrdtObject<T>
+class TwoPSetSB : CrdtObject<T>
 {
 private:
     uint32_t id; // server id
-    std::set<T> payload; 
-    std::unordered_map<uint32_t,GSetMetadata<T>> replica_metadata; // sets on servers
+    std::set<T> payload;
+    std::set<T> tombstone; 
+    std::unordered_map<uint32_t,TwoPSetMetadata<T>> replica_metadata; // sets on servers
 
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -128,12 +145,12 @@ protected:
     }
 
 public:
-    GSetSB(uint32_t id)
+    TwoPSetSB(uint32_t id)
     {
         this->id = id;
     }
 
-    ~GSetSB()
+    ~TwoPSetSB()
     {
         ;
     }
@@ -141,7 +158,8 @@ public:
     bool updateInternalPayload()
     {
         std::set<T> curr;
-        typename std::unordered_map<uint32_t,GSetMetadata<T>>::iterator metadata_it;
+        std::set<T> curr_ts;
+        typename std::unordered_map<uint32_t,TwoPSetMetadata<T>>::iterator metadata_it;
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
             auto temp_data = metadata_it->second.queryPayload();
@@ -149,17 +167,15 @@ public:
             {
                 curr.insert(iter);
             }
+            auto temp_data_ts = metadata_it->second.queryTombstone();
+            for (auto iter_ts: temp_data_ts)
+            {
+                curr_ts.insert(iter_ts);
+            }
         }
         this->payload = curr;
+        this->tombstone = curr_ts;
         return true;
-    }
-
-    bool compare(GSetSB<T> handler, uint32_t setId) {
-        return includes(this->replica_metadata[setId].queryPayload().begin(), this->replica_metadata[setId].queryPayload().end(), handler.replica_metadata[setId].queryPayload().begin(), handler.replica_metadata[setId].queryPayload().end());
-    }
-
-    bool compare_sets(std::set<T> set1, std::set<T> set2) {
-        return includes(set1.begin(), set1.end(), set2.begin(), set2.end());
     }
 
 #ifdef BUILD_TESTING
@@ -173,15 +189,60 @@ public:
         return this->payload;
     }
 
-    std::set<T> queryPayloadwithID(uint32_t replicaID)
+    std::set<T> queryTombstone() 
     {
-        std::set<T> queryResult;
-        auto findMS = replica_metadata.find(replicaID);
-        if (findMS == replica_metadata.end()) return queryResult;
-        return findMS->second.queryPayload();
+        return this->tombstone;
     }
 
-    void addExternalReplica(std::vector<GSetMetadata<T>> external_replica_metadata)
+    std::set<T> queryTwoPSet()
+    {
+        std::set<T> queryResult;
+        for (auto const &e: this->payload) {
+            if (lookup(e)) {
+                queryResult.insert(e);
+            }
+        }
+        return queryResult;
+    }
+
+    bool lookup(T e) {
+        if (this->payload.count(e) && !this->tombstone.count(e)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    bool lookupwithID(T e, uint32_t replicaID) {
+        std::set<T> queryPayload, queryTombstone;
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return false;
+        queryPayload = findMS->second.queryPayload();
+        queryTombstone = findMS->second.queryTombstone();
+        if (queryPayload.count(e) && !queryTombstone.count(e)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    std::set<T> queryTwoPSetwithID(uint32_t replicaID)
+    {
+        std::set<T> queryPayload, queryResult;
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return queryPayload;
+        queryPayload = findMS->second.queryPayload();
+        for (auto const &e: queryPayload) {
+            if (lookupwithID(e, replicaID)) {
+                queryResult.insert(e);
+            }
+        }
+        return queryResult;
+    }
+
+    void addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
         {
@@ -193,21 +254,27 @@ public:
                 std::set<T> setB = metadata.queryPayload();
                 std::set_union(setA.begin(),setA.end(),setB.begin(),setB.end(),std::inserter(merged_set,merged_set.begin()));
                 metadata.setPayload(merged_set);
+
+                std::set<T> merged_ts;
+                std::set<T> tsA = search->second.queryTombstone();
+                std::set<T> tsB = metadata.queryTombstone();
+                std::set_union(tsA.begin(),tsA.end(),tsB.begin(),tsB.end(),std::inserter(merged_ts,merged_ts.begin()));
+                metadata.setTombstone(merged_ts);
             }
             
-            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GSetMetadata<T>>(metadata.queryId(), metadata));
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, TwoPSetMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
         updateInternalPayload();
     }
 
-    void updateLocalExternalPayload(std::vector<GSetSB> handlers)
+    void updateLocalExternalPayload(std::vector<TwoPSetSB> handlers)
     {
-        for (GSetSB handler: handlers)
+        for (TwoPSetSB handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
             {
-                GSetMetadata<T> metadata = iter.second;
+                TwoPSetMetadata<T> metadata = iter.second;
                 addExternalReplica({metadata});  
             }
         }
@@ -219,4 +286,4 @@ public:
 }   // namespace state
 }   // namespace crdt
 
-#endif  // __GSetSB_H__
+#endif  // __TwoPSetSB_H__
