@@ -8,6 +8,7 @@ using namespace std;
 //#include "../src/operation_based/CounterOB.hpp"
 #include "../src/state_based/GSetSB.hpp"
 #include "../src/state_based/TwoPSetSB.hpp"
+#include "../src/state_based/VectorSB.hpp"
 
 /*
 TEST_CASE("Test CounterOB", "[classic]")
@@ -280,5 +281,82 @@ TEST_CASE("Test TwoPSetSB", "[classic]")
 		REQUIRE(handler1.queryTwoPSet() == handler2.queryTwoPSet());
 		REQUIRE(handler1.queryTwoPSet() == handler3.queryTwoPSet());
 		REQUIRE(handler2.queryTwoPSet() == handler3.queryTwoPSet());
+	}
+}
+
+
+TEST_CASE("Test VectorSB", "[classic]")
+{
+	SECTION("Test Insert Operation")
+	{
+		crdt::state::VectorSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::VectorMetadata<uint32_t> replica1A(1,3);
+		crdt::state::VectorMetadata<uint32_t> replica1B(2,6);
+		crdt::state::VectorMetadata<uint32_t> replica1C(3,9);
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::vector<uint32_t> test = {3,6,9};
+		REQUIRE(handler.queryPayload() == test);
+
+		replica1B.push_back(16);
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		test = {3,6,9,16};
+		REQUIRE(handler.queryPayload() == test);
+
+		replica1C.push_back(2);
+		replica1C.push_back(10);
+		replica1C.push_back(10);
+		replica1C.push_back(36);
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+		test = {2,9,10,10,36};
+		REQUIRE(handler.queryPayloadwithID(3) == test); 
+		test = {2,3,6,9,10,10,16,36};
+		REQUIRE(handler.queryPayload() == test);
+	}
+	
+	SECTION("Test Conflict on localServer")
+	{
+		crdt::state::VectorSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::VectorMetadata<uint32_t> replica1A(1,2);
+		crdt::state::VectorMetadata<uint32_t> replica1B(1,4);
+		crdt::state::VectorMetadata<uint32_t> replica1C(1,6);
+		handler1.addExternalReplica({replica1A,replica1B,replica1C});
+		std::vector<uint32_t> val = {2,4,6};
+		REQUIRE(handler1.queryPayload() == val);
+
+		crdt::state::VectorSB<uint32_t> handler2(2); //Represents Server 1
+		crdt::state::VectorMetadata<uint32_t> replica2A(3,{1,2,3});
+		crdt::state::VectorMetadata<uint32_t> replica2B(3,{2,3,4,2});
+		crdt::state::VectorMetadata<uint32_t> replica2C(3,{4,5,6});
+		handler2.addExternalReplica({replica2A,replica2B,replica2C});
+		val = {1,2,2,3,4,5,6};
+		REQUIRE(handler2.queryPayload() == val);
+	}
+	
+	SECTION("Test Conflict on Multiple Servers")
+	{
+		crdt::state::VectorSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::VectorSB<uint32_t> handler2(2); //Represents Server 1.2
+		crdt::state::VectorSB<uint32_t> handler3(3); //Represents Server 1.3
+		crdt::state::VectorMetadata<uint32_t> replicaA(4,{3,6,9});
+		crdt::state::VectorMetadata<uint32_t> replicaB(4,{2,4,6});
+		crdt::state::VectorMetadata<uint32_t> replicaC(4,{1,2,3,6,6});
+		handler1.addExternalReplica({replicaA});
+		handler2.addExternalReplica({replicaB});
+		handler3.addExternalReplica({replicaC});
+		REQUIRE(handler1.queryPayloadwithID(4) != handler2.queryPayloadwithID(4));
+		REQUIRE(handler1.queryPayloadwithID(4) != handler3.queryPayloadwithID(4));
+		REQUIRE(handler2.queryPayloadwithID(4) != handler3.queryPayloadwithID(4));
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3}); // merge
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayloadwithID(4) == handler2.queryPayloadwithID(4));
+		REQUIRE(handler1.queryPayloadwithID(4) == handler3.queryPayloadwithID(4));
+		REQUIRE(handler2.queryPayloadwithID(4) == handler3.queryPayloadwithID(4));
+		std::vector<uint32_t> test = {1,2,3,4,6,6,9};
+		REQUIRE(handler1.queryPayload() == test);
+		REQUIRE(handler2.queryPayload() == test);
+		REQUIRE(handler3.queryPayload() == test);
 	}
 }

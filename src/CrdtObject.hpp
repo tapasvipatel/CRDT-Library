@@ -34,7 +34,8 @@ enum CrdtType
     GCounterSBType,
     PNCounterSBType,
     GSetSBType,
-    TwoPSetSBType
+    TwoPSetSBType,
+    VectorSBType
 };
 
 class CrdtMetaData
