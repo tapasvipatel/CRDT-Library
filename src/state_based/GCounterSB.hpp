@@ -20,8 +20,8 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __PNCOUNTERSB_H__
-#define __PNCOUNTERSB_H__
+#ifndef __GCOUNTERSB_H__
+#define __GCOUNTERSB_H__
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
@@ -30,95 +30,68 @@ namespace crdt
 {
 namespace state
 {
+
 /*
-* metadata template class for CRDT PNCounter
+* metadata template class for CRDT counter
 */
 template<typename T=int32_t>
-class PNCounterMetadata : CrdtMetaData
+class GCounterMetadata : CrdtMetaData
 {
 private:
     uint32_t id;
-    T positivePayload;
-    T negativePayload;
-    T totalPayload;
+    T payload;
+
 public:
-    PNCounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::PNCounterSBType)
+    GCounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::GCounterSBType)
     {
         this->id = id;
-        this->positivePayload = 0;
-        this->negativePayload = 0;
+        this->payload = 0;
     }
-    PNCounterMetadata(uint32_t id, T positivePayload) : CrdtMetaData(CrdtType::PNCounterSBType)
+
+    GCounterMetadata(uint32_t id, T payload) : CrdtMetaData(CrdtType::GCounterSBType)
     {
         this->id = id;
-        this->positivePayload = positivePayload;
-        this->totalPayload = positivePayload;
-        this->negativePayload = 0;
+        this->payload = payload;
     }
-    ~PNCounterMetadata()
+
+    ~GCounterMetadata()
     {
         ;
     }
     
-
     const uint32_t& queryId() const
     {
         return this->id;
     }
 
-    const T& queryPayloadT() const
+    const T& queryPayload() const
     {
-        return this->totalPayload;
+        return this->payload;
     }
 
-    const T& queryPayloadP() const
+    void updatePayload(T payload)
     {
-        return this->positivePayload;
-    }
-    const T& queryPayloadN() const
-    {
-        return this->negativePayload;
+        this->payload += payload;
     }
 
-    void increasePayload(T positivePayload)
+    void setPayload(T payload)
     {
-        this->positivePayload += positivePayload;
-        this->totalPayload = this->positivePayload - this->negativePayload;
+        this->payload = payload;
     }
-
-    void decreasePayload(T negativePayload)
-    {
-        this->negativePayload += negativePayload;
-        this->totalPayload = this->positivePayload - this->negativePayload;
-    }
-    void setPayloadT(T payload)
-    {
-        this->totalPayload = payload;
-    }
-    void setPayloadP(T payload)
-    {
-        this->positivePayload = payload;
-        this->totalPayload = this->positivePayload - this->negativePayload;
-    }
-    void setPayloadN(T payload)
-    {
-        this->negativePayload = payload;
-        this->totalPayload = this->positivePayload - this->negativePayload;
-    }
-
+    
 };
 
-
 /*
-* template class for CRDT PNCounter
+* template class for CRDT Gcounter
 */
 template<typename T=int32_t>
-class PNCounterSB : CrdtObject<T>
+class GCounterSB : CrdtObject<T>
 {
 private:
     uint32_t id;
     T payload;
-    std::unordered_map<uint32_t,PNCounterMetadata<T>> replica_metadata;
+    std::unordered_map<uint32_t,GCounterMetadata<T>> replica_metadata;
+
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
     {
@@ -143,37 +116,41 @@ protected:
     {
         return false;
     }
+
 public:
-    PNCounterSB(uint32_t id)
+    GCounterSB(uint32_t id)
     {
         this->id = id;
         this->payload = T();
     }
-    ~PNCounterSB()
+    
+    ~GCounterSB()
     {
         ;
     }
+
     bool updateInternalPayload()
     {
         T curr = T();
-        
-        typename std::unordered_map<uint32_t,PNCounterMetadata<T>>::iterator metadata_it;
+        typename std::unordered_map<uint32_t,GCounterMetadata<T>>::iterator metadata_it;
 
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
-            curr += metadata_it->second.queryPayloadT();
+            curr += metadata_it->second.queryPayload();
         }
 
         this->payload = curr;
         return true;
     }
+
     bool updateExternalPayload()
     {
-        typename std::unordered_map<uint32_t,PNCounterMetadata<T>>::iterator metadata_it;
+        typename std::unordered_map<uint32_t,GCounterMetadata<T>>::iterator metadata_it;
         metadata_it = this->replica_metadata.find(this->id);
         metadata_it->second.payload = this->payload;
         return true;
     }
+
 #ifdef BUILD_TESTING
     const uint32_t& queryId() const
     {
@@ -185,38 +162,31 @@ public:
         return this->payload;
     }
 
-    void setPayLoad(T payload)
-    {
-        this->payload = payload;
-    }
-
     T queryPayloadwithID(uint32_t replicaID) 
     {
         T queryResult = T();
         auto findPQ = replica_metadata.find(replicaID);
         if (findPQ == replica_metadata.end()) return queryResult;
-        return findPQ->second.queryPayloadT();
+        return findPQ->second.queryPayload();
     }
 
-
-    void addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)
+    void addExternalReplica(std::vector<GCounterMetadata<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
         {
             auto metadata_it = this->replica_metadata.find(metadata.queryId());
-            if (metadata_it != this->replica_metadata.end()) //Fixes the Conflict
+            if (metadata_it != this->replica_metadata.end()) //Found a conflict
             {
-               auto metadata_it = this->replica_metadata.find(metadata.queryId());
-               metadata.setPayloadP(std::max(metadata_it->second.queryPayloadP(), metadata.queryPayloadP()));
-               metadata.setPayloadN(std::max(metadata_it->second.queryPayloadN(), metadata.queryPayloadN()));
+               metadata.setPayload(std::max(metadata_it->second.queryPayload(), metadata.queryPayload()));
             } 
-            auto replica = this->replica_metadata.insert(std::pair<uint32_t, PNCounterMetadata<T>>(metadata.queryId(), metadata));
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, GCounterMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
         updateInternalPayload();
     }
-    void updateLocalExternalPayload(std::vector<PNCounterSB> handlers)
+    void updateLocalExternalPayload(std::vector<GCounterSB> handlers)
     {
+        
         for (auto handler: handlers)
         {
             for (auto &iter: handler.replica_metadata)
@@ -225,7 +195,7 @@ public:
                 addExternalReplica({metadata});
             }
         }
-     
+        
     }
 #endif
 };
@@ -233,4 +203,4 @@ public:
 }   // namespace state
 }   // namespace crdt
 
-#endif  // __PNCOUNTERSB_H__
+#endif  // __GCOUNTERSB_H__

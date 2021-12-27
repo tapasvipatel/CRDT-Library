@@ -25,13 +25,17 @@
 
 #include <string>
 #include <chrono>
+#include <vector>
 
 enum CrdtType
 {
     CounterOBType,
     GCounterOBType,
     GCounterSBType,
-    PNCounterSBType
+    PNCounterSBType,
+    GMapSBType,
+    PriorityQueueSBType,
+    MultiSetSBType
 };
 
 class CrdtMetaData
@@ -49,7 +53,7 @@ class CrdtObject
 private:
     std::chrono::time_point<std::chrono::system_clock> date_last_modified;
 protected:
-    virtual bool merge(uint32_t replica_id) = 0;
+    virtual bool merge(std::vector<uint32_t> replica_ids) = 0;
     virtual bool serialize(std::string& buffer) = 0;
     virtual bool deserialize(std::string& buffer) = 0;
     virtual bool exportDB() = 0;
