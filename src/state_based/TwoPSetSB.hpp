@@ -71,7 +71,7 @@ public:
         ;
     }
 
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }

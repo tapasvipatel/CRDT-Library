@@ -57,13 +57,13 @@ public:
     VectorMetadata(uint32_t id, T value) : CrdtMetaData(CrdtType::VectorSBType)
     {
         this->id = id;
-        payload.push_back(value);
+        this->payload.push_back(value);
     }
 
     VectorMetadata(uint32_t id, std::vector<T> value) : CrdtMetaData(CrdtType::VectorSBType)
     {
         this->id = id;
-        payload = value;
+        this->payload = value;
     }
 
     ~VectorMetadata()
@@ -71,7 +71,7 @@ public:
         ;
     }
 
-    const T& queryId() const
+    const uint32_t& queryId() const
     {
         return this->id;
     }
@@ -89,6 +89,11 @@ public:
     void push_back(T value) 
     {
         this->payload.push_back(value);
+    }
+
+    void push_back(std::vector<T> v) 
+    {
+        for (auto val: v) this->payload.push_back(val);
     }
 };
 
@@ -141,22 +146,22 @@ public:
 
     std::vector<T> fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)
     {
-        std::vector<T> fixConflict;
-        std::unordered_map<T,uint32_t> freq; //We use this for set union
+        std::vector<T> merged_vector;
+        std::merge(vector1.begin(), vector1.end(), vector2.begin(), vector2.end(), std::inserter(merged_vector, merged_vector.begin()));
+        std::unordered_map<T,uint32_t> freq, freq2; //We use this for set union
         for (T n1 : vector1) {
             freq[n1]++;
-            fixConflict.push_back(n1);
         }
         for (T n2 : vector2) {
-            if (freq[n2] == 0) {
-                fixConflict.push_back(n2);
-            }
-            else {
+            if (freq[n2] != 0) {
                 freq[n2]--;
+                freq2[n2]++;
+                typename std::vector<T>::iterator position = std::find(merged_vector.begin(), merged_vector.end(), n2);
+                if (position != merged_vector.end()) merged_vector.erase(position);
             }
         }
-        sort(fixConflict.begin(), fixConflict.end());
-        return fixConflict;
+        
+        return merged_vector;
     }
 
     bool updateInternalPayload()
@@ -166,12 +171,10 @@ public:
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
             auto temp_data = metadata_it->second.queryPayload();
-            for (auto iter: temp_data)
-            {
-                curr.push_back(iter);
-            }
+            std::vector<T> merged_vector;
+            std::merge(curr.begin(), curr.end(), temp_data.begin(), temp_data.end(), std::inserter(merged_vector, merged_vector.begin()));
+            curr = merged_vector;
         }
-        sort(curr.begin(),curr.end());
         this->payload = curr;
         return true;
     }

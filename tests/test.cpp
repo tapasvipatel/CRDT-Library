@@ -283,6 +283,26 @@ TEST_CASE("Test TwoPSetSB", "[classic]")
 		REQUIRE(handler1.queryTwoPSet() == handler2.queryTwoPSet());
 		REQUIRE(handler1.queryTwoPSet() == handler3.queryTwoPSet());
 		REQUIRE(handler2.queryTwoPSet() == handler3.queryTwoPSet());
+
+		replicaB.insert(2); // insert tombstone value 2 again will not change the set
+		handler2.addExternalReplica({replicaB});
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3}); // merge
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryTwoPSetwithID(4) == handler2.queryTwoPSetwithID(4));
+		REQUIRE(handler1.queryTwoPSetwithID(4) == handler3.queryTwoPSetwithID(4));
+		REQUIRE(handler2.queryTwoPSetwithID(4) == handler3.queryTwoPSetwithID(4));
+		test = {1,3,4,6,9};
+		REQUIRE(handler1.queryTwoPSetwithID(4) == test);
+		test = {2,3,10};
+		REQUIRE(handler1.queryTwoPSetwithID(6) == test);
+		REQUIRE(handler2.queryTwoPSetwithID(6) == test);
+		REQUIRE(handler3.queryTwoPSetwithID(6) == test);
+		test = {1,3,4,10};
+		REQUIRE(handler1.queryTwoPSet() == test);
+		REQUIRE(handler1.queryTwoPSet() == handler2.queryTwoPSet());
+		REQUIRE(handler1.queryTwoPSet() == handler3.queryTwoPSet());
+		REQUIRE(handler2.queryTwoPSet() == handler3.queryTwoPSet());
 	}
 }
 
@@ -311,9 +331,9 @@ TEST_CASE("Test VectorSB", "[classic]")
 		replica1C.push_back(10);
 		replica1C.push_back(36);
 		handler.addExternalReplica({replica1A,replica1B,replica1C});
-		test = {2,9,10,10,36};
+		test = {9,2,10,10,36};
 		REQUIRE(handler.queryPayloadwithID(3) == test); 
-		test = {2,3,6,9,10,10,16,36};
+		test = {3,6,9,2,10,10,16,36};
 		REQUIRE(handler.queryPayload() == test);
 	}
 	
@@ -332,7 +352,7 @@ TEST_CASE("Test VectorSB", "[classic]")
 		crdt::state::VectorMetadata<uint32_t> replica2B(3,{2,3,4,2});
 		crdt::state::VectorMetadata<uint32_t> replica2C(3,{4,5,6});
 		handler2.addExternalReplica({replica2A,replica2B,replica2C});
-		val = {1,2,2,3,4,5,6};
+		val = {1,2,3,2,4,5,6};
 		REQUIRE(handler2.queryPayload() == val);
 	}
 	
