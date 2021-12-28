@@ -24,6 +24,7 @@
 #define __COUNTEROB_H__
 
 #include <unordered_map>
+#include <vector>
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
@@ -95,10 +96,10 @@ private:
     T payload;
     T num_increments;
     T num_decrements;
-    std::unordered_map<uint32_t, CounterMetadata<T>> external_replica_metadata;
+    std::unordered_map<uint32_t, CounterMetadata<T>> replica_metadata;
 
 protected:
-    bool merge(uint32_t replica_id)
+    bool merge(std::vector<uint32_t> replica_ids)
     {
         return false;
     }

@@ -24,3 +24,4 @@
 
 # Folders
 /build
+.vscode/settings.json
