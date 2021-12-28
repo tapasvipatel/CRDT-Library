@@ -2,8 +2,6 @@
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch_all.hpp>
-using namespace std;
-
 
 //#include "../src/operation_based/CounterOB.hpp"
 #include "../src/state_based/GSetSB.hpp"
