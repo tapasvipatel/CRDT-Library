@@ -1225,5 +1225,11 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		replica1B.insert(0,{9,9,9,9});
 		std::multiset<uint32_t> test1 = {1,2,2,2,4,5,6,6,6,7,9,9,9,9,16};
 		handler1.addExternalReplica({replica1A,replica1B});
+		REQUIRE(handler1.queryLWWMultiSet() == test1);
+		std::multiset<uint32_t> test2 = {1,2,2,4,5,6,6,7,9,9,16}; //Remove 2,6,9,9
+		replica1B.remove(0,{9,9});
+		replica1A.remove(0,{2,6});
+		handler1.addExternalReplica({replica1A,replica1B});
+		REQUIRE(handler1.queryLWWMultiSet() == test2);
 	}
 }

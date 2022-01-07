@@ -38,7 +38,7 @@ class LWWMultiSetMetadata : CrdtMetaData
 {
     private:
     uint32_t id;
-    uint32_t currentTime;
+    long long int currentTime;
     std::map<uint32_t, std::multiset<T>> payload;
     std::map<uint32_t, std::multiset<T>> tombstone; 
     public:
@@ -50,10 +50,11 @@ class LWWMultiSetMetadata : CrdtMetaData
     LWWMultiSetMetadata(uint32_t id, T value) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
+        this->currentTime = 0;
         this->payload[0].insert(value);
 
     }
-    LWWMultiSetMetadata(uint32_t id, T value, uint32_t timestamp) : CrdtMetaData(CrdtType::MultiSetSBType)
+    LWWMultiSetMetadata(uint32_t id, T value, long long int timestamp) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
         this->currentTime = timestamp;
@@ -64,7 +65,7 @@ class LWWMultiSetMetadata : CrdtMetaData
         this->id = id;
         this->payload[0] = payload;
     }
-    LWWMultiSetMetadata(uint32_t id, std::multiset<T> payload, uint32_t timestamp) : CrdtMetaData(CrdtType::MultiSetSBType)
+    LWWMultiSetMetadata(uint32_t id, std::multiset<T> payload, long long int timestamp) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
         this->currentTime = timestamp;
@@ -78,28 +79,28 @@ class LWWMultiSetMetadata : CrdtMetaData
     {
         return this->id;
     }
-    const uint32_t& queryTime() const
+    const long long int& queryTime() const
     {
         return this->currentTime;
     }
-    void insert(uint32_t timestamp, T value)
+    void insert(long long int timestamp, T value)
     {
         this->payload[timestamp].insert(value);
         currentTime = std::max(timestamp,currentTime);
     }
-    void insert(uint32_t timestamp, std::vector<T> value)
+    void insert(long long int timestamp, std::vector<T> value)
     {
         for (auto &iter:value) {
             this->payload[timestamp].insert(iter);
         }
         currentTime = std::max(timestamp,currentTime);
     }
-    void remove(uint32_t timestamp, T value)
+    void remove(long long int timestamp, T value)
     {
         this->tombstone[timestamp].insert(value);
         currentTime = std::max(timestamp,currentTime);
     }
-    void remove(uint32_t timestamp, std::vector<T> value)
+    void remove(long long int timestamp, std::vector<T> value)
     {
         for (auto &iter:value) {
             this->tombstone[timestamp].insert(iter);
@@ -107,6 +108,7 @@ class LWWMultiSetMetadata : CrdtMetaData
         currentTime = std::max(timestamp,currentTime);
     }
     std::multiset<T> queryPayload() {
+        // std::cout << "The current time is" << currentTime << std::endl;
         return this->payload[currentTime];
     }
     std::multiset<T> queryTombstone() {
@@ -115,12 +117,10 @@ class LWWMultiSetMetadata : CrdtMetaData
     void setPayload(std::multiset<T> payload, uint32_t timestamp)
     {
         this->payload[timestamp] = payload;
-        currentTime = std::max(timestamp,currentTime);
     }
     void setTombstone(std::multiset<T> tombstone, uint32_t timestamp)
     {
         this->tombstone[timestamp] = tombstone;
-        currentTime = std::max(timestamp,currentTime);
     }
 };
 
@@ -254,9 +254,9 @@ public:
                 std::multiset<T> merged_set;
                 std::multiset<T> setA = search->second.queryPayload();
                 std::multiset<T> setB = metadata.queryPayload();
-                uint32_t setATime = search->second.queryTime();
-                uint32_t setBTime = metadata.queryTime();
-                uint32_t merged_setTime = std::max(setATime,setBTime);
+                long long int  setATime = search->second.queryTime();
+                long long int  setBTime = metadata.queryTime();
+                long long int  merged_setTime = std::max(setATime,setBTime);
                 std::set_union(setA.begin(),setA.end(),setB.begin(),setB.end(),std::inserter(merged_set,merged_set.begin()));
                 metadata.setPayload(merged_set, merged_setTime);
 
