@@ -15,6 +15,7 @@
 #include "../src/state_based/GMapSB.hpp"
 #include "../src/state_based/PriorityQueueSB.hpp"
 #include "../src/state_based/MultiSetSB.hpp"
+#include "../src/state_based/LWWMultiSetSB.hpp"
 
 /*
 TEST_CASE("Test CounterOB", "[classic]")
