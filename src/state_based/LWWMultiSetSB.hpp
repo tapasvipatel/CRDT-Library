@@ -114,7 +114,7 @@ class LWWMultiSetMetadata : CrdtMetaData
     }
     void setPayload(std::multiset<T> payload, uint32_t timestamp)
     {
-        this->paload[timestamp] = payload;
+        this->payload[timestamp] = payload;
         currentTime = std::max(timestamp,currentTime);
     }
     void setTombstone(std::multiset<T> tombstone, uint32_t timestamp)
@@ -133,7 +133,7 @@ class LWWMultiSetSB : CrdtObject<T>
 private:
     uint32_t id;
     std::multiset<T> payload;
-    std::multiset<T> tombstome;
+    std::multiset<T> tombstone;
     std::unordered_map<uint32_t,LWWMultiSetMetadata<T>> replica_metadata;
 protected:
 bool merge(std::vector<uint32_t> replica_ids)
@@ -244,7 +244,7 @@ public:
         }
         return queryResult;
     }
-    void addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)
+    void addExternalReplica(std::vector<LWWMultiSetMetadata<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
         {
@@ -267,7 +267,7 @@ public:
                 metadata.setTombstone(merged_ts,merged_setTime);
             }
             
-            auto replica = this->replica_metadata.insert(std::pair<uint32_t, TwoPSetMetadata<T>>(metadata.queryId(), metadata));
+            auto replica = this->replica_metadata.insert(std::pair<uint32_t, LWWMultiSetMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }
         updateInternalPayload();

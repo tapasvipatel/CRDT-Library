@@ -1213,3 +1213,17 @@ TEST_CASE("Test MultiSetSB", "[classic]")
 	}
 
 }
+
+TEST_CASE("Test LWWMultiSetSB", "[classic]")
+{
+	SECTION("Test Insertion + Deletion")
+	{
+		crdt::state::LWWMultiSetSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,5); //Added at time = 0
+		replica1A.insert(0,{2,6,4,6,2,16,2,1,6,7});
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,7); //Added at time = 0
+		replica1B.insert(0,{9,9,9,9});
+		std::multiset<uint32_t> test1 = {1,2,2,2,4,5,6,6,6,7,9,9,9,9,16};
+		handler1.addExternalReplica({replica1A,replica1B});
+	}
+}
