@@ -85,33 +85,86 @@ class LWWMultiSetMetadata : CrdtMetaData
     }
     void insert(long long int timestamp, T value)
     {
-        this->payload[timestamp].insert(value);
+        if (timestamp > currentTime) 
+        {
+            this->payload[timestamp] = this->payload[currentTime];
+        }
         currentTime = std::max(timestamp,currentTime);
+        if (timestamp != currentTime) return;
+        this->payload[timestamp].insert(value);
     }
     void insert(long long int timestamp, std::vector<T> value)
-    {
+    {   
+        if (timestamp > currentTime) 
+        {
+            this->payload[timestamp] = this->payload[currentTime];
+        }
+        currentTime = std::max(timestamp,currentTime);
+        if (timestamp != currentTime) return;
         for (auto &iter:value) {
             this->payload[timestamp].insert(iter);
         }
-        currentTime = std::max(timestamp,currentTime);
     }
     void remove(long long int timestamp, T value)
     {
-        this->tombstone[timestamp].insert(value);
+
         currentTime = std::max(timestamp,currentTime);
+        if (currentTime != timestamp) return;
+        this->tombstone[timestamp].insert(value);
+        if (this->payload.count(timestamp)) {
+            std::multiset<T> updateMS;
+            std::unordered_map<T,int> freq;
+            for (auto i: this->tombstone[timestamp]) {
+                freq[i]++;
+            }
+            for (auto i: this->payload[timestamp]) {
+                if (freq[i] <= 0) {
+                    updateMS.insert(i);
+                }
+                freq[i]--;
+            }
+            this->payload[timestamp] = updateMS;
+        }
     }
     void remove(long long int timestamp, std::vector<T> value)
     {
+        currentTime = std::max(timestamp,currentTime);
+        if (currentTime != timestamp) return;
         for (auto &iter:value) {
             this->tombstone[timestamp].insert(iter);
         }
-        currentTime = std::max(timestamp,currentTime);
+        if (this->payload.count(timestamp)) {
+            std::multiset<T> updateMS;
+            std::unordered_map<T,int> freq;
+            for (auto i: this->tombstone[timestamp]) {
+                freq[i]++;
+            }
+            for (auto i: this->payload[timestamp]) {
+                if (freq[i] <= 0) {
+                    updateMS.insert(i);
+                }
+                freq[i]--;
+            }
+            this->payload[timestamp] = updateMS;
+        }
     }
     std::multiset<T> queryPayload() {
         // std::cout << "The current time is" << currentTime << std::endl;
         return this->payload[currentTime];
     }
-    std::multiset<T> queryTombstone() {
+    std::multiset<T> queryTombstone(int flag = -1) {
+        // // for (auto i: this->tombstone[currentTime]) {
+        // //     std::cout << i << std::endl;
+        // // }
+        // if (flag == 3) {
+        //     std::cout << currentTime << " ";
+        //     for (auto [_,i]: this->tombstone) {
+        //         for (auto k: i) {
+        //             std::cout << k << std::endl;
+        //         }
+            
+        //     }
+        // }
         return this->tombstone[currentTime];
     }
     void setPayload(std::multiset<T> payload, uint32_t timestamp)
@@ -180,9 +233,12 @@ public:
             {
                 curr.insert(iter);
             }
-            auto temp_data_ts = metadata_it->second.queryTombstone();
+            
+            auto temp_data_ts = metadata_it->second.queryTombstone(3);
+           // std::cout << "SIZE IS: " << temp_data_ts.size();
             for (auto iter_ts: temp_data_ts)
             {
+                std::cout << iter_ts << std::endl;
                 curr_ts.insert(iter_ts);
             }
         }
@@ -217,6 +273,10 @@ public:
         for (auto const &e: this->tombstone) {
             inTombStone[e]++;
         }
+        // std::cout << "THE SIZE: = " << this->tombstone.size() << " ";
+        // for (auto[_,value]: inTombStone) {
+        //     std::cout << value << std::endl;
+        // }
         for (auto const &e: this->payload) {
             if (inTombStone[e] <= 0)
                 queryResult.insert(e);
@@ -257,16 +317,24 @@ public:
                 long long int  setATime = search->second.queryTime();
                 long long int  setBTime = metadata.queryTime();
                 long long int  merged_setTime = std::max(setATime,setBTime);
-                std::set_union(setA.begin(),setA.end(),setB.begin(),setB.end(),std::inserter(merged_set,merged_set.begin()));
-                metadata.setPayload(merged_set, merged_setTime);
-
+                //std::set_union(setA.begin(),setA.end(),setB.begin(),setB.end(),std::inserter(merged_set,merged_set.begin()));
+                if (setATime == merged_setTime) {
+                    metadata.setPayload(setA,merged_setTime);
+                } else {
+                    metadata.setPayload(setB,merged_setTime);
+                }
                 std::multiset<T> merged_ts;
                 std::multiset<T> tsA = search->second.queryTombstone();
                 std::multiset<T> tsB = metadata.queryTombstone();
-                std::set_union(tsA.begin(),tsA.end(),tsB.begin(),tsB.end(),std::inserter(merged_ts,merged_ts.begin()));
-                metadata.setTombstone(merged_ts,merged_setTime);
+                if (setATime == merged_setTime) {
+                    // std::cout << merged_setTime;
+                    metadata.setTombstone(tsA,merged_setTime);
+                } else {
+                    //  std::cout << "B";
+                    metadata.setTombstone(tsB,merged_setTime);
+                }
             }
-            
+    
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, LWWMultiSetMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
         }

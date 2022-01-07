@@ -1219,17 +1219,23 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 	SECTION("Test Insertion + Deletion")
 	{
 		crdt::state::LWWMultiSetSB<uint32_t> handler1(1); //Represents Server 1
-		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,5); //Added at time = 0
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,5,0); //Added at time = 0
 		replica1A.insert(0,{2,6,4,6,2,16,2,1,6,7});
-		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,7); //Added at time = 0
-		replica1B.insert(0,{9,9,9,9});
-		std::multiset<uint32_t> test1 = {1,2,2,2,4,5,6,6,6,7,9,9,9,9,16};
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,7,1); //Added at time = 0
+		replica1B.insert(1,{9,9,9,9});
+		replica1B.insert(2,{350,360}); //time = 2
+		std::multiset<uint32_t> test1 = {7, 9, 9, 9, 9, 350, 360};
 		handler1.addExternalReplica({replica1A,replica1B});
 		REQUIRE(handler1.queryLWWMultiSet() == test1);
-		std::multiset<uint32_t> test2 = {1,2,2,4,5,6,6,7,9,9,16}; //Remove 2,6,9,9
-		replica1B.remove(0,{9,9});
-		replica1A.remove(0,{2,6});
+		std::multiset<uint32_t> test2 = {7, 9, 9, 9, 9}; //Remove 350,360 @time = 3
+		replica1B.remove(2,{350,360});
+		replica1A.remove(3,{350,360});
 		handler1.addExternalReplica({replica1A,replica1B});
 		REQUIRE(handler1.queryLWWMultiSet() == test2);
+		//Add back in 350 @time t = 4
+		replica1B.insert(4,350);
+		std::multiset<uint32_t> test3 = {7, 9, 9, 9, 9,350};
+		handler1.addExternalReplica({replica1A,replica1B});
+		REQUIRE(handler1.queryLWWMultiSet() == test3);
 	}
 }
