@@ -1269,4 +1269,40 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		std::multiset<uint32_t> test4 = {30,40};
 		REQUIRE(handler1.queryPayload() == test4);
 	}
+	SECTION("Test Conflict on multiple Servers")
+	{
+		crdt::state::LWWMultiSetSB<uint32_t> handler1(1);
+		crdt::state::LWWMultiSetSB<uint32_t> handler2(2);
+		crdt::state::LWWMultiSetSB<uint32_t> handler3(3);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replicaA(0,{5,5},0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replicaB(0,{5,5,7},1);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replicaC(0,{5,10,15},2);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replicaD(1, {20,25}, 0);
+		handler1.addExternalReplica({replicaA,replicaD});
+		handler2.addExternalReplica({replicaB});
+		handler3.addExternalReplica({replicaC});
+		std::multiset<uint32_t> test1 = {5,10,15, 20, 25};
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler1.queryPayload() == test1);
+		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
+		handler1.remove(0,4,{5,10});
+		std::multiset<uint32_t> test2 = {15, 20, 25};
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler2.queryPayload() == test2);
+		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
+		handler3.insert(0,5,10);
+		std::multiset<uint32_t> test3 = {10, 15, 20, 25};
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler2.queryPayload() == test3);
+		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
+		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
+	}
 }

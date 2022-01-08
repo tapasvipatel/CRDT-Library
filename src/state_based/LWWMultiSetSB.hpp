@@ -155,22 +155,9 @@ class LWWMultiSetMetadata : CrdtMetaData
         }
     }
     std::multiset<T> queryPayload() {
-        // std::cout << "The current time is" << currentTime << std::endl;
         return this->payload[currentTime];
     }
     std::multiset<T> queryTombstone(int flag = -1) {
-        // // for (auto i: this->tombstone[currentTime]) {
-        // //     std::cout << i << std::endl;
-        // // }
-        // if (flag == 3) {
-        //     std::cout << currentTime << " ";
-        //     for (auto [_,i]: this->tombstone) {
-        //         for (auto k: i) {
-        //             std::cout << k << std::endl;
-        //         }
-            
-        //     }
-        // }
         return this->tombstone[currentTime];
     }
     void setPayload(std::multiset<T> payload, long long int timestamp)
@@ -280,10 +267,6 @@ public:
         for (auto const &e: this->tombstone) {
             inTombStone[e]++;
         }
-        // std::cout << "THE SIZE: = " << this->tombstone.size() << " ";
-        // for (auto[_,value]: inTombStone) {
-        //     std::cout << value << std::endl;
-        // }
         for (auto const &e: this->payload) {
             if (inTombStone[e] <= 0)
                 queryResult.insert(e);
@@ -324,7 +307,6 @@ public:
                 long long int  setATime = search->second.queryTime();
                 long long int  setBTime = metadata.queryTime();
                 long long int  merged_setTime = std::max(setATime,setBTime);
-                //std::set_union(setA.begin(),setA.end(),setB.begin(),setB.end(),std::inserter(merged_set,merged_set.begin()));
                 if (setATime == merged_setTime) {
                     metadata.setPayload(setA,merged_setTime);
                 } else {
