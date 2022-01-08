@@ -25,8 +25,7 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <set>
-#include <algorithm>
+
 
 namespace crdt
 {

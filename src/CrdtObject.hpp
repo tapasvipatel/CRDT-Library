@@ -26,6 +26,8 @@
 #include <string>
 #include <chrono>
 #include <vector>
+#include <set>
+#include <algorithm>
 
 enum CrdtType
 {
@@ -39,7 +41,8 @@ enum CrdtType
     VectorSBType,
     GMapSBType,
     PriorityQueueSBType,
-    MultiSetSBType
+    MultiSetSBType,
+    LWWMultiSetSBType
 };
 
 class CrdtMetaData
