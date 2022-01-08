@@ -23,7 +23,7 @@
 #define __LWWMULTISETSB_H__
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-
+// using namespace std;
 namespace crdt
 {
 namespace state
@@ -110,6 +110,9 @@ class LWWMultiSetMetadata : CrdtMetaData
 
         currentTime = std::max(timestamp,currentTime);
         if (currentTime != timestamp) return;
+        if (!this->payload.count(currentTime)) {
+            this->payload[currentTime] = prev(this->payload.end())->second;
+        }
         this->tombstone[timestamp].insert(value);
         if (this->payload.count(timestamp)) {
             std::multiset<T> updateMS;
@@ -130,6 +133,9 @@ class LWWMultiSetMetadata : CrdtMetaData
     {
         currentTime = std::max(timestamp,currentTime);
         if (currentTime != timestamp) return;
+        if (!this->payload.count(currentTime)) {
+            this->payload[currentTime] = prev(this->payload.end())->second;
+        }
         for (auto &iter:value) {
             this->tombstone[timestamp].insert(iter);
         }
@@ -167,13 +173,15 @@ class LWWMultiSetMetadata : CrdtMetaData
         // }
         return this->tombstone[currentTime];
     }
-    void setPayload(std::multiset<T> payload, uint32_t timestamp)
+    void setPayload(std::multiset<T> payload, long long int timestamp)
     {
+        currentTime = std::max(currentTime, timestamp);
         this->payload[timestamp] = payload;
     }
-    void setTombstone(std::multiset<T> tombstone, uint32_t timestamp)
+    void setTombstone(std::multiset<T> tombstone, long long int timestamp)
     {
-        this->tombstone[timestamp] = tombstone;
+        currentTime = std::max(currentTime, timestamp);
+        this->tombstone[timestamp] = tombstone;    
     }
 };
 
@@ -225,20 +233,19 @@ public:
     {
         std::multiset<T> curr;
         std::multiset<T> curr_ts;
+        long long int time = 0;
         typename std::unordered_map<uint32_t,LWWMultiSetMetadata<T>>::iterator metadata_it;
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
             auto temp_data = metadata_it->second.queryPayload();
             for (auto iter: temp_data)
             {
+           
                 curr.insert(iter);
             }
-            
             auto temp_data_ts = metadata_it->second.queryTombstone(3);
-           // std::cout << "SIZE IS: " << temp_data_ts.size();
             for (auto iter_ts: temp_data_ts)
             {
-                std::cout << iter_ts << std::endl;
                 curr_ts.insert(iter_ts);
             }
         }
@@ -286,23 +293,23 @@ public:
     }
     
    
-    std::multiset<T> queryTwoPSetwithID(uint32_t replicaID)
+    std::multiset<T> queryLWWMultiSetwithID(uint32_t replicaID)
     {
         std::multiset<T> queryPayload, queryResult, queryTombstone;
         auto findMS = replica_metadata.find(replicaID);
         if (findMS == replica_metadata.end()) return queryPayload;
-        queryPayload = findMS->second.queryPayload();
-        queryTombstone = findMS->second.queryTombstone();
-        std::unordered_map<T,int> inTombStone;
-        for (auto const &e: queryTombstone) {
-            inTombStone[e]++;
-        }
-        for (auto const &e: queryPayload) {
-            if (inTombStone[e] <= 0)
-                queryResult.insert(e);
-            inTombStone[e]--;
-        }
-        return queryResult;
+        // queryPayload = findMS->second.queryPayload();
+        // queryTombstone = findMS->second.queryTombstone();
+        // std::unordered_map<T,int> inTombStone;
+        // for (auto const &e: queryTombstone) {
+        //     inTombStone[e]++;
+        // }
+        // for (auto const &e: queryPayload) {
+        //     if (inTombStone[e] <= 0)
+        //         queryResult.insert(e);
+        //     inTombStone[e]--;
+        // }
+        return findMS->second.queryPayload();;
     }
     void addExternalReplica(std::vector<LWWMultiSetMetadata<T>> external_replica_metadata)
     {
@@ -312,8 +319,8 @@ public:
             auto search = this->replica_metadata.find(metadata.queryId());
             if (search != this->replica_metadata.end()) {
                 std::multiset<T> merged_set;
-                std::multiset<T> setA = search->second.queryPayload();
-                std::multiset<T> setB = metadata.queryPayload();
+                std::multiset<T> setA = search->second.queryPayload(); //our one
+                std::multiset<T> setB = metadata.queryPayload(); //
                 long long int  setATime = search->second.queryTime();
                 long long int  setBTime = metadata.queryTime();
                 long long int  merged_setTime = std::max(setATime,setBTime);
@@ -327,10 +334,8 @@ public:
                 std::multiset<T> tsA = search->second.queryTombstone();
                 std::multiset<T> tsB = metadata.queryTombstone();
                 if (setATime == merged_setTime) {
-                    // std::cout << merged_setTime;
                     metadata.setTombstone(tsA,merged_setTime);
                 } else {
-                    //  std::cout << "B";
                     metadata.setTombstone(tsB,merged_setTime);
                 }
             }
@@ -339,6 +344,31 @@ public:
             if (!replica.second) replica.first->second = metadata;
         }
         updateInternalPayload();
+    }
+
+    void insert(uint32_t replicaID, long long int timestamp, T value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        findMS->second.insert(timestamp,value);
+        updateInternalPayload();
+    }
+    void insert(uint32_t replicaID, long long int timestamp, std::vector<T> value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        findMS->second.insert(timestamp,value);
+         updateInternalPayload();
+    }
+    void remove(uint32_t replicaID, long long int timestamp, T value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        findMS->second.remove(timestamp,value);
+        updateInternalPayload();
+    }
+    void remove(uint32_t replicaID, long long int timestamp, std::vector<T> value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        findMS->second.remove(timestamp,value);
+         updateInternalPayload();
     }
     void updateLocalExternalPayload(std::vector<LWWMultiSetSB> handlers)
     {

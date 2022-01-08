@@ -1221,21 +1221,52 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		crdt::state::LWWMultiSetSB<uint32_t> handler1(1); //Represents Server 1
 		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,5,0); //Added at time = 0
 		replica1A.insert(0,{2,6,4,6,2,16,2,1,6,7});
-		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,7,1); //Added at time = 0
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(1,7,1); //Added at time = 0
 		replica1B.insert(1,{9,9,9,9});
 		replica1B.insert(2,{350,360}); //time = 2
-		std::multiset<uint32_t> test1 = {7, 9, 9, 9, 9, 350, 360};
+		std::multiset<uint32_t> test1 = {1, 2, 2, 2, 4, 5, 6, 6, 6, 7, 7, 9, 9, 9, 9, 16, 350 , 360};
+		std::multiset<uint32_t> test2 = { 1, 2, 2, 2, 4, 5, 6, 6, 6, 7, 16 };
+		std::multiset<uint32_t> test3 = { 7, 9, 9, 9, 9, 350 , 360};
 		handler1.addExternalReplica({replica1A,replica1B});
 		REQUIRE(handler1.queryLWWMultiSet() == test1);
-		std::multiset<uint32_t> test2 = {7, 9, 9, 9, 9}; //Remove 350,360 @time = 3
-		replica1B.remove(2,{350,360});
-		replica1A.remove(3,{350,360});
-		handler1.addExternalReplica({replica1A,replica1B});
-		REQUIRE(handler1.queryLWWMultiSet() == test2);
+		REQUIRE(handler1.queryLWWMultiSetwithID(0) == test2);
+		REQUIRE(handler1.queryLWWMultiSetwithID(1) == test3);
+		std::multiset<uint32_t> test4 = { 1, 4, 5, 6, 6, 6, 7, 16 };
+		std::multiset<uint32_t> test5 = { 7, 9, 9, 9, 9};
+		std::multiset<uint32_t> test6  = {1, 4, 5, 6, 6, 6, 7, 7, 9, 9, 9, 9, 16 }; 
+		handler1.remove(1,2,{350,360});
+		handler1.remove(0,3,{2,2,2});;
+		REQUIRE(handler1.queryLWWMultiSetwithID(0) == test4);
+		REQUIRE(handler1.queryLWWMultiSetwithID(1) == test5);
+		REQUIRE(handler1.queryPayload() == test6);
+	
 		//Add back in 350 @time t = 4
-		replica1B.insert(4,350);
-		std::multiset<uint32_t> test3 = {7, 9, 9, 9, 9,350};
-		handler1.addExternalReplica({replica1A,replica1B});
-		REQUIRE(handler1.queryLWWMultiSet() == test3);
+		handler1.insert(1,4,350);
+		std::multiset<uint32_t> test7 = {1, 4, 5, 6, 6, 6, 7, 7, 9, 9, 9, 9, 16, 350};
+		REQUIRE(handler1.queryLWWMultiSet() == test7);
+	}
+	SECTION("Test Conflict on localServer")
+	{
+		crdt::state::LWWMultiSetSB<uint32_t> handler1(1); //Represents Server 1
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1C(0);
+		replica1A.insert(0,{20,25,30}); //t = 0
+		replica1B.insert(1,{30,35}); // t = 1
+		replica1C.insert(2, {40,45,30,30}); // t = 2
+		handler1.addExternalReplica({replica1A,replica1B,replica1C});
+		std::multiset<uint32_t> test1 = {30,30,40,45};
+		REQUIRE(handler1.queryPayload() == test1);
+		handler1.remove(0,3,{30,30});
+		handler1.remove(0,4,30);
+		handler1.remove(0,5,{30,30,45});
+		std::multiset<uint32_t> test2 = {40};
+		REQUIRE(handler1.queryPayload() == test2);
+		handler1.insert(0,6,{30,30});
+		std::multiset<uint32_t> test3 = {30,30,40};
+		REQUIRE(handler1.queryPayload() == test3);
+		handler1.remove(0,8,30);
+		std::multiset<uint32_t> test4 = {30,40};
+		REQUIRE(handler1.queryPayload() == test4);
 	}
 }
