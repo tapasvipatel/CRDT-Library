@@ -16,6 +16,7 @@
 #include "../src/state_based/PriorityQueueSB.hpp"
 #include "../src/state_based/MultiSetSB.hpp"
 #include "../src/state_based/LWWMultiSetSB.hpp"
+#include "../src/operation_based/StringOB.hpp"
 
 /*
 TEST_CASE("Test CounterOB", "[classic]")
