@@ -25,7 +25,7 @@
 using Triplet = std::tuple<int,char,char>;
 namespace crdt
 {
-namespace state
+namespace operation
 {
 
 /*
@@ -192,32 +192,23 @@ public:
                 }
             }
         }
-        for (auto i: m1)
-        {
-            auto iter = i.second;
-            auto freq = iter.first;
-            auto index = iter.second;
-            if (freq <= 0) continue;
-            while(freq--)
-            {
+        for (auto iter: vis) {
+            auto a = std::get<0>(iter);
+            auto b = std::get<1>(iter);
+            auto c = std::get<2>(iter);
+            if (m1[b].first >= 1 && b != c) {
+                m1[b].first--;
                 std::string temp = "";
-                temp+=i.first;
-                mergedString.insert(index+1,temp);
+                temp+=b;
+                mergedString.insert(a+1,temp);
+            } else if (m2[c].first >= 1 && b != c) {
+                m2[c].first--;
+                std::string temp = "";
+                temp+=c;
+                mergedString.insert(a+1,temp);
             }
         }
-        for (auto i: m2)
-        {
-            auto iter = i.second;
-            auto freq = iter.first;
-            auto index = iter.second;
-            if (freq <= 0) continue;
-            while(freq--)
-            {
-                std::string temp = "";
-                temp+=i.first;
-                mergedString.insert(index+1,temp);
-            }
-        }
+        while (mergedString.back() == ' ') mergedString.pop_back();
         return mergedString;
     }
     bool updateInternalPayload()
@@ -258,6 +249,7 @@ public:
     {
         std::string queryResult;
         auto findString = replica_metadata.find(replicaID);
+        if (findString == replica_metadata.end()) return "";
         return findString->second.queryPayload();
     }
 

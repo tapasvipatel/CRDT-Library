@@ -1307,3 +1307,36 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
 }
+
+TEST_CASE("Test SringOB", "[classic]")
+{
+	SECTION("Test Conflict on localServer")
+	{
+		crdt::operation::StringOB<std::string> handler1(1);
+		crdt::operation::StringMetaData<std::string> replicaA(0, "AB+++CDEFG");
+		crdt::operation::StringMetaData<std::string> replicaB(0, "AB***CDEFG");
+		handler1.addExternalReplica({replicaA,replicaB});
+		REQUIRE(handler1.queryPayloadwithID(0) == "AB*+++**CDEFG");
+		crdt::operation::StringMetaData<std::string> replicaC(1, "ABCDEF+++G");
+		crdt::operation::StringMetaData<std::string> replicaD(1, "AB***CDEFG");
+		handler1.addExternalReplica({replicaC,replicaD});
+		REQUIRE(handler1.queryPayloadwithID(1) == "AB***CD+++EFG");
+		crdt::operation::StringMetaData<std::string> replicaE(2, "Hello Ugly World");
+		crdt::operation::StringMetaData<std::string> replicaF(2, "Hello Ugli World");
+		handler1.addExternalReplica({replicaE,replicaF});
+		REQUIRE(handler1.queryPayloadwithID(2) == "Hello Ugliy World");
+		crdt::operation::StringMetaData<std::string> replicaG(3, "ABCDEFG");
+		crdt::operation::StringMetaData<std::string> replicaH(3, "***");
+		handler1.addExternalReplica({replicaG,replicaH});
+		REQUIRE(handler1.queryPayloadwithID(3) == "*ABC**DEFG");
+		crdt::operation::StringMetaData<std::string> replicaI(4, "");
+		crdt::operation::StringMetaData<std::string> replicaJ(4, "ABCDEFG");
+		handler1.addExternalReplica({replicaI,replicaJ});
+		REQUIRE(handler1.queryPayloadwithID(4) == "ABCDEFG");
+		crdt::operation::StringMetaData<std::string> replicaK(5, "Hello    World");
+		crdt::operation::StringMetaData<std::string> replicaL(5, "Hello Sun      ");
+		handler1.addExternalReplica({replicaK,replicaL});
+		REQUIRE(handler1.queryPayloadwithID(5) == "Hello Sun World");
+	}
+
+}
