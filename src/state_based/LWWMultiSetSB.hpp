@@ -338,7 +338,7 @@ public:
     {
         auto findMS = replica_metadata.find(replicaID);
         findMS->second.insert(timestamp,value);
-         updateInternalPayload();
+        updateInternalPayload();
     }
     void remove(uint32_t replicaID, long long int timestamp, T value) 
     {

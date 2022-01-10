@@ -42,7 +42,8 @@ enum CrdtType
     GMapSBType,
     PriorityQueueSBType,
     MultiSetSBType,
-    LWWMultiSetSBType
+    LWWMultiSetSBType,
+    StringOBType
 };
 
 class CrdtMetaData
