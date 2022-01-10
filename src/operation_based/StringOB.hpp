@@ -64,8 +64,27 @@ public:
     {
         return this->payload;
     }
-    void setPayload(std::string payload) {
+    void setPayload(std::string payload) 
+    {
         this->payload = payload;
+    }
+    void insert(int pos, std::string payload)
+    {
+        if (pos >= this->payload.size())
+        {
+            this->payload.resize(pos+1);
+        }
+        this->payload.insert(pos,payload);
+    }
+    void clear()
+    {
+        this->payload = "";
+    }
+    void erase(int startIndex, int endIndex)
+    {
+        if (startIndex >= this->payload.size() || startIndex < 0) return;
+        if (endIndex >= this->pyalod.size() || endIndex < 0) return;
+        this->payload.erase(startIndex,endIndex);
     }
 };
 
@@ -111,18 +130,22 @@ public:
 
     std::string fixConflict(std::string conflictA, std::string conflictB) 
     {
+        if (conflictA.size() > conflictB.size())
+            return fixConflict(conflictB,conflictA);
         std::string mergedString = "";
-        std::unordered_map<char,std::pair<int,int>> m1;
-        std::unordered_map<char,std::pair<int,int>> m2;
+        std::map<std::pair<char,int>,int> m1;
+        std::map<std::pair<char,int>,int> m2;
+        std::unordered_map<char,int> m3;
+        std::unordered_map<char,int> m4;
         for (int i = 0 ; i < conflictA.size(); i++) 
         {
-            m1[conflictA[i]].first++;
-            m1[conflictA[i]].second = i;
+            m1[{conflictA[i],i}]++;
+            m3[conflictA[i]]++;
         }
         for (int i = 0 ; i < conflictB.size(); i++)
         {
-            m2[conflictB[i]].first++;
-            m2[conflictB[i]].second = i;
+            m2[{conflictB[i],i}]++;
+            m4[conflictB[i]]++;
         }
         int i = 0;
         int j = 0;
@@ -151,44 +174,38 @@ public:
             if (b == 255)
             {
                 mergedString+=c;
-                m2[c].first--;
+                m2[{c,a}]--;
+                m4[c]--;
             }
             else if (c == 255)
             {
                 mergedString+=b;
-                m1[b].first--;
+                m1[{b,a}]--;
+                m3[b]--;
             }
             else if (b == c)
             {
                 mergedString+=b;
-                m1[b].first--;
-                m2[c].first--;
+                m1[{b,a}]--;
+                m2[{b,a}]--;
+                m3[b]--;
+                m4[b]--;
             }
             else
             {
-                if (m1[c].first <= 0 && m2[c].first >= 1)
-                {
-                    mergedString+=c;
-                    m2[c].first--;
+                if (m1[{c,a}] <= 0 && m2[{c,a}] >= 1) 
+                { //found only within the second sting
+                    mergedString+=c; 
+                    m2[{c,a}]--;
+                    m3[c]--;
+                    m4[c]--;
                 }
-                else if (m1[c].first >= 1 && m2[c].first >= 1)
-                {
-                    mergedString+=c;
-                    m1[c].first--;
-                    m2[c].first--;
-                }
-                else if (m2[b].first <= 0 && m1[b].first >= 1)
-                {
+                else if (m2[{b,a}] <= 0 && m1[{b,a}] >= 1) 
+                { //only found within the first string
                     mergedString+=b;
-                    m1[b].first--;
-                }
-                else if (m1[b].first >= 1 && m2[b].first >= 1)
-                {
-                    mergedString+=b;
-                    m1[b].first--;
-                    m2[b].first--;
-                } else {
-                    mergedString+=b;
+                    m1[{b,a}]--;
+                    m3[b]--;
+                    m4[b]--;
                 }
             }
         }
@@ -196,19 +213,22 @@ public:
             auto a = std::get<0>(iter);
             auto b = std::get<1>(iter);
             auto c = std::get<2>(iter);
-            if (m1[b].first >= 1 && b != c) {
-                m1[b].first--;
+            if (m1[{b,a}] >= 1 && b != c && m3[b] >= 1) {
+                m1[{b,a}]--;
+                m3[b]--;
                 std::string temp = "";
                 temp+=b;
                 mergedString.insert(a+1,temp);
-            } else if (m2[c].first >= 1 && b != c) {
-                m2[c].first--;
+            } else if (m2[{c,a}] >= 1 && b != c && m4[c] >= 1) {
+                m2[{c,a}]--;
+                m4[c]--;
                 std::string temp = "";
                 temp+=c;
                 mergedString.insert(a+1,temp);
             }
         }
-        while (mergedString.back() == ' ') mergedString.pop_back();
+        while (!mergedString.empty() && mergedString[0] == ' ') mergedString.erase(mergedString.begin());
+        while (!mergedString.empty() && mergedString.back() == ' ') mergedString.pop_back();
         return mergedString;
     }
     bool updateInternalPayload()
@@ -252,6 +272,36 @@ public:
         if (findString == replica_metadata.end()) return "";
         return findString->second.queryPayload();
     }
+
+    void insert(uint32_t replicaID, int pos, std::string payload)
+    {
+        auto findString = replica_metadata.find(replicaID);
+        if (findString == replica_metadata.end()) return;
+        findString->second.insert(pos,payload);
+        updateInternalPayload();
+    }
+    void clear(uint32_t replicaID)
+    {
+        auto findString = replica_metadata.find(replicaID);
+        if (findString == replica_metadata.end()) return;
+        findString->second.clear();
+        updateInternalPayload();
+    }
+    void erase(uint32_t replicaID, int startIndex, int endIndex)
+    {
+        auto findString = replica_metadata.find(replicaID);
+        if (findString == replica_metadata.end()) return;
+        findString->second.erase(startIndex,endIndex);
+        updateInternalPayload();
+    }
+    void setStringTo(uint32_t replicaID, std::string payload)
+    {
+        auto findString = replica_metadata.find(replicaID);
+        if (findString == replica_metadata.end()) return;
+        findString->second.setPayload(payload);
+        updateInternalPayload();
+    }
+
 
     
 
