@@ -100,6 +100,11 @@ public:
     {
         this->payload.insert(value);
     }
+    void insert(std::vector<T> values) 
+    {
+        for (auto value: values)
+            this->payload.insert(value);
+    }
 
     void remove(T value) 
     {
@@ -154,6 +159,22 @@ public:
     {
         ;
     }
+
+    void insert(uint32_t replicaID, T value) 
+    {
+        auto findTwoPSet = replica_metadata.find(replicaID);
+        if (findTwoPSet == replica_metadata.end()) return;
+        findTwoPSet->second.insert(payload);
+    }
+    void insert(uint32_t replicaID, std::vector<T> values) 
+    {
+        auto findTwoPSet = replica_metadata.find(replicaID);
+        if (findTwoPSet == replica_metadata.end()) return;
+        for (auto value: values)
+            this->payload.insert(value);
+    }
+
+
 
     bool updateInternalPayload()
     {

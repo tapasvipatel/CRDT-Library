@@ -28,6 +28,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <sstream> 
 
 enum CrdtType
 {

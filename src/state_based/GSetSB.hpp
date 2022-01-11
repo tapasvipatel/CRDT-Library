@@ -22,10 +22,6 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <unordered_map>
-#include <vector>
-#include <iterator>
-
 
 namespace crdt
 {
@@ -89,6 +85,11 @@ public:
     {
         this->payload.insert(value);
     }
+    void insert(std::vector<T> values) 
+    {
+        for (auto value: values)
+            this->payload.insert(value);
+    }
 };
 
 /*
@@ -136,6 +137,18 @@ public:
     ~GSetSB()
     {
         ;
+    }
+    void insert(uint32_t replicaID, T value)
+    {
+        auto findGSet = replica_metadata.find(replicaID);
+        if (findGSet == replica_metadata.end()) return;
+        findGSet->second.insert(value);
+    }
+    void insert(uint32_t replicaID, std::vector<T> values)
+    {
+        auto findGSet = replica_metadata.find(replicaID);
+        if (findGSet == replica_metadata.end()) return;
+        for (auto value: values) findGSet->second.insert(value);
     }
 
     bool updateInternalPayload()

@@ -18,7 +18,7 @@
 #include "../src/state_based/LWWMultiSetSB.hpp"
 #include "../src/operation_based/StringOB.hpp"
 
-/*
+/* To Tas, finish testing the validity of CounterDB from Rushab */
 TEST_CASE("Test CounterOB", "[classic]")
 {
 	SECTION("Test Overloaded Operators")
@@ -61,7 +61,7 @@ TEST_CASE("Test CounterOB", "[classic]")
 		REQUIRE(four.query_num_increments() == 5);
 	}
 }
-*/
+
 TEST_CASE("Test GSetSB", "[classic]")
 {
 	SECTION("Test Insert Operation")

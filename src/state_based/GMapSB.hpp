@@ -25,8 +25,7 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <sstream> 
-#include <algorithm>
+
 namespace crdt
 {
 namespace state
@@ -144,6 +143,19 @@ class GMapSB : CrdtObject<T>
     ~GMapSB()
     {
         ;
+    }
+
+    void insert(uint32_t replicaID, K key, T value)
+    {
+        auto findGMap = replica_metadata.find(replicaID);
+        if (findGMap == replica_metadata.end()) return;
+        findGMap->second.insert(key,value);
+    }
+    void updateIncrease(uint32_t replicaID, K key, T value)
+    {
+        auto findGMap = replica_metadata.find(replicaID);
+        if (findGMap == replica_metadata.end()) return;
+        findGMap->second.updateIncrease(key,value);
     }
 
     void fixlocalConflict(K key, T value)

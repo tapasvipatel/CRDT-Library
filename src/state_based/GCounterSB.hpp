@@ -128,6 +128,13 @@ public:
     {
         ;
     }
+    
+    void updatePayload(uint32_t replicaID, T payload)
+    {
+        auto findGCounter = replica_metadata.find(replicaID);
+        if (findGCounter == replica_metadata.end()) return;
+        findGCounter->second.updatePayload(payload);
+    }
 
     bool updateInternalPayload()
     {

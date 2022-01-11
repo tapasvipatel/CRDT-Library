@@ -22,10 +22,6 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <map>
-#include <unordered_map>
-#include <vector>
-#include <iterator>
 
 
 namespace crdt
@@ -106,7 +102,7 @@ class VectorSB : CrdtObject<T>
 private:
     uint32_t id; // server id
     std::vector<T> payload; 
-    std::map<uint32_t,VectorMetadata<T>> replica_metadata; // vectors on servers
+    std::unordered_map<uint32_t,VectorMetadata<T>> replica_metadata; // vectors on servers
 
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -143,6 +139,19 @@ public:
     {
         ;
     }
+    void push_back(uint32_t replicaID, T value) 
+    {
+        auto findVector = replica_metadata.find(replicaID);
+        if (findVector == replica_metadata.end()) return;
+        findVector->second.push_back(value);
+    }
+
+    void push_back(uint32_t replicaID,std::vector<T> v) 
+    {
+        auto findVector = replica_metadata.find(replicaID);
+        if (findVector == replica_metadata.end()) return;
+        findVector->second.push_back(v);
+    }
 
     std::vector<T> fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)
     {
@@ -167,7 +176,7 @@ public:
     bool updateInternalPayload()
     {
         std::vector<T> curr;
-        typename std::map<uint32_t,VectorMetadata<T>>::iterator metadata_it;
+        typename std::unordered_map<uint32_t,VectorMetadata<T>>::iterator metadata_it;
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
             auto temp_data = metadata_it->second.queryPayload();

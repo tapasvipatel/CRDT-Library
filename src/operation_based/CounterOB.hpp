@@ -23,8 +23,6 @@
 #ifndef __COUNTEROB_H__
 #define __COUNTEROB_H__
 
-#include <unordered_map>
-#include <vector>
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
