@@ -22,11 +22,6 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <map>
-#include <unordered_map>
-#include <vector>
-#include <iterator>
-
 
 namespace crdt
 {
@@ -96,6 +91,13 @@ public:
     {
         this->payload.push_back(value);
     }
+    void insert(std::vector<T> values)
+    {
+        for (auto value: values)
+        {
+            this->payload.push_back(value);
+        }
+    }
 
     void remove(T value)
     {
@@ -149,6 +151,20 @@ public:
     ~ORSetSB()
     {
         ;
+    }
+    void insert(uint32_t replicaID, T value) 
+    {
+        auto findOrSet = replica_metadata.find(replicaID);
+        if (findOrSet  == replica_metadata.end()) return;
+        findOrSet->second.insert(value);
+        updateInternalPayload();
+    }
+    void insert(uint32_t replicaID, std::vector<T> values) 
+    {
+        auto findOrSet = replica_metadata.find(replicaID);
+        if (findOrSet  == replica_metadata.end()) return;
+        findOrSet->second.insert(values);
+        updateInternalPayload();
     }
 
     std::vector<T> fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)

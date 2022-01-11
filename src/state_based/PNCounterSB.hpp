@@ -153,6 +153,18 @@ public:
     {
         ;
     }
+    void increasePayload(uint32_t replicaID, T payload)
+    {
+        auto findPNCounter = replica_metadata.find(replicaID);
+        if (findPNCounter == replica_metadata.end()) return;
+        findPNCounter->second.increasePayload(payload);
+    }
+    void decreasePayload(uint32_t replicaID, T payload)
+    {
+        auto findPNCounter = replica_metadata.find(replicaID);
+        if (findPNCounter == replica_metadata.end()) return;
+        findPNCounter->second.decreasePayload(payload);
+    }
     bool updateInternalPayload()
     {
         T curr = T();

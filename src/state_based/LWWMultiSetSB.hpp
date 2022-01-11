@@ -216,6 +216,34 @@ public:
     {
         ;
     }
+    void insert(uint32_t replicaID, long long int timestamp, T value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return;
+        findMS->second.insert(timestamp,value);
+        updateInternalPayload();
+    }
+    void insert(uint32_t replicaID, long long int timestamp, std::vector<T> value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return;
+        findMS->second.insert(timestamp,value);
+        updateInternalPayload();
+    }
+    void remove(uint32_t replicaID, long long int timestamp, T value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+         if (findMS == replica_metadata.end()) return;
+        findMS->second.remove(timestamp,value);
+        updateInternalPayload();
+    }
+    void remove(uint32_t replicaID, long long int timestamp, std::vector<T> value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return;
+        findMS->second.remove(timestamp,value);
+        updateInternalPayload();
+    }
     bool updateInternalPayload()
     {
         std::multiset<T> curr;
@@ -328,30 +356,6 @@ public:
         updateInternalPayload();
     }
 
-    void insert(uint32_t replicaID, long long int timestamp, T value) 
-    {
-        auto findMS = replica_metadata.find(replicaID);
-        findMS->second.insert(timestamp,value);
-        updateInternalPayload();
-    }
-    void insert(uint32_t replicaID, long long int timestamp, std::vector<T> value) 
-    {
-        auto findMS = replica_metadata.find(replicaID);
-        findMS->second.insert(timestamp,value);
-        updateInternalPayload();
-    }
-    void remove(uint32_t replicaID, long long int timestamp, T value) 
-    {
-        auto findMS = replica_metadata.find(replicaID);
-        findMS->second.remove(timestamp,value);
-        updateInternalPayload();
-    }
-    void remove(uint32_t replicaID, long long int timestamp, std::vector<T> value) 
-    {
-        auto findMS = replica_metadata.find(replicaID);
-        findMS->second.remove(timestamp,value);
-         updateInternalPayload();
-    }
     void updateLocalExternalPayload(std::vector<LWWMultiSetSB> handlers)
     {
         for (LWWMultiSetSB handler: handlers)

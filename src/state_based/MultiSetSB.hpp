@@ -134,6 +134,20 @@ public:
         std::set_union(multisetA.begin(),multisetA.end(),multisetB.begin(),multisetB.end(),std::inserter(fixConflict,fixConflict.begin()));
         return fixConflict;
     }
+    void insert(uint32_t replicaID, T value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return;
+        findMS->second.insert(value);
+        updateInternalPayload();
+    }
+    void insert(uint32_t replicaID, std::vector<T> value) 
+    {
+        auto findMS = replica_metadata.find(replicaID);
+        if (findMS == replica_metadata.end()) return;
+        findMS->second.insert(value);
+        updateInternalPayload();
+    }
 
     bool updateInternalPayload()
     {
