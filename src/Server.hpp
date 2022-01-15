@@ -68,12 +68,12 @@ public:
 
 class Server
 {
-private:
+public:
     std::string ip_address;
     uint32_t port;
     std::unordered_map<std::string, uint32_t> lookup_table;
     std::unordered_map<uint32_t, ExternalReplicaMetadata> replica_table;
-public:
+    
     Server();
     Server(std::string ip_address, uint32_t port);
     ~Server();

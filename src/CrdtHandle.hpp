@@ -28,18 +28,26 @@
 
 #include "CrdtObject.hpp"
 #include "Server.hpp"
+#include "state_based/GCounterSB.hpp"
 
 class CrdtHandle
 {
 private:
     Server server;
-    // std::vector<std::unordered_map<uint32_t, CrdtObject*>> global_crdt_list;
+    std::unordered_map<uint32_t, crdt::state::GCounterSB<uint32_t>> global_gcountersb_list;
+
+    //std::unordered_map<uint32_t, std::unordered_map<uint32_t, CrdtObject<uint32_t>>> global_crdt_list;
 public:
     CrdtHandle();
     ~CrdtHandle();
 
     // API
     void initializeCrdtHandle(std::string ip_address, uint32_t port);
+    void registerCrdt(crdt::state::GCounterSB<uint32_t>& crdt_object);
+    void updateRegisteredCrdt(crdt::state::GCounterSB<uint32_t>& crdt_object);
+    void removeRegisteredCrdt(crdt::state::GCounterSB<uint32_t>& crdt_object);
+
+    void printRegisteredCrdtGCounterSB();
 };
 
 #endif  // __CRDT_HANDLE__

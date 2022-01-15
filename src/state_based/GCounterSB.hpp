@@ -85,11 +85,10 @@ public:
 * template class for CRDT Gcounter
 */
 template<typename T=int32_t>
-class GCounterSB : CrdtObject<T>
+class GCounterSB : public CrdtObject<T>
 {
 private:
     uint32_t id;
-    T payload;
     std::unordered_map<uint32_t,GCounterMetadata<T>> replica_metadata;
 
 protected:
@@ -118,10 +117,14 @@ protected:
     }
 
 public:
+    T payload;
+    
     GCounterSB(uint32_t id)
     {
         this->id = id;
         this->payload = T();
+        this->crdt_type = GCounterSBType;
+        this->inst_id = id;
     }
     
     ~GCounterSB()

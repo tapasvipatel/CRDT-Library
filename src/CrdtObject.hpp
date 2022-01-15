@@ -62,12 +62,15 @@ class CrdtObject
 private:
     std::chrono::time_point<std::chrono::system_clock> date_last_modified;
 protected:
-    virtual bool merge(std::vector<uint32_t> replica_ids) = 0;
-    virtual bool serialize(std::string& buffer) = 0;
-    virtual bool deserialize(std::string& buffer) = 0;
-    virtual bool exportDB() = 0;
-    virtual bool importDB() = 0;
-public:    
+    bool merge(std::vector<uint32_t> replica_ids);
+    bool serialize(std::string& buffer);
+    bool deserialize(std::string& buffer);
+    bool exportDB();
+    bool importDB();
+public:
+    uint32_t inst_id;
+    CrdtType crdt_type;
+
     CrdtObject()
     {
         this->date_last_modified = std::chrono::system_clock::now();
