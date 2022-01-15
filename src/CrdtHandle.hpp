@@ -35,10 +35,11 @@ private:
     Server server;
     // std::vector<std::unordered_map<uint32_t, CrdtObject*>> global_crdt_list;
 public:
-    CrdtHandle(std::string ip_address, uint32_t port);
+    CrdtHandle();
     ~CrdtHandle();
 
     // API
+    void initializeCrdtHandle(std::string ip_address, uint32_t port);
 };
 
 #endif  // __CRDT_HANDLE__

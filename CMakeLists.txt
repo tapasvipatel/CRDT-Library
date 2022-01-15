@@ -11,3 +11,7 @@ add_subdirectory(src)
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
+
+if(BUILD_TEST_APPLICATION)
+    add_subdirectory(test_application)
+endif()
