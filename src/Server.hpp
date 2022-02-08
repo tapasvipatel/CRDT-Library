@@ -38,45 +38,18 @@ enum Request
     Drop    // drop an existing crdt
 };
 
-/*
-enum DataType
-{
-    uint8_t,
-    int8_t,
-    uint16_t,
-    int16_t
-    uint32_t,
-    int32_t,
-    uint64_t,
-    int64_t,
-    char,
-    bool,
-    double
-}
-*/
-
-class ExternalReplicaMetadata
-{
-private:
-    uint32_t external_replica_id;
-    std::queue<CrdtMetaData> previous_queue;
-    std::queue<CrdtMetaData> ready_queue;
-public:
-    ExternalReplicaMetadata(uint32_t external_replica_id);
-    ~ExternalReplicaMetadata();
-};
-
 class Server
 {
 public:
     std::string ip_address;
     uint32_t port;
-    std::unordered_map<std::string, uint32_t> lookup_table;
-    std::unordered_map<uint32_t, ExternalReplicaMetadata> replica_table;
-    
+    std::vector<std::pair<std::string, uint32_t>> lookup_table;
+
     Server();
     Server(std::string ip_address, uint32_t port);
     ~Server();
+
+    void addServer(std::string ip_address, uint32_t port);
 };
 
 #endif  // __SERVER__

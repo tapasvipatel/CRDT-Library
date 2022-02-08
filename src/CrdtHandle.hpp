@@ -46,8 +46,8 @@ public:
     void registerCrdt(crdt::state::GCounterSB<uint32_t>& crdt_object);
     void updateRegisteredCrdt(crdt::state::GCounterSB<uint32_t>& crdt_object);
     void removeRegisteredCrdt(crdt::state::GCounterSB<uint32_t>& crdt_object);
-
     void printRegisteredCrdtGCounterSB();
+    void getExternalUpdates(crdt::state::GCounterSB<uint32_t>& crdt_object);
 };
 
 #endif  // __CRDT_HANDLE__

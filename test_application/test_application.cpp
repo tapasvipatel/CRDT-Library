@@ -16,11 +16,7 @@ int main(int argc, char* argv[])
 	handle.registerCrdt(handler);
 	handle.printRegisteredCrdtGCounterSB();
 
-	handle.updateRegisteredCrdt(handler);
-	handle.printRegisteredCrdtGCounterSB();
-	
-	handle.removeRegisteredCrdt(handler);
-	handle.printRegisteredCrdtGCounterSB();
+	handle.getExternalUpdates(handler);
 
 	return 0;
 }

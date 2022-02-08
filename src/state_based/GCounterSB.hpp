@@ -91,34 +91,9 @@ private:
     uint32_t id;
     std::unordered_map<uint32_t,GCounterMetadata<T>> replica_metadata;
 
-protected:
-    bool merge(std::vector<uint32_t> replica_ids)
-    {
-        return false;
-    }
-    bool serialize(std::string& buffer)
-    {
-        return false;
-    }
-
-    bool deserialize(std::string& buffer)
-    {
-        return false;
-    }
-
-    bool exportDB()
-    {
-        return false;
-    }
-
-    bool importDB()
-    {
-        return false;
-    }
-
 public:
     T payload;
-    
+
     GCounterSB(uint32_t id)
     {
         this->id = id;
@@ -159,6 +134,37 @@ public:
         metadata_it = this->replica_metadata.find(this->id);
         metadata_it->second.payload = this->payload;
         return true;
+    }
+
+    std::string serialize()
+    {
+        std::string serialized_string = "";
+
+        serialized_string += std::to_string(this->id) + ",";
+        serialized_string += std::to_string(this->payload) + ",";
+        
+        return serialized_string;
+    }
+
+    void deserialize(std::string s)
+    {
+        // split string and get elements
+        std::vector<int> elements;
+        uint32_t extern_id;
+        uint32_t extern_payload;
+        
+        std::string token;
+        size_t pos = 0;
+        
+        while((pos = s.find(",")) != std::string::npos)
+        {
+            token = s.substr(0, pos);
+            elements.push_back(std::stoi(token));
+            s.erase(0, pos + 1);
+        }
+
+        extern_id = elements[0];
+        extern_payload = elements[1];
     }
 
 #ifdef BUILD_TESTING

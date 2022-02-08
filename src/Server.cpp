@@ -20,28 +20,17 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <string>
+#include <unordered_map>
+
 #include "Server.hpp"
-
-/*******************************************************************************************
-ExternalReplicaMetadata
-*******************************************************************************************/
-ExternalReplicaMetadata::ExternalReplicaMetadata(uint32_t external_replica_id)
-{
-    this->external_replica_id = external_replica_id;
-}
-
-ExternalReplicaMetadata::~ExternalReplicaMetadata()
-{
-    ;
-}
-
 /*******************************************************************************************
 Server
 *******************************************************************************************/
 Server::Server()
 {
     this->ip_address = "";
-    this->port = -1;
+    this->port = 0;
 }
 
 Server::Server(std::string ip_address, uint32_t port)
@@ -53,4 +42,9 @@ Server::Server(std::string ip_address, uint32_t port)
 Server::~Server()
 {
     ;
+}
+
+void Server::addServer(std::string ip_address, uint32_t port)
+{
+    this->lookup_table.push_back(std::pair<std::string, int>(ip_address, port));
 }
