@@ -11,3 +11,7 @@ add_subdirectory(src)
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
+
+if(BUILD_TRELLO_APPLICATION)
+    add_subdirectory(trello_application)
+endif()
