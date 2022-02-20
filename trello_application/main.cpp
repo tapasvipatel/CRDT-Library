@@ -1,8 +1,10 @@
 #include <SFML/Graphics.hpp>
+#include <TGUI/TGUI.hpp>
 
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(200,200), "SFML WORKS!");
+	tgui::Gui gui(window);
 	sf::CircleShape shape(100.f);
 	shape.setFillColor(sf::Color::Green);
 	
