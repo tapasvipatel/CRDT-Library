@@ -2,6 +2,10 @@
 // #include <SFML/Graphics.hpp>
 #include <TGUI/TGUI.hpp>
 #include "userLogin.hpp"
+#include "../src/state_based/LWWMultiSetSB.hpp"
+#include "../src/state_based/VectorSB.hpp"
+#include "../src/state_based/PNCounterSB.hpp"
+#include "../src/state_based/GMapSB.hpp"
 using namespace std;
 
 
@@ -9,10 +13,35 @@ using namespace std;
 class userInfo {
     private:
     string userName;
-    
+    uint32_t uniqueID;
+    string path ="../../trello_application/TextDB/";
+
     public:
     userInfo() {
 
+    }
+
+    void readNthLine(istream& in, int n) {
+        for (int i = 0; i < n-1; ++i) {
+            in.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+        in >> uniqueID;
+    }
+
+
+    void parseFile(string username, string password) 
+    {
+        ifstream fileParser;
+        fileParser.open(path + username + password + ".txt");
+        readNthLine(fileParser, 3); //get the unique ID which is the third line
+    }
+
+    void setupCRDTHandler()
+    {
+        crdt::state::VectorSB<uint32_t> handlerVector(this->uniqueID);
+        crdt::state::GMapSB<uint32_t, uint32_t> handlerMap(this->uniqueID);
+        crdt::state::LWWMultiSetSB<uint32_t> handlerLWWMS(this->uniqueID);
+        crdt::state::PNCounterSB<uint32_t> handlerPNCounter(this->uniqueID); 
     }
 
     void setUserName(string userName) {
@@ -22,6 +51,13 @@ class userInfo {
     string getUserName() {
         return this->userName;
     }
+
+    uint32_t getHash() {
+        return this->uniqueID;
+    }
+
+
+
 
 };
 
@@ -37,12 +73,22 @@ userInfo endUser;
 void loadWidgets2(tgui::GuiBase &gui)
 {
     gui.removeAllWidgets();
+    const float windowHeight = gui.getView().getRect().height;
+    gui.setTextSize(static_cast<unsigned int>(0.04f * windowHeight)); // 7% of height
     tgui::Label::Ptr welcomeMessage = tgui::Label::create();
     welcomeMessage->setSize({"100.0%", "100.0%"});
     welcomeMessage->setPosition({"0%", "2.0%"});
     welcomeMessage->setText("Welcome: " + endUser.getUserName());
+    cout << endUser.getHash() << endl;
     //message->getRenderer()->setTextColor(sf::Color(0, 200, 0));
     gui.add(welcomeMessage);
+
+    // Create the merge button
+    auto mergeBoard = tgui::Button::create("Merge Board");
+    mergeBoard ->setSize({"10%", "10%"});
+    mergeBoard ->setPosition({"87%", "90%"});
+    gui.add(mergeBoard);
+
 }
 
 
@@ -139,7 +185,9 @@ void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBa
     if (createUser.doesExist((string)username->getText(), (string)password->getText()))
     {
         cout << "Login In Successful" << endl;
+        endUser.parseFile(_username,_password);
         endUser.setUserName(_username);
+        endUser.setupCRDTHandler();
         loadWidgets2(gui);
     }
     else
