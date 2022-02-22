@@ -244,6 +244,46 @@ void loadWidgets2(tgui::GuiBase &gui)
     logOut ->getRenderer()->setTextColor(tgui::Color::White);
     gui.add(logOut); 
 
+    //Backlog button
+    auto backlog = tgui::Button::create("Backlog");
+    backlog->setSize({"12%", "12%"});
+    backlog->setPosition({"3%", "15%"});
+    backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    backlog->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(backlog);
+
+    //In progress button
+    auto ipr = tgui::Button::create("In Progress");
+    ipr->setSize({"12%", "12%"});
+    ipr->setPosition({"20%", "15%"});
+    ipr->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    ipr->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(ipr);  
+
+    //Ready to test button
+    auto ready = tgui::Button::create("Ready to Test");
+    ready->setSize({"12%", "12%"});
+    ready->setPosition({"37%", "15%"});
+    ready->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    ready->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(ready);
+
+    //Complete button
+    auto complete = tgui::Button::create("Complete");
+    complete->setSize({"12%", "12%"});
+    complete->setPosition({"54%", "15%"});
+    complete->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    complete->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(complete);    
+
+    //Not added button
+    auto notAdded = tgui::Button::create("Not Added");
+    notAdded->setSize({"12%", "12%"});
+    notAdded->setPosition({"71%", "15%"});
+    notAdded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    notAdded->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(notAdded);   
+
     mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
     logOut->onPress(&logout,std::ref(gui));
 }
