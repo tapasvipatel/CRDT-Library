@@ -42,7 +42,7 @@ private:
 public:
     VectorMetadata() : CrdtMetaData(CrdtType::VectorSBType)
     {
-        ;
+        this->id = 0;
     }
 
     VectorMetadata(uint32_t id) : CrdtMetaData(CrdtType::VectorSBType)
@@ -90,6 +90,10 @@ public:
     void push_back(std::vector<T> v) 
     {
         for (auto val: v) this->payload.push_back(val);
+    }
+    void clear()
+    {
+        this->payload.clear();
     }
 };
 

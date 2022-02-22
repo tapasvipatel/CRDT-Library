@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <dirent.h>
 // #include <SFML/Graphics.hpp>
 #include <TGUI/TGUI.hpp>
 #include "userLogin.hpp"
@@ -7,18 +8,120 @@
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/GMapSB.hpp"
 using namespace std;
+using std::filesystem::directory_iterator;
+tgui::Label::Ptr usersOnline;
 
 
 
 class userInfo {
     private:
     string userName;
+    string passWord;
     uint32_t uniqueID;
+    int id;
+    crdt::state::VectorMetadata<string> replicaUserOnline;
     string path ="../../trello_application/TextDB/";
 
     public:
     userInfo() {
+        userName = "";
+        passWord = "";
+        id = 0;
+    }
 
+    int getUserStatus(string username, string password)
+    {
+        ifstream fileParser;
+        fileParser.open(path + username + password + ".txt");
+        auto line = readNthLineS(fileParser, 4); //get the unique ID which is the third line
+        stringstream ss(line);
+        vector<string> breakText;
+        while(ss.good()) {
+            string temp = "";
+            getline(ss,temp,':');
+            breakText.push_back(temp);
+        }
+        string status = breakText.back();
+        status.erase(status.begin());
+        return status == "0" ? 0 : 1;
+    }
+
+    void mergeVectorCRDT()
+    {
+        vector<string> arr;
+        replicaUserOnline.clear();
+        for (const auto & file : directory_iterator(path)) 
+        {
+            ifstream filein(file.path());
+            string line = "";
+            int lineNumber = 0;
+            while (getline(filein,line)) {
+                 if (lineNumber == 0) {
+                    arr.push_back(line);
+                }
+                if (lineNumber == 3) {
+                    stringstream ss(line);
+                    vector<string> breakText;
+                    while(ss.good()) {
+                        string temp = "";
+                        getline(ss,temp,':');
+                        breakText.push_back(temp);
+                    }
+                    string status = breakText.back();
+                    status.erase(status.begin());
+                    if (status == "0") {
+                        arr.pop_back();
+                    }
+                }
+                lineNumber++;
+            }
+        }
+        for (string curr: arr) {
+            replicaUserOnline.push_back(curr);
+        }
+    }
+
+    void setUserStatus(int statusCode) {
+        int lineNumber = 0;
+        int line_to_replace = 3;
+        ifstream filein(path + userName + passWord + ".txt");
+        ofstream fileout(path + userName + passWord + "output.txt");
+        string line = "";
+        string _oldName = path + userName + passWord + ".txt";
+        string _newName = path + userName + passWord + "output.txt";
+        char *oldName =  const_cast<char*>(_oldName.c_str());
+        char *newName =  const_cast<char*>(_newName.c_str());
+        while (getline(filein,line))
+        {
+            if (lineNumber == line_to_replace)
+            {
+                if (statusCode == 0) {
+                    fileout << "User status: 0" << endl;
+                } else {
+                    fileout << "User status: 1" << endl;
+                }
+            } else {
+                fileout << line << endl;
+            }
+            lineNumber++;
+        }
+        filein.close();
+        fileout.close();
+        remove(oldName);
+        rename(newName, oldName);
+    }
+    
+ 
+    string readNthLineS(istream& in, int n) {
+        int lineNumber = 0;
+        string temp = "";
+        while(getline(in,temp)) {
+            if (lineNumber == n - 1) {
+                return temp;
+            }
+            lineNumber++;
+        }
+        return "";
     }
 
     void readNthLine(istream& in, int n) {
@@ -31,6 +134,7 @@ class userInfo {
 
     void parseFile(string username, string password) 
     {
+        passWord = password;
         ifstream fileParser;
         fileParser.open(path + username + password + ".txt");
         readNthLine(fileParser, 3); //get the unique ID which is the third line
@@ -56,30 +160,71 @@ class userInfo {
         return this->uniqueID;
     }
 
-
-
+    vector<string> getAllUsersOnline()
+    {
+        return this->replicaUserOnline.queryPayload();
+    }
 
 };
 
 //Fuction Definations
 void loadWidgets(tgui::GuiBase &gui, tgui::Label::Ptr &message);
+void loadWidgets2(tgui::GuiBase &gui);
 
 //Class Definations
 userInfo endUser;
 
 
+
+
+
 // -------------------------------- Window Screen 2 ----------------------------------------------------------//
+
+void convergeBoard(tgui::GuiBase &gui, int statusCode)
+{
+    endUser.mergeVectorCRDT();
+    gui.remove(usersOnline);
+    string getAllUsers = "Users Online: ";
+    for (auto i: endUser.getAllUsersOnline()) {
+        getAllUsers+=i + ", ";
+        //cout << i << endl;
+    }
+    while(getAllUsers .back() == ',' || getAllUsers.back() == ' ') getAllUsers.pop_back();
+    for (int i = 2 ; i < getAllUsers.size(); i++) {
+        if (getAllUsers[i] == ',' && getAllUsers[i-2] == getAllUsers[i]) {
+            getAllUsers.erase(getAllUsers.begin() + i);
+            i--;
+        }
+    }
+    usersOnline->setSize({"100.0%", "100.0%"});
+    usersOnline->setPosition({"20%", "2.0%"});
+    usersOnline->setText(getAllUsers);
+    gui.add(usersOnline);
+    if (statusCode == 1) {
+        loadWidgets2(gui);
+    }
+}
+
+void logout(tgui::GuiBase &gui)
+{
+    endUser.setUserStatus(0);
+    tgui::Label::Ptr message = tgui::Label::create();
+    gui.removeAllWidgets();
+    loadWidgets(gui, message); //Send back to login Screen
+}
+
 
 void loadWidgets2(tgui::GuiBase &gui)
 {
     gui.removeAllWidgets();
+    convergeBoard(gui,0);
     const float windowHeight = gui.getView().getRect().height;
-    gui.setTextSize(static_cast<unsigned int>(0.04f * windowHeight)); // 7% of height
+    gui.setTextSize(static_cast<unsigned int>(0.04f * windowHeight)); 
     tgui::Label::Ptr welcomeMessage = tgui::Label::create();
     welcomeMessage->setSize({"100.0%", "100.0%"});
     welcomeMessage->setPosition({"0%", "2.0%"});
     welcomeMessage->setText("Welcome: " + endUser.getUserName());
-    cout << endUser.getHash() << endl;
+    //cout << endUser.getHash() << endl;
     //message->getRenderer()->setTextColor(sf::Color(0, 200, 0));
     gui.add(welcomeMessage);
 
@@ -87,15 +232,21 @@ void loadWidgets2(tgui::GuiBase &gui)
     auto mergeBoard = tgui::Button::create("Merge Board");
     mergeBoard ->setSize({"10%", "10%"});
     mergeBoard ->setPosition({"87%", "90%"});
+    mergeBoard->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    mergeBoard ->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(mergeBoard);
 
+    //Log Out Button
+    auto logOut = tgui::Button::create("Logout");
+    logOut ->setSize({"10%", "10%"});
+    logOut ->setPosition({"87%", "2.0%"});
+    logOut ->getRenderer()->setBackgroundColor(tgui::Color::Red);
+    logOut ->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(logOut); 
+
+    mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
+    logOut->onPress(&logout,std::ref(gui));
 }
-
-
-
-
-
-
 
 // -------------------------------------------------------------------------------------------------------------//
 
@@ -135,7 +286,14 @@ void updateGUI(tgui::GuiBase &gui, int handler, tgui::Label::Ptr &message)
         message->setText("Incorrect Login. Please try again");
         message->getRenderer()->setTextColor(sf::Color::Red);
         gui.add(message);
-
+    }
+    else if (handler == 5)
+    {
+        message->setSize({"80.0%", "10.0%"});
+        message->setPosition({"42%", "51.0%"});
+        message->setText("User is logged in.");
+        message->getRenderer()->setTextColor(sf::Color::Red);
+        gui.add(message);
     }
 }
 
@@ -159,6 +317,7 @@ void newUser(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::Gui
         fs << (string)username->getText() << endl;
         fs << (string)password->getText() << endl;
         fs << hashValue(s) << endl;
+        fs << "User status: 0" << endl;
         fs.close();
         updateGUI(gui, 1, message);
         loadWidgets(gui, message);
@@ -168,8 +327,8 @@ void newUser(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::Gui
         updateGUI(gui, 2, message);
         loadWidgets(gui, message);
     }
-    std::cout << "Username: " << username->getText() << std::endl;
-    std::cout << "Password: " << password->getText() << std::endl;
+   // std::cout << "Username: " << username->getText() << std::endl;
+   // std::cout << "Password: " << password->getText() << std::endl;
 }
 
 void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBase &gui, tgui::Label::Ptr &message)
@@ -184,10 +343,16 @@ void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBa
     userLogin createUser;
     if (createUser.doesExist((string)username->getText(), (string)password->getText()))
     {
+        if (endUser.getUserStatus(_username,_password) == 1) {
+            updateGUI(gui, 5, message);
+            return;
+        }
         cout << "Login In Successful" << endl;
         endUser.parseFile(_username,_password);
         endUser.setUserName(_username);
         endUser.setupCRDTHandler();
+        endUser.setUserStatus(1);
+        endUser.mergeVectorCRDT();
         loadWidgets2(gui);
     }
     else
@@ -258,6 +423,11 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "TrelloRDT");
     tgui::Gui gui(window);
+    sf::Image Icon;
+    Icon.loadFromFile("../../icon.png");
+    window.setIcon(32,32,Icon.getPixelsPtr());
+
+    usersOnline = tgui::Label::create();
     tgui::Label::Ptr message = tgui::Label::create();
     gui.setFont("../../blackjack.otf");
     loadWidgets(gui, message);
@@ -266,13 +436,17 @@ int main()
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
+                endUser.setUserStatus(0);
                 window.close();
+            }
+                
             gui.handleEvent(event);
         }
         window.clear(sf::Color(238, 238, 228));
         gui.draw();
         window.display();
     }
+    endUser.setUserStatus(0);
     return 0;
 }
