@@ -252,6 +252,15 @@ void loadWidgets2(tgui::GuiBase &gui)
     backlog->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(backlog);
 
+    //Add a backlog board button
+    auto backlogAdd = tgui::Button::create("+");
+    backlogAdd->setSize(35, 35);
+    backlogAdd->setPosition(242, 192);
+    backlogAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    backlogAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    backlogAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(backlogAdd);
+
     //In progress button
     auto ipr = tgui::Button::create("In Progress");
     ipr->setSize({"12%", "12%"});
@@ -259,6 +268,15 @@ void loadWidgets2(tgui::GuiBase &gui)
     ipr->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
     ipr->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(ipr);  
+
+    //Add an in progress board button
+    auto iprAdd = tgui::Button::create("+");
+    iprAdd->setSize(35, 35);
+    iprAdd->setPosition(557, 192);
+    iprAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    iprAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    iprAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(iprAdd);
 
     //Ready to test button
     auto ready = tgui::Button::create("Ready to Test");
@@ -268,6 +286,15 @@ void loadWidgets2(tgui::GuiBase &gui)
     ready->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(ready);
 
+    //Add a ready board button
+    auto readyAdd = tgui::Button::create("+");
+    readyAdd->setSize(35, 35);
+    readyAdd->setPosition(871, 192);
+    readyAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    readyAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    readyAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(readyAdd);
+
     //Complete button
     auto complete = tgui::Button::create("Complete");
     complete->setSize({"12%", "12%"});
@@ -276,6 +303,15 @@ void loadWidgets2(tgui::GuiBase &gui)
     complete->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(complete);    
 
+    //Add a complete board button
+    auto completeAdd = tgui::Button::create("+");
+    completeAdd->setSize(35, 35);
+    completeAdd->setPosition(1185, 192);
+    completeAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    completeAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    completeAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(completeAdd);
+
     //Not added button
     auto notAdded = tgui::Button::create("Not Added");
     notAdded->setSize({"12%", "12%"});
@@ -283,6 +319,15 @@ void loadWidgets2(tgui::GuiBase &gui)
     notAdded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
     notAdded->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(notAdded);   
+
+    //Add a not added board button
+    auto notAddedAdd = tgui::Button::create("+");
+    notAddedAdd->setSize(35, 35);
+    notAddedAdd->setPosition(1499, 192);
+    notAddedAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    notAddedAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    notAddedAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(notAddedAdd);
 
     mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
     logOut->onPress(&logout,std::ref(gui));
