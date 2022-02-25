@@ -213,6 +213,108 @@ void logout(tgui::GuiBase &gui)
     loadWidgets(gui, message); //Send back to login Screen
 }
 
+void updateTextSize(tgui::GuiBase &gui)
+{
+    // Update the text size of all widgets in the gui, based on the current window height
+    const float windowHeight = gui.getView().getRect().height;
+    gui.setTextSize(static_cast<unsigned int>(0.07f * windowHeight)); // 7% of height
+}
+
+void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::EditBox::Ptr urgency, tgui::GuiBase &childGui, int boardType) {
+
+    string _assignee = (string)assignee->getText();
+    string _task = (string)task->getText();
+    string _urgency = (string)urgency->getText();
+    string bType;
+
+    tgui::Label::Ptr msg = tgui::Label::create();
+
+    if (_assignee.empty() || _task.empty() || _urgency.empty())
+    {
+        msg->setSize({"80.0%", "10.0%"});
+        msg->setPosition({"32%", "70.0%"});
+        msg->setText("Please fill in all fields");
+        msg->getRenderer()->setTextColor(sf::Color::Red);
+        childGui.add(msg);
+        return;
+    }
+    else {
+
+        switch (boardType) {
+            case 1:
+                bType = "Backlog";
+                break;
+            case 2:
+                bType = "In Progress";
+                break;
+            case 3:
+                bType = "Ready for Test";
+                break;
+            case 4:
+                bType = "Complete";
+                break;
+            case 5:
+                bType = "Not Added";
+                break;
+        }
+
+        cout << "Creating board of type: " << bType << endl;
+        cout << "Assignee: " << _assignee << endl;
+        cout << "Task: " << _task << endl;
+        cout << "Urgency: " << _urgency << endl;
+    }
+}
+
+void addBoard(tgui::GuiBase &gui, int boardType) {
+
+    sf::RenderWindow addWindow(sf::VideoMode(720, 480), "Add Board");
+    tgui::Gui childGui(addWindow);
+
+    childGui.setFont("../../blackjack.otf");
+
+    auto assignee = tgui::EditBox::create();
+    assignee->setSize({"66.67%", "12.5%"});
+    assignee->setPosition({"16.67%", "22.0%"});
+    assignee->setDefaultText("Assignee");
+    childGui.add(assignee);
+
+    auto task = tgui::EditBox::copy(assignee);
+    task->setPosition({"16.67%", "39.0%"});
+    task->setDefaultText("Task");
+    childGui.add(task);
+
+    auto urgency = tgui::EditBox::copy(assignee);
+    urgency->setPosition({"16.67%", "56.0%"});
+    urgency->setDefaultText("Urgency");
+    childGui.add(urgency);
+
+    auto createBoardButton = tgui::Button::create("Create Board");
+    createBoardButton->setSize({"35%", "16.67%"});
+    createBoardButton->setPosition({"35%", "80%"});
+    childGui.add(createBoardButton);
+
+    updateTextSize(childGui);
+
+    createBoardButton->onPress(&createBoard, assignee, task, urgency, std::ref(childGui), boardType);
+
+    while (addWindow.isOpen())
+    {
+        sf::Event event;
+        while (addWindow.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed) {
+                endUser.setUserStatus(0);
+                addWindow.close();
+            }
+                
+            childGui.handleEvent(event);
+        }
+        addWindow.clear(sf::Color(238, 238, 228));
+        childGui.draw();
+        addWindow.display();
+    }
+}
+
 
 void loadWidgets2(tgui::GuiBase &gui)
 {
@@ -331,6 +433,13 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
     logOut->onPress(&logout,std::ref(gui));
+
+    backlogAdd->onPress(&addBoard, std::ref(gui), 1);
+    iprAdd->onPress(&addBoard, std::ref(gui), 2);
+    readyAdd->onPress(&addBoard, std::ref(gui), 3);
+    completeAdd->onPress(&addBoard, std::ref(gui), 4);
+    notAddedAdd->onPress(&addBoard, std::ref(gui), 5);
+    
 }
 
 // -------------------------------------------------------------------------------------------------------------//
@@ -445,13 +554,6 @@ void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBa
         updateGUI(gui, 4, message);
         cout << "Try again!" << endl;
     }
-}
-
-void updateTextSize(tgui::GuiBase &gui)
-{
-    // Update the text size of all widgets in the gui, based on the current window height
-    const float windowHeight = gui.getView().getRect().height;
-    gui.setTextSize(static_cast<unsigned int>(0.07f * windowHeight)); // 7% of height
 }
 
 void loadWidgets(tgui::GuiBase &gui, tgui::Label::Ptr &message)
