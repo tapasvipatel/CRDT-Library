@@ -7,22 +7,36 @@
 #include "../src/state_based/VectorSB.hpp"
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/GMapSB.hpp"
+#include "../src/state_based/GSetSB.hpp"
+#include "../src/state_based/ORSetSB.hpp"
+#include "../src/state_based/TwoPSetSB.hpp"
 using namespace std;
 using std::filesystem::directory_iterator;
 tgui::Label::Ptr usersOnline;
 
-
+//taps
+string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/";
+crdt::state::VectorMetadata<string> backlogList;
+crdt::state::VectorSB<string> backlogServer();
+crdt::state::GSetMetadata<string> inprogressList;
+crdt::state::GSetSB<string> inprogressServer();
+crdt::state::ORSetMetadata<string> readytotestList;
+crdt::state::ORSetSB<string> readytotestServer();
+crdt::state::TwoPSetMetadata<string> completeList;
+crdt::state::TwoPSetSB<string> completeServer();
+crdt::state::LWWMultiSetMetadata<string> notaddedList;
+crdt::state::LWWMultiSetSB<string> notaddedServer();
 
 class userInfo {
-    private:
-    string userName;
+private:
     string passWord;
     uint32_t uniqueID;
     int id;
     crdt::state::VectorMetadata<string> replicaUserOnline;
     string path ="../../trello_application/TextDB/";
 
-    public:
+public:
+    string userName;
     userInfo() {
         userName = "";
         passWord = "";
@@ -220,7 +234,7 @@ void updateTextSize(tgui::GuiBase &gui)
     gui.setTextSize(static_cast<unsigned int>(0.07f * windowHeight)); // 7% of height
 }
 
-void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::EditBox::Ptr urgency, tgui::GuiBase &childGui, int boardType) {
+void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::EditBox::Ptr urgency, tgui::GuiBase &childGui, int boardType, tgui::GuiBase &gui) {
 
     string _assignee = (string)assignee->getText();
     string _task = (string)task->getText();
@@ -258,10 +272,40 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 break;
         }
 
+        // taps
         cout << "Creating board of type: " << bType << endl;
         cout << "Assignee: " << _assignee << endl;
         cout << "Task: " << _task << endl;
         cout << "Urgency: " << _urgency << endl;
+
+        //Backlog button
+        auto backlog = tgui::Button::create(_task);
+        backlog->setSize({"12%", "12%"});
+        backlog->setPosition({"30%", "15%"});
+        backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        backlog->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(backlog);
+
+        switch (boardType) {
+            case 1:
+                backlogList.push_back(_task);
+                backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
+                break;
+            case 2:
+                inprogressList.insert(_task);
+                inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
+                break;
+            case 3:
+                readytotestList.insert(_task);
+                readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
+                break;
+            case 4:
+                completeList.insert(_task);
+                completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
+                break;
+            case 5:
+                break;
+        }
     }
 }
 
@@ -295,7 +339,7 @@ void addBoard(tgui::GuiBase &gui, int boardType) {
 
     updateTextSize(childGui);
 
-    createBoardButton->onPress(&createBoard, assignee, task, urgency, std::ref(childGui), boardType);
+    createBoardButton->onPress(&createBoard, assignee, task, urgency, std::ref(childGui), boardType, std::ref(gui));
 
     while (addWindow.isOpen())
     {
@@ -618,6 +662,9 @@ int main()
     tgui::Label::Ptr message = tgui::Label::create();
     gui.setFont("../../blackjack.otf");
     loadWidgets(gui, message);
+
+    // Set id of all crdts
+
     while (window.isOpen())
     {
         sf::Event event;
