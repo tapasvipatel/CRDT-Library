@@ -17,7 +17,7 @@ tgui::Label::Ptr usersOnline;
 //taps
 string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/";
 crdt::state::VectorMetadata<string> backlogList;
-crdt::state::VectorSB<string> backlogServer();
+crdt::state::VectorSB<string> backlogServer;
 crdt::state::GSetMetadata<string> inprogressList;
 crdt::state::GSetSB<string> inprogressServer();
 crdt::state::ORSetMetadata<string> readytotestList;
@@ -193,6 +193,27 @@ userInfo endUser;
 
 
 // -------------------------------- Window Screen 2 ----------------------------------------------------------//
+// taps
+void updateTableMaster(tgui::GuiBase &gui)
+{
+    // backlog
+    vector<string> backlogPayload = backlogServer.queryPayload();
+    int count = 0;
+    for(auto element : backlogPayload)
+    {
+        auto backlog = tgui::Button::create(element);
+        backlog->setSize({"12%", "12%"});
+        int y = count + 308;
+        count += 150;
+        string y_position = to_string(y);
+        backlog->setPosition(55, y);
+        backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        backlog->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(backlog);
+    }
+
+    
+}
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
 {
@@ -217,6 +238,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     if (statusCode == 1) {
         loadWidgets2(gui);
     }
+
+    // taps
+    // Read all crdts and update in local copy
+    //updateTableMaster();
 }
 
 void logout(tgui::GuiBase &gui)
@@ -278,18 +303,12 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         cout << "Task: " << _task << endl;
         cout << "Urgency: " << _urgency << endl;
 
-        //Backlog button
-        auto backlog = tgui::Button::create(_task);
-        backlog->setSize({"12%", "12%"});
-        backlog->setPosition({"30%", "15%"});
-        backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
-        backlog->getRenderer()->setTextColor(tgui::Color::Black);
-        gui.add(backlog);
-
         switch (boardType) {
             case 1:
                 backlogList.push_back(_task);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
+                backlogServer.addExternalReplica({backlogList});
+                updateTableMaster(std::ref(gui));
                 break;
             case 2:
                 inprogressList.insert(_task);

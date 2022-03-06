@@ -169,6 +169,11 @@ protected:
     }
 
 public:
+    VectorSB()
+    {
+        ;
+    }
+
     VectorSB(uint32_t id)
     {
         this->id = id;
@@ -235,7 +240,6 @@ public:
         return includes(vector1.begin(), vector1.end(), vector2.begin(), vector2.end());
     }
 
-#ifdef BUILD_TESTING
     const uint32_t& queryId() const
     {
         return this->id;
@@ -283,8 +287,6 @@ public:
             }
         }
     }
-
-#endif
 };
 
 }   // namespace state
