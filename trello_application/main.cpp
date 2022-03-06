@@ -21,7 +21,7 @@ crdt::state::VectorSB<string> backlogServer;
 crdt::state::GSetMetadata<string> inprogressList;
 crdt::state::GSetSB<string> inprogressServer;
 crdt::state::ORSetMetadata<string> readytotestList;
-crdt::state::ORSetSB<string> readytotestServer();
+crdt::state::ORSetSB<string> readytotestServer;
 crdt::state::TwoPSetMetadata<string> completeList;
 crdt::state::TwoPSetSB<string> completeServer();
 crdt::state::LWWMultiSetMetadata<string> notaddedList;
@@ -227,6 +227,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         inprogress->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(inprogress);
     }
+
+    // readytotest
+    vector<string> readytotestPayload = readytotestServer.queryPayload();
+    count = 0;
+    for(auto element : readytotestPayload)
+    {
+        auto readytotest = tgui::Button::create(element);
+        readytotest->setSize({"12%", "12%"});
+        int y = count + 308;
+        count += 150;
+        string y_position = to_string(y);
+        readytotest->setPosition(685, y);
+        readytotest->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        readytotest->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(readytotest);
+    }
 }
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
@@ -333,6 +349,8 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
             case 3:
                 readytotestList.insert(_task);
                 readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
+                readytotestServer.addExternalReplica({readytotestList});
+                updateTableMaster(std::ref(gui));
                 break;
             case 4:
                 completeList.insert(_task);
