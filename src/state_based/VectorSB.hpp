@@ -36,10 +36,10 @@ template<typename T=int32_t>
 class VectorMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     std::vector<T> payload;  // Vector
 
 public:
+    uint32_t id;
     VectorMetadata() : CrdtMetaData(CrdtType::VectorSBType)
     {
         ;
@@ -139,7 +139,6 @@ template<typename T=int32_t>
 class VectorSB : CrdtObject<T>
 {
 private:
-    uint32_t id; // server id
     std::vector<T> payload; 
     std::unordered_map<uint32_t,VectorMetadata<T>> replica_metadata; // vectors on servers
 
@@ -169,6 +168,7 @@ protected:
     }
 
 public:
+    uint32_t id; // server id
     VectorSB()
     {
         ;

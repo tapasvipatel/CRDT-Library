@@ -33,12 +33,12 @@ crdt::state::LWWMultiSetSB<string> notaddedServer();
 class userInfo {
 private:
     string passWord;
-    uint32_t uniqueID;
-    int id;
     crdt::state::VectorMetadata<string> replicaUserOnline;
     string path ="../../trello_application/TextDB/";
 
 public:
+    uint32_t uniqueID;
+    int id;
     string userName;
     userInfo() {
         userName = "";
@@ -787,8 +787,6 @@ int main()
     gui.setFont("../../blackjack.otf");
     loadWidgets(gui, message);
 
-    // Set id of all crdts
-
     while (window.isOpen())
     {
         sf::Event event;
@@ -804,6 +802,16 @@ int main()
         window.clear(sf::Color(238, 238, 228));
         gui.draw();
         window.display();
+
+        // Set id of all crdts
+        backlogList.id = endUser.uniqueID;
+        backlogServer.id = endUser.uniqueID;
+        inprogressList.id = endUser.uniqueID;
+        inprogressServer.id = endUser.uniqueID;
+        readytotestList.id = endUser.uniqueID;
+        readytotestServer.id = endUser.uniqueID;
+        completeList.id = endUser.uniqueID;
+        completeServer.id = endUser.uniqueID;
     }
     endUser.setUserStatus(0);
     return 0;

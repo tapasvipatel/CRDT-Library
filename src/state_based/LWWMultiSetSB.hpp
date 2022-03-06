@@ -37,11 +37,11 @@ template<typename T=int32_t>
 class LWWMultiSetMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     long long int currentTime;
     std::map<uint32_t, std::multiset<T>> payload;
     std::map<uint32_t, std::multiset<T>> tombstone; 
 public:
+    uint32_t id;
     LWWMultiSetMetadata() : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         ;
@@ -279,7 +279,6 @@ template<typename T=int32_t>
 class LWWMultiSetSB : CrdtObject<T> 
 {
 private:
-    uint32_t id;
     std::multiset<T> payload;
     std::multiset<T> tombstone;
     std::unordered_map<uint32_t,LWWMultiSetMetadata<T>> replica_metadata;
@@ -308,6 +307,7 @@ bool merge(std::vector<uint32_t> replica_ids)
         return false;
     }
 public:
+    uint32_t id;
     LWWMultiSetSB(uint32_t id)
     {
         this->id = id;

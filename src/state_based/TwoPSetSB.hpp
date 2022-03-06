@@ -39,11 +39,11 @@ template<typename T=int32_t>
 class TwoPSetMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     std::set<T> payload;  // Set
     std::set<T> tombstone;  // Removed Set
 
 public:
+    uint32_t id;
     TwoPSetMetadata() : CrdtMetaData(CrdtType::TwoPSetSBType)
     {
         ;
@@ -164,7 +164,6 @@ template<typename T=int32_t>
 class TwoPSetSB : CrdtObject<T>
 {
 private:
-    uint32_t id; // server id
     std::set<T> payload;
     std::set<T> tombstone; 
     std::unordered_map<uint32_t,TwoPSetMetadata<T>> replica_metadata; // sets on servers
@@ -195,6 +194,7 @@ protected:
     }
 
 public:
+    uint32_t id; // server id
     TwoPSetSB()
     {
         ;

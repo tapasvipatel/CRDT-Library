@@ -39,9 +39,9 @@ template<typename T=int32_t>
 class MultiSetMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     std::multiset<T> payload;
 public:
+    uint32_t id;
     MultiSetMetadata() : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         ;
@@ -133,7 +133,6 @@ template<typename T=int32_t>
 class MultiSetSB : CrdtObject<T> 
 {
 private:
-    uint32_t id;
     std::multiset<T> payload;
     std::unordered_map<uint32_t,MultiSetMetadata<T>> replica_metadata;
 protected:
@@ -161,6 +160,7 @@ protected:
         return false;
     }
 public:
+    uint32_t id;
     MultiSetSB(uint32_t id)
     {
         this->id = id;

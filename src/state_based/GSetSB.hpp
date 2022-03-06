@@ -35,10 +35,10 @@ template<typename T=int32_t>
 class GSetMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     std::set<T> payload;  // Set
 
 public:
+    uint32_t id;
     GSetMetadata() : CrdtMetaData(CrdtType::GSetSBType)
     {
         ;
@@ -136,7 +136,6 @@ template<typename T=int32_t>
 class GSetSB : CrdtObject<T>
 {
 private:
-    uint32_t id; // server id
     std::set<T> payload; 
     std::unordered_map<uint32_t,GSetMetadata<T>> replica_metadata; // sets on servers
 
@@ -166,6 +165,7 @@ protected:
     }
 
 public:
+    uint32_t id; // server id
     GSetSB()
     {
         ;

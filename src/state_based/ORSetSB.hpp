@@ -35,10 +35,10 @@ template<typename T=int32_t>
 class ORSetMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     std::vector<T> payload;  // Vector
 
 public:
+    uint32_t id;
     ORSetMetadata() : CrdtMetaData(CrdtType::ORSetSBType)
     {
         ;
@@ -148,7 +148,6 @@ template<typename T=int32_t>
 class ORSetSB : CrdtObject<T>
 {
 private:
-    uint32_t id; // server id
     std::vector<T> payload; 
     std::map<uint32_t,ORSetMetadata<T>> replica_metadata; // vectors on servers
 
@@ -178,6 +177,7 @@ protected:
     }
 
 public:
+    uint32_t id; // server id
     ORSetSB()
     {
         ;

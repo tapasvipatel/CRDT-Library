@@ -38,9 +38,9 @@ template<typename T=int32_t>
 class PriorityQueueMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
     std::priority_queue<T> payload;
 public:
+    uint32_t id;
     PriorityQueueMetadata() : CrdtMetaData(CrdtType::PriorityQueueSBType)
     {
         ;
@@ -159,7 +159,6 @@ template<typename T=int32_t>
 class PriorityQueueSB : CrdtObject<T>
 {
 private:
-    uint32_t id;
     std::priority_queue<T> payload;
     std::unordered_map<uint32_t,PriorityQueueMetadata<T>> replica_metadata;
 protected:
@@ -187,6 +186,7 @@ protected:
         return false;
     }
 public:
+    uint32_t id;
     PriorityQueueSB(uint32_t id)
     {
         this->id = id;

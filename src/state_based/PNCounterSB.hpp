@@ -37,8 +37,8 @@ template<typename T=int32_t>
 class PNCounterMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
 public:
+    uint32_t id;
     T positivePayload;
     T negativePayload;
     T totalPayload;
@@ -154,7 +154,6 @@ template<typename T=int32_t>
 class PNCounterSB : CrdtObject<T>
 {
 private:
-    uint32_t id;
     T payload;
     std::unordered_map<uint32_t,PNCounterMetadata<T>> replica_metadata;
 protected:
@@ -182,6 +181,7 @@ protected:
         return false;
     }
 public:
+    uint32_t id;
     PNCounterSB(uint32_t id)
     {
         this->id = id;
