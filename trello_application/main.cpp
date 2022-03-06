@@ -23,7 +23,7 @@ crdt::state::GSetSB<string> inprogressServer;
 crdt::state::ORSetMetadata<string> readytotestList;
 crdt::state::ORSetSB<string> readytotestServer;
 crdt::state::TwoPSetMetadata<string> completeList;
-crdt::state::TwoPSetSB<string> completeServer();
+crdt::state::TwoPSetSB<string> completeServer;
 crdt::state::LWWMultiSetMetadata<string> notaddedList;
 crdt::state::LWWMultiSetSB<string> notaddedServer();
 
@@ -243,6 +243,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         readytotest->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(readytotest);
     }
+
+    // complete
+    set<string> completePayload = completeServer.queryPayload();
+    count = 0;
+    for(auto element : completePayload)
+    {
+        auto complete = tgui::Button::create(element);
+        complete->setSize({"12%", "12%"});
+        int y = count + 308;
+        count += 150;
+        string y_position = to_string(y);
+        complete->setPosition(999, y);
+        complete->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        complete->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(complete);
+    }
 }
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
@@ -355,6 +371,8 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
             case 4:
                 completeList.insert(_task);
                 completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
+                completeServer.addExternalReplica({completeList});
+                updateTableMaster(std::ref(gui));
                 break;
             case 5:
                 break;
