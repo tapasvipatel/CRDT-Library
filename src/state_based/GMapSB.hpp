@@ -36,10 +36,15 @@ namespace state
 template<typename K, typename T = uint32_t>
 class GMapMetadata : CrdtMetaData
 {
-    private:
+private:
     uint32_t id;
     std::map<K,T> payload;
-    public:
+public:
+    GMapMetadata() : CrdtMetaData(CrdtType::GMapSBType)
+    {
+        ;
+    }
+
     GMapMetadata(uint32_t id) : CrdtMetaData(CrdtType::GMapSBType)
     {
         this->id = id;
@@ -58,6 +63,58 @@ class GMapMetadata : CrdtMetaData
     {
         ;
     }
+
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        json internal;
+        
+        for(auto value : this->payload)
+        {
+            internal[std::to_string(value.first)] = std::to_string(value.second);
+        }
+
+        j["payload"] = internal.dump();
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internal;
+        
+        for(auto value : this->payload)
+        {
+            internal[std::to_string(value.first)] = std::to_string(value.second);
+        }
+
+        j["payload"] = internal.dump();
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        std::string payload_string = j["payload"];
+        json internal = json::parse(payload_string);
+
+        for(json::iterator it = internal.begin(); it != internal.end(); ++it)
+        {
+            std::string value = it.value();
+            value.erase(remove(value.begin(), value.end(), '"'), value.end());
+            this->payload[std::stoi(it.key())] = std::stoi(value);
+        }
+    }
+
     const uint32_t& queryId() const
     {
         return this->id;
