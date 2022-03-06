@@ -37,10 +37,15 @@ namespace state
 template<typename T=int32_t>
 class PriorityQueueMetadata : CrdtMetaData
 {
-    private:
+private:
     uint32_t id;
     std::priority_queue<T> payload;
-    public:
+public:
+    PriorityQueueMetadata() : CrdtMetaData(CrdtType::PriorityQueueSBType)
+    {
+        ;
+    }
+
     PriorityQueueMetadata(uint32_t id) : CrdtMetaData(CrdtType::PriorityQueueSBType)
     {
         this->id = id;
@@ -59,6 +64,69 @@ class PriorityQueueMetadata : CrdtMetaData
     {
         ;
     }
+
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        std::vector<T> convertedPayload;
+
+        while(!this->payload.empty())
+        {
+            convertedPayload.push_back(this->payload.top());
+            this->payload.pop();
+        }
+
+        for(auto element : convertedPayload)
+        {
+            this->payload.push(element);
+        }
+
+        json internal(convertedPayload);
+        j["payload"] = internal;
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        std::vector<T> convertedPayload;
+
+        while(!this->payload.empty())
+        {
+            convertedPayload.push_back(this->payload.top());
+            this->payload.pop();
+        }
+
+        for(auto element : convertedPayload)
+        {
+            this->payload.push(element);
+        }
+
+        json internal(convertedPayload);
+        j["payload"] = internal;
+
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            int32_t value = *it;
+            this->payload.push(value);
+        }
+    }
+
     const uint32_t& queryId() const
     {
         return this->id;
