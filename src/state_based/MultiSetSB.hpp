@@ -38,10 +38,15 @@ namespace state
 template<typename T=int32_t>
 class MultiSetMetadata : CrdtMetaData
 {
-    private:
+private:
     uint32_t id;
     std::multiset<T> payload;
-    public:
+public:
+    MultiSetMetadata() : CrdtMetaData(CrdtType::MultiSetSBType)
+    {
+        ;
+    }
+
     MultiSetMetadata(uint32_t id) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
@@ -60,6 +65,42 @@ class MultiSetMetadata : CrdtMetaData
     {
         ;
     }
+
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        json internal(this->payload);
+        j["payload"] = internal;
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internal(this->payload);
+        j["payload"] = internal;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            int32_t value = *it;
+            this->payload.insert(value);
+        }
+    }
+
     const uint32_t& queryId() const
     {
         return this->id;
