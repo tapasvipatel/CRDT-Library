@@ -10,6 +10,9 @@
 #include "../src/state_based/GSetSB.hpp"
 #include "../src/state_based/ORSetSB.hpp"
 #include "../src/state_based/TwoPSetSB.hpp"
+#include <filesystem>
+namespace fs = std::filesystem;
+
 using namespace std;
 using std::filesystem::directory_iterator;
 tgui::Label::Ptr usersOnline;
@@ -285,9 +288,59 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
         loadWidgets2(gui);
     }
 
-    // taps
+    // tapshere
     // Read all crdts and update in local copy
-    //updateTableMaster();
+    string rootFolder = filePath;
+    string backlogFolder = rootFolder + "backlog";
+    string completeFolder = rootFolder + "complete";
+    string inprogressFolder = rootFolder + "inprogress";
+    string readytotestFolder = rootFolder + "readytotest";
+
+    // Get backlog updates
+    vector<crdt::state::VectorMetadata<string>> backlogMetadataList;
+    for(auto & file : fs::directory_iterator(backlogFolder))
+    {
+        crdt::state::VectorMetadata<std::string> replica;
+        replica.deserializeFile(file.path());
+        backlogMetadataList.push_back(replica);
+    }
+
+    backlogServer.addExternalReplica(backlogMetadataList);
+
+    // Get complete updates
+    vector<crdt::state::TwoPSetMetadata<string>> completeMetadataList;
+    for(auto & file : fs::directory_iterator(completeFolder))
+    {
+        crdt::state::TwoPSetMetadata<string> replica;
+        replica.deserializeFile(file.path());
+        completeMetadataList.push_back(replica);
+    }
+
+    completeServer.addExternalReplica(completeMetadataList);
+
+    // Get inprogress updates
+    vector<crdt::state::GSetMetadata<string>> inprogressMetadataList;
+    for(auto & file : fs::directory_iterator(inprogressFolder))
+    {
+        crdt::state::GSetMetadata<string> replica;
+        replica.deserializeFile(file.path());
+        inprogressMetadataList.push_back(replica);
+    }
+
+    inprogressServer.addExternalReplica(inprogressMetadataList);
+
+    // Get readytotest updates
+    vector<crdt::state::ORSetMetadata<string>> readytotestMetadataList;
+    for(auto & file : fs::directory_iterator(readytotestFolder))
+    {
+        crdt::state::ORSetMetadata<string> replica;
+        replica.deserializeFile(file.path());
+        readytotestMetadataList.push_back(replica);
+    }
+
+    readytotestServer.addExternalReplica(readytotestMetadataList);
+
+    updateTableMaster(std::ref(gui));
 }
 
 void logout(tgui::GuiBase &gui)
