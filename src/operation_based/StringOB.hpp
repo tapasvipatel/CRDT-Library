@@ -56,6 +56,35 @@ public:
     {
         ;
     }
+
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        j["payload"] = this->payload;
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        j["payload"] = this->payload;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+        this->payload = j["payload"];
+    }
+
     const uint32_t& queryId() const
     {
         return this->id;
