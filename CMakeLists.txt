@@ -15,3 +15,7 @@ endif()
 if(BUILD_TRELLO_APPLICATION)
     add_subdirectory(trello_application)
 endif()
+
+if(BUILD_TEST_APPLICATION)
+    add_subdirectory(test_application)
+endif()

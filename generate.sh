@@ -2,6 +2,7 @@
 
 TESTING=0
 TRELLO_APPLICATION=0
+TEST_APPLICATION=0
 
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -15,6 +16,12 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 		-trello_application)
 		TRELLO_APPLICATION=1
+		shift
+		;;
+	esac
+	case $key in
+		-test_application)
+		TEST_APPLICATION=1
 		shift
 		;;
 	esac
@@ -32,6 +39,10 @@ fi
 
 if [ $TRELLO_APPLICATION -eq 1 ]; then
 	cmake_flags=${cmake_flags}' -DBUILD_TRELLO_APPLICATION=1'
+fi
+
+if [ $TEST_APPLICATION -eq 1 ]; then
+	cmake_flags=${cmake_flags}' -DBUILD_TEST_APPLICATION=1'
 fi
 
 cmake $cmake_flags ../ && make clean && make

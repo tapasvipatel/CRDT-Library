@@ -25,6 +25,12 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
+#include <ostream>
+#include <iostream>
+#include <fstream>
+
+#include "../json.hpp"
+using json = nlohmann::json;
 
 namespace crdt
 {
@@ -38,10 +44,15 @@ class PNCounterMetadata : CrdtMetaData
 {
 private:
     uint32_t id;
+public:
     T positivePayload;
     T negativePayload;
     T totalPayload;
-public:
+
+    PNCounterMetadata() : CrdtMetaData(CrdtType::PNCounterSBType)
+    {
+        ;
+    }
     PNCounterMetadata(uint32_t id) : CrdtMetaData(CrdtType::PNCounterSBType)
     {
         this->id = id;
@@ -59,8 +70,42 @@ public:
     {
         ;
     }
-    
 
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        j["positivePayload"] = this->positivePayload;
+        j["negativePayload"] = this->negativePayload;
+        j["totalPayload"] = this->totalPayload;
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        j["positivePayload"] = this->positivePayload;
+        j["negativePayload"] = this->negativePayload;
+        j["totalPayload"] = this->totalPayload;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+        this->positivePayload = j["positivePayload"];
+        this->negativePayload = j["negativePayload"];
+        this->totalPayload = j["totalPayload"];
+    }
+
+    
     const uint32_t& queryId() const
     {
         return this->id;
@@ -185,6 +230,17 @@ public:
         metadata_it = this->replica_metadata.find(this->id);
         metadata_it->second.payload = this->payload;
         return true;
+    }
+    std::string serializeObject()
+    {
+        json j;
+
+        for(auto replicaMetadata : this->replica_metadata)
+        {
+            j[std::to_string(replicaMetadata.first)] = replicaMetadata.second.serialize();
+        }
+
+        return j.dump();
     }
 #ifdef BUILD_TESTING
     const uint32_t& queryId() const
