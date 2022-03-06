@@ -71,6 +71,51 @@ public:
         ;
     }
 
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        json internalPayload(this->payload);
+        j["payload"] = internalPayload;
+        json internalTombstone(this->tombstone);
+        j["tombstome"] = internalTombstone;
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internalPayload(this->payload);
+        j["payload"] = internalPayload;
+        json internalTombstone(this->tombstone);
+        j["tombstone"] = internalTombstone;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            int32_t value = *it;
+            this->payload.insert(value);
+        }
+
+        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        {
+            int32_t value = *it;
+            this->tombstone.insert(value);
+        }
+    }
+
     const uint32_t& queryId() const
     {
         return this->id;
