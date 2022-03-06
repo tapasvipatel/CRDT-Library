@@ -166,6 +166,11 @@ protected:
     }
 
 public:
+    GSetSB()
+    {
+        ;
+    }
+
     GSetSB(uint32_t id)
     {
         this->id = id;
@@ -212,7 +217,6 @@ public:
         return includes(set1.begin(), set1.end(), set2.begin(), set2.end());
     }
 
-#ifdef BUILD_TESTING
     const uint32_t& queryId() const
     {
         return this->id;
@@ -262,8 +266,6 @@ public:
             }
         }
     }
-
-#endif
 };
 
 }   // namespace state

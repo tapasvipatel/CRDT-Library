@@ -19,7 +19,7 @@ string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/
 crdt::state::VectorMetadata<string> backlogList;
 crdt::state::VectorSB<string> backlogServer;
 crdt::state::GSetMetadata<string> inprogressList;
-crdt::state::GSetSB<string> inprogressServer();
+crdt::state::GSetSB<string> inprogressServer;
 crdt::state::ORSetMetadata<string> readytotestList;
 crdt::state::ORSetSB<string> readytotestServer();
 crdt::state::TwoPSetMetadata<string> completeList;
@@ -212,7 +212,21 @@ void updateTableMaster(tgui::GuiBase &gui)
         gui.add(backlog);
     }
 
-    
+    // inprogress
+    set<string> inprogressPayload = inprogressServer.queryPayload();
+    count = 0;
+    for(auto element : inprogressPayload)
+    {
+        auto inprogress = tgui::Button::create(element);
+        inprogress->setSize({"12%", "12%"});
+        int y = count + 308;
+        count += 150;
+        string y_position = to_string(y);
+        inprogress->setPosition(371, y);
+        inprogress->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        inprogress->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(inprogress);
+    }
 }
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
@@ -313,6 +327,8 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
             case 2:
                 inprogressList.insert(_task);
                 inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
+                inprogressServer.addExternalReplica({inprogressList});
+                updateTableMaster(std::ref(gui));
                 break;
             case 3:
                 readytotestList.insert(_task);
