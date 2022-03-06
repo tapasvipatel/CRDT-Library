@@ -25,12 +25,6 @@
 
 #include "../CrdtHandle.hpp"
 #include "../CrdtObject.hpp"
-#include <ostream>
-#include <iostream>
-#include <fstream>
-
-#include "../json.hpp"
-using json = nlohmann::json;
 
 namespace crdt
 {
@@ -104,7 +98,6 @@ public:
         this->negativePayload = j["negativePayload"];
         this->totalPayload = j["totalPayload"];
     }
-
     
     const uint32_t& queryId() const
     {

@@ -30,6 +30,13 @@
 #include <algorithm>
 #include <sstream> 
 
+#include <ostream>
+#include <iostream>
+#include <fstream>
+
+#include "json.hpp"
+using json = nlohmann::json;
+
 enum CrdtType
 {
     CounterOBType,
