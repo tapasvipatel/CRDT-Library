@@ -42,7 +42,7 @@ private:
 public:
     VectorMetadata() : CrdtMetaData(CrdtType::VectorSBType)
     {
-        this->id = 0;
+        ;
     }
 
     VectorMetadata(uint32_t id) : CrdtMetaData(CrdtType::VectorSBType)
@@ -65,6 +65,41 @@ public:
     ~VectorMetadata()
     {
         ;
+    }
+
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        json internal(this->payload);
+        j["payload"] = internal;
+
+        return j.dump();
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internal(this->payload);
+        j["payload"] = internal;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            int32_t value = *it;
+            this->payload.push_back(value);
+        }
     }
 
     const uint32_t& queryId() const
