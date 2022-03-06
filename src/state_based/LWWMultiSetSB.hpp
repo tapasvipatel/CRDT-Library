@@ -157,7 +157,7 @@ public:
             std::multiset<T> temp;
             for(json::iterator it_one = j["payload"][it.key()].begin(); it_one != j["payload"][it.key()].end(); ++it_one)
             {
-                int32_t value = *it_one;
+                T value = *it_one;
                 temp.insert(value);
             }
             this->payload[std::stoi(it.key())] = temp;
@@ -168,7 +168,7 @@ public:
             std::multiset<T> temp;
             for(json::iterator it_one = j["tombstone"][it.key()].begin(); it_one != j["tombstone"][it.key()].end(); ++it_one)
             {
-                int32_t value = *it_one;
+                T value = *it_one;
                 temp.insert(value);
             }
             this->tombstone[std::stoi(it.key())] = temp;

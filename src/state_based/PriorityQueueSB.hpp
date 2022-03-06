@@ -122,7 +122,7 @@ public:
 
         for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
         {
-            int32_t value = *it;
+            T value = *it;
             this->payload.push(value);
         }
     }

@@ -105,13 +105,13 @@ public:
 
         for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
         {
-            int32_t value = *it;
+            T value = *it;
             this->payload.insert(value);
         }
 
         for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
         {
-            int32_t value = *it;
+            T value = *it;
             this->tombstone.insert(value);
         }
     }

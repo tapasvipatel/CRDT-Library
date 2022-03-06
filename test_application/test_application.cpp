@@ -63,11 +63,11 @@ int main(int argc, char* argv[])
 
 	// GSET BEGIN
 	/*
-	crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
+	crdt::state::GSetMetadata<std::string> replica1A(1,"bob");
 	std::cout << replica1A.serialize() << std::endl;
 	replica1A.serializeFile(filePath);
 
-	crdt::state::GSetMetadata<uint32_t> replica1C;
+	crdt::state::GSetMetadata<std::string> replica1C;
 	replica1C.deserializeFile(filePath);
 	std::cout << replica1C.serialize() << std::endl;
 	*/
@@ -88,28 +88,28 @@ int main(int argc, char* argv[])
 
 	// ORSET START
 	/*
-	crdt::state::ORSetMetadata<uint32_t> replica1A(3,{7,8,9,10});
+	crdt::state::ORSetMetadata<std::string> replica1A(3,{"bob","alice","charlie","jack"});
 	std::cout << replica1A.serialize() << std::endl;
 	replica1A.serializeFile(filePath);
 
-	crdt::state::ORSetMetadata<uint32_t> replica1C;
+	crdt::state::ORSetMetadata<std::string> replica1C;
 	replica1C.deserializeFile(filePath);
 	std::cout << replica1C.serialize() << std::endl;
 	*/
 	// ORSET END
 
 	// PRIORITY QUEUE START
-	/*
-	crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0,5);
-	replica1A.push(7);
-	replica1A.push(2);
+	
+	crdt::state::PriorityQueueMetadata<std::string> replica1A(0,"hi");
+	replica1A.push("you");
+	replica1A.push("me");
 	std::cout << replica1A.serialize() << std::endl;
 	replica1A.serializeFile(filePath);
 
-	crdt::state::PriorityQueueMetadata<uint32_t> replica1C;
+	crdt::state::PriorityQueueMetadata<std::string> replica1C;
 	replica1C.deserializeFile(filePath);
 	std::cout << replica1C.serialize() << std::endl;
-	*/
+	
 	// PRIORITY QUEUE END
 
 	// 2PSET START
@@ -130,15 +130,15 @@ int main(int argc, char* argv[])
 
 	// VECTOR START
 	/*
-	crdt::state::VectorMetadata<uint32_t> replica1A(3,9);
-	replica1A.push_back(2);
-	replica1A.push_back(10);
-	replica1A.push_back(10);
-	replica1A.push_back(36);
+	crdt::state::VectorMetadata<std::string> replica1A(3,"bob");
+	replica1A.push_back("alice");
+	replica1A.push_back("george");
+	//replica1A.push_back(10);
+	//replica1A.push_back(36);
 	std::cout << replica1A.serialize() << std::endl;
 	replica1A.serializeFile(filePath);
 
-	crdt::state::VectorMetadata<uint32_t> replica1C;
+	crdt::state::VectorMetadata<std::string> replica1C;
 	replica1C.deserializeFile(filePath);
 	std::cout << replica1C.serialize() << std::endl;
 	*/
@@ -157,15 +157,16 @@ int main(int argc, char* argv[])
 	// STRING END
 
 	// LWWMULTISET START
-	crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,5,0); //Added at time = 0
-	replica1A.insert(0,{2,6,4,6,2,16,2,1,6,7});
+	/*
+	crdt::state::LWWMultiSetMetadata<std::string> replica1A(0,"taps",0); //Added at time = 0
+	replica1A.insert(0,{"bob","cat","fish","goat","lion","mufasa","disney","elephant"});
 	std::cout << replica1A.serialize() << std::endl;
 	replica1A.serializeFile(filePath);
 		
-	crdt::state::LWWMultiSetMetadata<uint32_t> replica1C;
+	crdt::state::LWWMultiSetMetadata<std::string> replica1C;
 	replica1C.deserializeFile(filePath);
 	std::cout << replica1C.serialize() << std::endl;
-
+	*/
 	// LWWMULTISET END
 
 	return 0;
