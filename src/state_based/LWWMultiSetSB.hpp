@@ -36,12 +36,17 @@ namespace state
 template<typename T=int32_t>
 class LWWMultiSetMetadata : CrdtMetaData
 {
-    private:
+private:
     uint32_t id;
     long long int currentTime;
     std::map<uint32_t, std::multiset<T>> payload;
     std::map<uint32_t, std::multiset<T>> tombstone; 
-    public:
+public:
+    LWWMultiSetMetadata() : CrdtMetaData(CrdtType::MultiSetSBType)
+    {
+        ;
+    }
+
     LWWMultiSetMetadata(uint32_t id) : CrdtMetaData(CrdtType::MultiSetSBType)
     {
         this->id = id;
@@ -75,6 +80,101 @@ class LWWMultiSetMetadata : CrdtMetaData
     {
         ;
     }
+
+    std::string serialize()
+    {
+        json j;
+        j["id"] = this->id;
+        j["currentTime"] = this->currentTime;
+        json internalPayload;
+
+        for(auto pay : this->payload)
+        {
+            json internalPayloadtemp(pay.second);
+            internalPayload[std::to_string(pay.first)] = internalPayloadtemp;
+        }
+
+        j["payload"] = internalPayload;
+        json internalTombstone;
+
+        for(auto tomb : this->tombstone)
+        {
+            json internalTombstonetemp(tomb.second);
+            internalTombstone[std::to_string(tomb.first)] = internalTombstonetemp;
+        }
+
+        j["tombstone"] = internalTombstone;
+
+        return j.dump();
+
+
+        /*
+        uint32_t id;
+    long long int currentTime;
+    std::map<uint32_t, std::multiset<T>> payload;
+    std::map<uint32_t, std::multiset<T>> tombstone; 
+        */
+    }
+
+    void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        j["currentTime"] = this->currentTime;
+        json internalPayload;
+
+        for(auto pay : this->payload)
+        {
+            json internalPayloadtemp(pay.second);
+            internalPayload[std::to_string(pay.first)] = internalPayloadtemp;
+        }
+
+        j["payload"] = internalPayload;
+        json internalTombstone;
+
+        for(auto tomb : this->tombstone)
+        {
+            json internalTombstonetemp(tomb.second);
+            internalTombstone[std::to_string(tomb.first)] = internalTombstonetemp;
+        }
+
+        j["tombstone"] = internalTombstone;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+        this->currentTime = j["currentTime"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            std::multiset<T> temp;
+            for(json::iterator it_one = j["payload"][it.key()].begin(); it_one != j["payload"][it.key()].end(); ++it_one)
+            {
+                int32_t value = *it_one;
+                temp.insert(value);
+            }
+            this->payload[std::stoi(it.key())] = temp;
+        }
+
+        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        {
+            std::multiset<T> temp;
+            for(json::iterator it_one = j["tombstone"][it.key()].begin(); it_one != j["tombstone"][it.key()].end(); ++it_one)
+            {
+                int32_t value = *it_one;
+                temp.insert(value);
+            }
+            this->tombstone[std::stoi(it.key())] = temp;
+        }
+    }
+
     const uint32_t& queryId() const
     {
         return this->id;
