@@ -182,6 +182,11 @@ protected:
     }
 public:
     uint32_t id;
+    PNCounterSB()
+    {
+        ;
+    }
+
     PNCounterSB(uint32_t id)
     {
         this->id = id;
@@ -235,7 +240,7 @@ public:
 
         return j.dump();
     }
-#ifdef BUILD_TESTING
+
     const uint32_t& queryId() const
     {
         return this->id;
@@ -288,7 +293,6 @@ public:
         }
      
     }
-#endif
 };
 
 }   // namespace state

@@ -31,6 +31,22 @@ crdt::state::TwoPSetSB<string> completeServer;
 crdt::state::LWWMultiSetMetadata<string> notaddedList;
 crdt::state::LWWMultiSetSB<string> notaddedServer;
 
+// Counters
+crdt::state::PNCounterMetadata<uint32_t> numTasksBacklog;
+crdt::state::PNCounterSB<uint32_t> numTasksBacklogServer;
+
+crdt::state::PNCounterMetadata<uint32_t> numTasksInprogress;
+crdt::state::PNCounterSB<uint32_t> numTasksInprogressServer;
+
+crdt::state::PNCounterMetadata<uint32_t> numTasksReadytotest;
+crdt::state::PNCounterSB<uint32_t> numTasksReadytotestServer;
+
+crdt::state::PNCounterMetadata<uint32_t> numTasksComplete;
+crdt::state::PNCounterSB<uint32_t> numTasksCompleteServer;
+
+crdt::state::PNCounterMetadata<uint32_t> numTasksNotadded;
+crdt::state::PNCounterSB<uint32_t> numTasksNotaddedServer;
+
 class userInfo {
 private:
     string passWord;
@@ -279,6 +295,47 @@ void updateTableMaster(tgui::GuiBase &gui)
         notadded->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(notadded);
     }
+
+    // update counters on the screen
+    string valueone = "Num: " + to_string(numTasksBacklogServer.queryPayload());
+    auto numTasksBacklogLabel = tgui::Button::create(valueone);
+    numTasksBacklogLabel->setSize({"12%", "12%"});
+    numTasksBacklogLabel->setPosition(55, 930);
+    numTasksBacklogLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
+    numTasksBacklogLabel->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(numTasksBacklogLabel);
+
+    string valuetwo = "Num: " + to_string(numTasksCompleteServer.queryPayload());
+    auto numTasksCompleteLabel = tgui::Button::create(valuetwo);
+    numTasksCompleteLabel->setSize({"12%", "12%"});
+    numTasksCompleteLabel->setPosition(999, 930);
+    numTasksCompleteLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
+    numTasksCompleteLabel->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(numTasksCompleteLabel);
+
+    string valuethree = "Num: " + to_string(numTasksInprogressServer.queryPayload());
+    auto numTasksInprogressLabel = tgui::Button::create(valuethree);
+    numTasksInprogressLabel->setSize({"12%", "12%"});
+    numTasksInprogressLabel->setPosition(371, 930);
+    numTasksInprogressLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
+    numTasksInprogressLabel->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(numTasksInprogressLabel);
+
+    string valuefour = "Num: " + to_string(numTasksNotaddedServer.queryPayload());
+    auto numTasksNotaddedLabel = tgui::Button::create(valuefour);
+    numTasksNotaddedLabel->setSize({"12%", "12%"});
+    numTasksNotaddedLabel->setPosition(1313, 930);
+    numTasksNotaddedLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
+    numTasksNotaddedLabel->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(numTasksNotaddedLabel);
+
+    string valuefive = "Num: " + to_string(numTasksReadytotestServer.queryPayload());
+    auto numTasksReadytotestLabel = tgui::Button::create(valuefive);
+    numTasksReadytotestLabel->setSize({"12%", "12%"});
+    numTasksReadytotestLabel->setPosition(685, 930);
+    numTasksReadytotestLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
+    numTasksReadytotestLabel->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(numTasksReadytotestLabel);
 }
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
@@ -369,6 +426,63 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
 
     notaddedServer.addExternalReplica(notaddedMetadataList);
 
+    // Get counter updates
+    string numTasksBacklogFolder = rootFolder + "numtasksbacklog";
+    string numTasksCompleteFolder = rootFolder + "numtaskscomplete";
+    string numTasksInprogressFolder = rootFolder + "numtasksinprogress";
+    string numTasksNotaddedFolder = rootFolder + "numtasksnotadded";
+    string numTasksReadytotestFolder = rootFolder + "numtasksreadytotest";
+
+    vector<crdt::state::PNCounterMetadata<uint32_t>> numTasksBacklogMetadataList;
+    for(auto & file : fs::directory_iterator(numTasksBacklogFolder))
+    {
+        crdt::state::PNCounterMetadata<uint32_t> replica;
+        replica.deserializeFile(file.path());
+        numTasksBacklogMetadataList.push_back(replica);
+    }
+
+    numTasksBacklogServer.addExternalReplica(numTasksBacklogMetadataList);
+
+    vector<crdt::state::PNCounterMetadata<uint32_t>> numTasksCompleteMetadataList;
+    for(auto & file : fs::directory_iterator(numTasksCompleteFolder))
+    {
+        crdt::state::PNCounterMetadata<uint32_t> replica;
+        replica.deserializeFile(file.path());
+        numTasksCompleteMetadataList.push_back(replica);
+    }
+
+    numTasksCompleteServer.addExternalReplica(numTasksCompleteMetadataList);
+
+    vector<crdt::state::PNCounterMetadata<uint32_t>> numTasksInprogressMetadataList;
+    for(auto & file : fs::directory_iterator(numTasksInprogressFolder))
+    {
+        crdt::state::PNCounterMetadata<uint32_t> replica;
+        replica.deserializeFile(file.path());
+        numTasksInprogressMetadataList.push_back(replica);
+    }
+
+    numTasksInprogressServer.addExternalReplica(numTasksInprogressMetadataList);
+
+    vector<crdt::state::PNCounterMetadata<uint32_t>> numTasksNotaddedMetadataList;
+    for(auto & file : fs::directory_iterator(numTasksNotaddedFolder))
+    {
+        crdt::state::PNCounterMetadata<uint32_t> replica;
+        replica.deserializeFile(file.path());
+        numTasksNotaddedMetadataList.push_back(replica);
+    }
+
+    numTasksNotaddedServer.addExternalReplica(numTasksNotaddedMetadataList);
+
+    vector<crdt::state::PNCounterMetadata<uint32_t>> numTasksReadytotestMetadataList;
+    for(auto & file : fs::directory_iterator(numTasksReadytotestFolder))
+    {
+        crdt::state::PNCounterMetadata<uint32_t> replica;
+        replica.deserializeFile(file.path());
+        numTasksReadytotestMetadataList.push_back(replica);
+    }
+
+    numTasksReadytotestServer.addExternalReplica(numTasksReadytotestMetadataList);
+
     updateTableMaster(std::ref(gui));
 }
 
@@ -436,24 +550,36 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 backlogList.push_back(_task);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
+                numTasksBacklog.increasePayload(1);
+                numTasksBacklog.serializeFile(filePath + "numtasksbacklog/" + endUser.userName + "_numtasksbacklog.json");
+                numTasksBacklogServer.addExternalReplica({numTasksBacklog});
                 updateTableMaster(std::ref(gui));
                 break;
             case 2:
                 inprogressList.insert(_task);
                 inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
                 inprogressServer.addExternalReplica({inprogressList});
+                numTasksInprogress.increasePayload(1);
+                numTasksInprogress.serializeFile(filePath + "numtasksinprogress/" + endUser.userName + "_numtasksinprogress.json");
+                numTasksInprogressServer.addExternalReplica({numTasksInprogress});
                 updateTableMaster(std::ref(gui));
                 break;
             case 3:
                 readytotestList.insert(_task);
                 readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
                 readytotestServer.addExternalReplica({readytotestList});
+                numTasksReadytotest.increasePayload(1);
+                numTasksReadytotest.serializeFile(filePath + "numtasksreadytotest/" + endUser.userName + "_numtasksreadytotest.json");
+                numTasksReadytotestServer.addExternalReplica({numTasksReadytotest});
                 updateTableMaster(std::ref(gui));
                 break;
             case 4:
                 completeList.insert(_task);
                 completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
                 completeServer.addExternalReplica({completeList});
+                numTasksComplete.increasePayload(1);
+                numTasksComplete.serializeFile(filePath + "numtaskscomplete/" + endUser.userName + "_numtaskscomplete.json");
+                numTasksCompleteServer.addExternalReplica({numTasksComplete});
                 updateTableMaster(std::ref(gui));
                 break;
             case 5:
@@ -461,6 +587,9 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 notaddedList.insert(0, _task);
                 notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
                 notaddedServer.addExternalReplica({notaddedList});
+                numTasksNotadded.increasePayload(1);
+                numTasksNotadded.serializeFile(filePath + "numtasksnotadded/" + endUser.userName + "_numtasksnotadded.json");
+                numTasksNotaddedServer.addExternalReplica({numTasksNotadded});
                 updateTableMaster(std::ref(gui));
                 break;
         }
@@ -756,6 +885,30 @@ void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBa
         updateGUI(gui, 4, message);
         cout << "Try again!" << endl;
     }
+
+    // Set id of all crdts
+    backlogList.id = endUser.uniqueID;
+    backlogServer.id = endUser.uniqueID;
+    inprogressList.id = endUser.uniqueID;
+    inprogressServer.id = endUser.uniqueID;
+    readytotestList.id = endUser.uniqueID;
+    readytotestServer.id = endUser.uniqueID;
+    completeList.id = endUser.uniqueID;
+    completeServer.id = endUser.uniqueID;
+    notaddedList.id = endUser.uniqueID;
+    notaddedServer.id = endUser.uniqueID;
+
+    // Set id of all crdt counters
+    numTasksBacklog.id = endUser.uniqueID;
+    numTasksBacklogServer.id = endUser.uniqueID;
+    numTasksInprogress.id = endUser.uniqueID;
+    numTasksInprogressServer.id = endUser.uniqueID;
+    numTasksReadytotest.id = endUser.uniqueID;
+    numTasksReadytotestServer.id = endUser.uniqueID;
+    numTasksComplete.id = endUser.uniqueID;
+    numTasksCompleteServer.id = endUser.uniqueID;
+    numTasksNotadded.id = endUser.uniqueID;
+    numTasksNotaddedServer.id = endUser.uniqueID;
 }
 
 void loadWidgets(tgui::GuiBase &gui, tgui::Label::Ptr &message)
@@ -836,18 +989,6 @@ int main()
         window.clear(sf::Color(238, 238, 228));
         gui.draw();
         window.display();
-
-        // Set id of all crdts
-        backlogList.id = endUser.uniqueID;
-        backlogServer.id = endUser.uniqueID;
-        inprogressList.id = endUser.uniqueID;
-        inprogressServer.id = endUser.uniqueID;
-        readytotestList.id = endUser.uniqueID;
-        readytotestServer.id = endUser.uniqueID;
-        completeList.id = endUser.uniqueID;
-        completeServer.id = endUser.uniqueID;
-        notaddedList.id = endUser.uniqueID;
-        notaddedServer.id = endUser.uniqueID;
     }
     endUser.setUserStatus(0);
     return 0;
