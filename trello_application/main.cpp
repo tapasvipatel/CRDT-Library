@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include <dirent.h>
+#include <chrono>
 // #include <SFML/Graphics.hpp>
 #include <TGUI/TGUI.hpp>
 #include "userLogin.hpp"
@@ -28,7 +29,7 @@ crdt::state::ORSetSB<string> readytotestServer;
 crdt::state::TwoPSetMetadata<string> completeList;
 crdt::state::TwoPSetSB<string> completeServer;
 crdt::state::LWWMultiSetMetadata<string> notaddedList;
-crdt::state::LWWMultiSetSB<string> notaddedServer();
+crdt::state::LWWMultiSetSB<string> notaddedServer;
 
 class userInfo {
 private:
@@ -262,6 +263,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         complete->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(complete);
     }
+
+    // notadded
+    multiset<string> notaddedPayload = notaddedServer.queryPayload();
+    count = 0;
+    for(auto element : notaddedPayload)
+    {
+        auto notadded = tgui::Button::create(element);
+        notadded->setSize({"12%", "12%"});
+        int y = count + 308;
+        count += 150;
+        string y_position = to_string(y);
+        notadded->setPosition(1313, y);
+        notadded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        notadded->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(notadded);
+    }
 }
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
@@ -295,6 +312,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     string completeFolder = rootFolder + "complete";
     string inprogressFolder = rootFolder + "inprogress";
     string readytotestFolder = rootFolder + "readytotest";
+    string notaddedFolder = rootFolder + "notadded";
 
     // Get backlog updates
     vector<crdt::state::VectorMetadata<string>> backlogMetadataList;
@@ -339,6 +357,17 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     }
 
     readytotestServer.addExternalReplica(readytotestMetadataList);
+
+    // Get notadded updates
+    vector<crdt::state::LWWMultiSetMetadata<string>> notaddedMetadataList;
+    for(auto & file : fs::directory_iterator(notaddedFolder))
+    {
+        crdt::state::LWWMultiSetMetadata<string> replica;
+        replica.deserializeFile(file.path());
+        notaddedMetadataList.push_back(replica);
+    }
+
+    notaddedServer.addExternalReplica(notaddedMetadataList);
 
     updateTableMaster(std::ref(gui));
 }
@@ -428,6 +457,11 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 5:
+                //auto temp = std::chrono::system_clock::now();
+                notaddedList.insert(0, _task);
+                notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
+                notaddedServer.addExternalReplica({notaddedList});
+                updateTableMaster(std::ref(gui));
                 break;
         }
     }
@@ -812,6 +846,8 @@ int main()
         readytotestServer.id = endUser.uniqueID;
         completeList.id = endUser.uniqueID;
         completeServer.id = endUser.uniqueID;
+        notaddedList.id = endUser.uniqueID;
+        notaddedServer.id = endUser.uniqueID;
     }
     endUser.setUserStatus(0);
     return 0;

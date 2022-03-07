@@ -308,6 +308,11 @@ bool merge(std::vector<uint32_t> replica_ids)
     }
 public:
     uint32_t id;
+    LWWMultiSetSB()
+    {
+        ;
+    }
+
     LWWMultiSetSB(uint32_t id)
     {
         this->id = id;
@@ -375,7 +380,7 @@ public:
         metadata_it->second.payload = this->payload;
         return true;
     }
-#ifdef BUILD_TESTING
+
     const uint32_t& queryId() const
     {
         return this->id;
@@ -467,7 +472,6 @@ public:
             }
         }
     }
-#endif
 };
 }   // namespace state
 }   // namespace crdt
