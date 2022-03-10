@@ -180,7 +180,6 @@ void LWWMultiSetPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
-/*
 void MultiSetPerformance()
 {
 	std::cout << "------------------------------------------------------" << std::endl;
@@ -219,7 +218,6 @@ void MultiSetPerformance()
 	}
 	std::cout << "------------------------------------------------------" << std::endl;
 }
-*/
 
 int main(int argc, char* argv[])
 {
@@ -228,6 +226,7 @@ int main(int argc, char* argv[])
 	//GCounterPerformance();
 	//GMapPerformance();
 	//LWWMultiSetPerformance();
+	MultiSetPerformance();
 
 	//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/test_application/json/temp.json";
 
