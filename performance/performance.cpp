@@ -258,6 +258,45 @@ void ORSetPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+void PriorityQueuePerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "PriorityQueue" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "PriorityQueue.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::PriorityQueueMetadata<uint32_t> replica1A(i,i);
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::PriorityQueueMetadata<uint32_t>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::PriorityQueueMetadata<uint32_t> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::PriorityQueueSB<uint32_t> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
 	// performance
@@ -266,7 +305,8 @@ int main(int argc, char* argv[])
 	//GMapPerformance();
 	//LWWMultiSetPerformance();
 	//MultiSetPerformance();
-	ORSetPerformance();
+	//ORSetPerformance();
+	PriorityQueuePerformance();
 
 	//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/test_application/json/temp.json";
 
@@ -281,18 +321,6 @@ int main(int argc, char* argv[])
 	std::cout << replica1C.serialize() << std::endl;
 	*/
 	// GSET END
-
-	// ORSET START
-	/*
-	crdt::state::ORSetMetadata<std::string> replica1A(3,{"bob","alice","charlie","jack"});
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::ORSetMetadata<std::string> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// ORSET END
 
 	// PRIORITY QUEUE START
 	/*

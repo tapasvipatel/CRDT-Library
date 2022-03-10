@@ -199,6 +199,11 @@ protected:
     }
 public:
     uint32_t id;
+    PriorityQueueSB()
+    {
+        ;
+    }
+
     PriorityQueueSB(uint32_t id)
     {
         this->id = id;
@@ -252,7 +257,6 @@ public:
         metadata_it->second.payload = this->payload;
         return true;
     }
-#ifdef BUILD_TESTING
     
     const uint32_t& queryId() const
     {
@@ -320,7 +324,6 @@ public:
             }
         }
     }
-#endif
 };
 
 }   // namespace state
