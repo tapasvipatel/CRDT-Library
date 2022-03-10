@@ -18,11 +18,14 @@
 #include "../src/operation_based/StringOB.hpp"
 #include "../src/state_based/LWWMultiSetSB.hpp"
 
+std::string filePath = "/home/tapasvi/workspace/CRDT-Library/performance/results/";
+
 void PNCounterPerformance()
 {
 	std::cout << "------------------------------------------------------" << std::endl;
 	std::cout << "PNCOUNTER" << std::endl;
 	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "PNCounter.csv");
 
 	for(auto num : replicas)
 	{
@@ -51,6 +54,7 @@ void PNCounterPerformance()
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+    	o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 	}
 	std::cout << "------------------------------------------------------" << std::endl;
 }
@@ -60,6 +64,7 @@ void GCounterPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 	std::cout << "GCounter" << std::endl;
 	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "GCounter.csv");
 
 	for(auto num : replicas)
 	{
@@ -88,6 +93,7 @@ void GCounterPerformance()
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 	}
 	std::cout << "------------------------------------------------------" << std::endl;
 }
@@ -97,6 +103,7 @@ void GMapPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 	std::cout << "GMap" << std::endl;
 	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "GMap.csv");
 
 	for(auto num : replicas)
 	{
@@ -127,17 +134,15 @@ void GMapPerformance()
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 	}
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
 int main(int argc, char* argv[])
 {
-	//std::ofstream o(pathToFile);
-    //o << j << std::endl;
-
 	// performance
-	PNCounterPerformance();
+	//PNCounterPerformance();
 	//GCounterPerformance();
 	//GMapPerformance();
 
