@@ -219,6 +219,45 @@ void MultiSetPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+void ORSetPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "ORSet" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "ORSet.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::ORSetMetadata<uint32_t> replica1A(i,i);
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::ORSetMetadata<uint32_t>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::ORSetMetadata<uint32_t> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::ORSetSB<uint32_t> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
 	// performance
@@ -226,7 +265,8 @@ int main(int argc, char* argv[])
 	//GCounterPerformance();
 	//GMapPerformance();
 	//LWWMultiSetPerformance();
-	MultiSetPerformance();
+	//MultiSetPerformance();
+	ORSetPerformance();
 
 	//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/test_application/json/temp.json";
 
@@ -241,19 +281,6 @@ int main(int argc, char* argv[])
 	std::cout << replica1C.serialize() << std::endl;
 	*/
 	// GSET END
-
-	// MULTISET START
-	/*
-	crdt::state::MultiSetMetadata<uint32_t> replica1A(0,5);
-	replica1A.insert({2,6,4,6,2,16,2,1,6,7});
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::MultiSetMetadata<uint32_t> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// MULTISET END
 
 	// ORSET START
 	/*
