@@ -95,6 +95,23 @@ public:
         o << j << std::endl;
     }
 
+    void deserialize(json j)
+    {
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            T value = *it;
+            this->payload.insert(value);
+        }
+
+        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        {
+            T value = *it;
+            this->tombstone.insert(value);
+        }
+    }
+
     void deserializeFile(std::string jsonString)
     {
         std::ifstream i(jsonString);

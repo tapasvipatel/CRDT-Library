@@ -112,6 +112,17 @@ public:
         o << j << std::endl;
     }
 
+    void deserialize(json j)
+    {
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            T value = *it;
+            this->payload.push(value);
+        }
+    }
+
     void deserializeFile(std::string jsonString)
     {
         std::ifstream i(jsonString);

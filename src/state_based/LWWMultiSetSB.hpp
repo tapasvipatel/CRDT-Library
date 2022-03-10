@@ -143,6 +143,34 @@ public:
         o << j << std::endl;
     }
 
+    void deserialize(json j)
+    {
+        this->id = j["id"];
+        this->currentTime = j["currentTime"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            std::multiset<T> temp;
+            for(json::iterator it_one = j["payload"][it.key()].begin(); it_one != j["payload"][it.key()].end(); ++it_one)
+            {
+                T value = *it_one;
+                temp.insert(value);
+            }
+            this->payload[std::stoi(it.key())] = temp;
+        }
+
+        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        {
+            std::multiset<T> temp;
+            for(json::iterator it_one = j["tombstone"][it.key()].begin(); it_one != j["tombstone"][it.key()].end(); ++it_one)
+            {
+                T value = *it_one;
+                temp.insert(value);
+            }
+            this->tombstone[std::stoi(it.key())] = temp;
+        }
+    }
+
     void deserializeFile(std::string jsonString)
     {
         std::ifstream i(jsonString);

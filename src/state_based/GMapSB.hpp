@@ -96,6 +96,21 @@ public:
         o << j << std::endl;
     }
 
+    void deserialize(json j)
+    {
+        this->id = j["id"];
+
+        std::string payload_string = j["payload"];
+        json internal = json::parse(payload_string);
+
+        for(json::iterator it = internal.begin(); it != internal.end(); ++it)
+        {
+            std::string value = it.value();
+            value.erase(remove(value.begin(), value.end(), '"'), value.end());
+            this->payload[std::stoi(it.key())] = std::stoi(value);
+        }
+    }
+
     void deserializeFile(std::string jsonString)
     {
         std::ifstream i(jsonString);

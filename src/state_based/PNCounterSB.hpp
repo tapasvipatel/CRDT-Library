@@ -87,6 +87,14 @@ public:
         o << j << std::endl;
     }
 
+    void deserialize(json j)
+    {
+        this->id = j["id"];
+        this->positivePayload = j["positivePayload"];
+        this->negativePayload = j["negativePayload"];
+        this->totalPayload = j["totalPayload"];
+    }
+
     void deserializeFile(std::string jsonString)
     {
         std::ifstream i(jsonString);
