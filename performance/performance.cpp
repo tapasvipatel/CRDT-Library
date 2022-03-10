@@ -139,56 +139,97 @@ void GMapPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+void LWWMultiSetPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "LWWMultiSet" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "LWWMultiSet.csv");
+
+	for(auto num : replicas)
+	{
+		int key = 0;
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::LWWMultiSetMetadata<std::string> replica1A(i,std::to_string(key),i);
+			serializedStrings.push_back(replica1A.serialize());
+			key++;
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::LWWMultiSetMetadata<std::string>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::LWWMultiSetMetadata<std::string> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::LWWMultiSetSB<std::string> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
+/*
+void MultiSetPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "MultiSet" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "MultiSet.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::MultiSetMetadata<uint32_t> replica1A(i,i);
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::MultiSetMetadata<uint32_t>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::MultiSetMetadata<uint32_t> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::MultiSetSB<uint32_t> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+*/
+
 int main(int argc, char* argv[])
 {
 	// performance
 	//PNCounterPerformance();
 	//GCounterPerformance();
 	//GMapPerformance();
+	//LWWMultiSetPerformance();
 
 	//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/test_application/json/temp.json";
-
-	// PN COUNTER
-	/*
-	crdt::state::PNCounterMetadata<uint32_t> replica1A(1,10);
-	crdt::state::PNCounterMetadata<uint32_t> replica1B(2,20);
-	
-	std::cout << replica1A.serialize() << std::endl;
-	std::cout << replica1B.serialize() << std::endl;
-	replica1B.serializeFile(filePath);
-
-	crdt::state::PNCounterMetadata<uint32_t> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.queryId() << std::endl;
-	std::cout << replica1C.queryPayloadP() << std::endl;
-	std::cout << replica1C.queryPayloadN() << std::endl;
-	*/
-	// PN COUNTER END
-
-	// GCOUNTER START
-	/*
-	crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::GCounterMetadata<uint32_t> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.queryId() << std::endl;
-	std::cout << replica1C.queryPayload() << std::endl;
-	*/
-	// GCOUNTER END
-
-	// GMAP START
-	/*
-	crdt::state::GMapMetadata<uint32_t, uint32_t> replica1A(1,0,1);
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::GMapMetadata<uint32_t> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// GMAP END
 
 	// GSET BEGIN
 	/*
@@ -284,19 +325,6 @@ int main(int argc, char* argv[])
 	std::cout << replica1C.serialize() << std::endl;
 	*/
 	// STRING END
-
-	// LWWMULTISET START
-	/*
-	crdt::state::LWWMultiSetMetadata<std::string> replica1A(0,"taps",0); //Added at time = 0
-	replica1A.insert(0,{"bob","cat","fish","goat","lion","mufasa","disney","elephant"});
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-		
-	crdt::state::LWWMultiSetMetadata<std::string> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// LWWMULTISET END
 
 	return 0;
 }
