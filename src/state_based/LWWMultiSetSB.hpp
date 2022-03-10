@@ -143,8 +143,9 @@ public:
         o << j << std::endl;
     }
 
-    void deserialize(json j)
+    void deserialize(std::string s)
     {
+        json j = json::parse(s);
         this->id = j["id"];
         this->currentTime = j["currentTime"];
 

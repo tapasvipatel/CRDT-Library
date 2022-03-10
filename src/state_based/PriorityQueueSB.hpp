@@ -112,8 +112,9 @@ public:
         o << j << std::endl;
     }
 
-    void deserialize(json j)
+    void deserialize(std::string s)
     {
+        json j = json::parse(s);
         this->id = j["id"];
 
         for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
