@@ -19,3 +19,7 @@ endif()
 if(BUILD_TEST_APPLICATION)
     add_subdirectory(test_application)
 endif()
+
+if(BUILD_PERFORMANCE)
+    add_subdirectory(performance)
+endif()

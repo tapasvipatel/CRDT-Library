@@ -184,7 +184,7 @@ class GMapSB : CrdtObject<T>
     std::map<K,T> totalPayload;
 
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
-    protected:
+protected:
     bool merge(std::vector<uint32_t> replica_ids)
     {
         return false;
@@ -208,7 +208,12 @@ class GMapSB : CrdtObject<T>
     {
         return false;
     }
-    public:
+public:
+    GMapSB()
+    {
+        ;
+    }
+
     GMapSB(uint32_t id)
     {
         this->id = id;
@@ -262,7 +267,6 @@ class GMapSB : CrdtObject<T>
         return true;
     }
 
-#ifdef BUILD_TESTING
     const uint32_t& queryId() const
     {
         return this->id;
@@ -361,7 +365,6 @@ class GMapSB : CrdtObject<T>
         }
        
     }
-#endif
 
 };
 
@@ -372,7 +375,7 @@ class GMapSBString : CrdtObject<T>
     std::map<K,T> totalPayload;
     std::unordered_map<uint32_t,std::map<K,T>> payload; 
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
-    protected:
+protected:
     bool merge(std::vector<uint32_t> replica_ids)
     {
         return false;
@@ -396,7 +399,12 @@ class GMapSBString : CrdtObject<T>
     {
         return false;
     }
-    public:
+public:
+    GMapSBString()
+    {
+        ;
+    }
+
     GMapSBString(uint32_t id)
     {
         this->id = id;
@@ -463,7 +471,6 @@ class GMapSBString : CrdtObject<T>
         return true;
     }
 
-#ifdef BUILD_TESTING
     const uint32_t& queryId() const
     {
         return this->id;
@@ -566,7 +573,6 @@ class GMapSBString : CrdtObject<T>
             }
         }
     }
-#endif
 
 };
 
