@@ -375,77 +375,98 @@ void GSetPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+void StringPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "String" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "String.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::operation::StringMetaData<std::string> replica1A(i,"aa");
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::operation::StringMetaData<std::string>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::operation::StringMetaData<std::string> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::operation::StringOB<std::string> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
+void VectorPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "Vector" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "Vector.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::VectorMetadata<uint32_t> replica1A(i,i);
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::VectorMetadata<uint32_t>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::VectorMetadata<uint32_t> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::VectorSB<uint32_t> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
 	// performance
 	//PNCounterPerformance();
 	//GCounterPerformance();
 	//GMapPerformance();
-	//LWWMultiSetPerformance();
-	//MultiSetPerformance();
-	//ORSetPerformance();
-	//PriorityQueuePerformance();
-	//TwoPSetPerformance();
+	LWWMultiSetPerformance();
+	MultiSetPerformance();
+	ORSetPerformance();
+	PriorityQueuePerformance();
+	TwoPSetPerformance();
 	GSetPerformance();
-
-	//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/test_application/json/temp.json";
-
-	// GSET BEGIN
-	/*
-	crdt::state::GSetMetadata<std::string> replica1A(1,"bob");
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::GSetMetadata<std::string> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// GSET END
-
-	// VECTOR START
-	/*
-	crdt::state::VectorMetadata<std::string> replica1A(3,"bob");
-	replica1A.push_back("alice");
-	replica1A.push_back("george");
-	//replica1A.push_back(10);
-	//replica1A.push_back(36);
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::VectorMetadata<std::string> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// VECTOR END
-
-	// STRING START
-	/*
-	crdt::operation::StringMetaData<std::string> replica1A(0, "AB+++CDEFG");
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::operation::StringMetaData<uint32_t> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// STRING END
+	//StringPerformance();
+	//VectorPerformance();
 
 	return 0;
 }
-
-/*
-	Testing JSON related functionality
-
-
-	json j;
-
-	j["pi"] = 123;
-	j["name"] = "taps";
-
-	std::cout << j << std::endl;
-
-	std::ofstream o("sample.json");
-	o << j << std::endl;
-	return 0;
-
-*/

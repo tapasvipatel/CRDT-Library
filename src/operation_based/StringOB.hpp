@@ -158,6 +158,11 @@ protected:
         return false;
     }
 public:
+    StringOB()
+    {
+        ;
+    }
+
     StringOB(uint32_t id) 
     {
         this->id = id;
@@ -288,7 +293,6 @@ public:
         metadata_it->second.payload = this->payload;
         return true;
     }
-#ifdef BUILD_TESTING
     
     const uint32_t& queryId() const
     {
@@ -337,9 +341,6 @@ public:
         updateInternalPayload();
     }
 
-
-    
-
     void addExternalReplica(std::vector<StringMetaData<T>> external_replica_metadata)
     {
         for (auto &metadata: external_replica_metadata)
@@ -367,7 +368,6 @@ public:
             }
         }
     }
-#endif  
 };
 } // namespace state
 } // namespace crdt
