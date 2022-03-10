@@ -159,6 +159,11 @@ protected:
     }
 
 public:
+    GCounterSB()
+    {
+        ;
+    }
+
     GCounterSB(uint32_t id)
     {
         this->id = id;
@@ -199,7 +204,6 @@ public:
         return true;
     }
 
-#ifdef BUILD_TESTING
     const uint32_t& queryId() const
     {
         return this->id;
@@ -245,7 +249,6 @@ public:
         }
         
     }
-#endif
 };
 
 }   // namespace state
