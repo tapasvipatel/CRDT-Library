@@ -336,6 +336,45 @@ void TwoPSetPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+void GSetPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "GSet" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "GSet.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::GSetMetadata<uint32_t> replica1A(i,i);
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::GSetMetadata<uint32_t>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::GSetMetadata<uint32_t> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::GSetSB<uint32_t> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
 	// performance
@@ -346,7 +385,8 @@ int main(int argc, char* argv[])
 	//MultiSetPerformance();
 	//ORSetPerformance();
 	//PriorityQueuePerformance();
-	TwoPSetPerformance();
+	//TwoPSetPerformance();
+	GSetPerformance();
 
 	//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/test_application/json/temp.json";
 
@@ -361,22 +401,6 @@ int main(int argc, char* argv[])
 	std::cout << replica1C.serialize() << std::endl;
 	*/
 	// GSET END
-
-	// 2PSET START
-	/*
-	crdt::state::TwoPSetMetadata<uint32_t> replica1A(3,{7,8,9,10});
-	replica1A.remove(7);
-	replica1A.remove(7);
-	replica1A.remove(8);
-	replica1A.remove(9);
-	std::cout << replica1A.serialize() << std::endl;
-	replica1A.serializeFile(filePath);
-
-	crdt::state::TwoPSetMetadata<uint32_t> replica1C;
-	replica1C.deserializeFile(filePath);
-	std::cout << replica1C.serialize() << std::endl;
-	*/
-	// 2PSET END
 
 	// VECTOR START
 	/*
