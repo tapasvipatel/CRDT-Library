@@ -29,8 +29,28 @@
 <hr>
 
 <h2 id="about"> ❓ About </h2>
+The goal of this project is to provide an alternative to strong eventual consistency models in a
+distributed system using multiple primitive data types. The use of conflict-free replicated data types (CRDTs) 
+can be used to prevent single point of failures as well as provide a good model for achieving strong eventual consistency. 
+CRDTs are data structures that can be used by applications without the need of a central server. They are able to
+communicate with other applications to send and receive data. CRDTs work by using simple
+mathematical rules to guarantee strong eventual consistency. CRDTs guarantee that if an application in
+the distributed system goes offline, once it comes back online, it will eventually converge to the same
+state as all the other applications in the system.
+CRDTs can be used in offline systems, peer-to-peer communication networks, or traditional client
+to server networks
+
 
 <h2 id="features"> 📃 Features </h2>
+This libary currently supports a combined of 12 CRDTs.
+
+## Counters
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Grow Only Counter| `gcounter` | `.inc()` | int |
+| Positive-Negative-Counter | `pncounter` |   `.inc()`,`.dec()` | int |
+| State-Based Counter | `scounter` |   `.inc()`,`.dec()` | int |
 
 <h2 id="setup"> ⚙ Set Up </h2>
 
