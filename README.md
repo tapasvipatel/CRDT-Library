@@ -57,8 +57,8 @@ the CRDT to the server, add the metadata to the handler.
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
-| Handler | `GCounterSB` | `.updatePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<GCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GCounterSB> handlers)` | `int`, `char` |
-| Metadata | `GCounterMetadata` |   `.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayload()`, `.updatePayload(T payload)`, `.setPayload(T payload)`    | `int`, `char` |
+| Handler | `GCounterSB` | `.updatePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<GCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GCounterSB> handlers)` | `int`, `char`,  `bool` , `double` |
+| Metadata | `GCounterMetadata` |   `.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayload()`, `.updatePayload(T payload)`, `.setPayload(T payload)`    | `int`, `char` ,  `bool`, `double` |
 
 
 | Supported Operations (Handler) | Functionality | 
@@ -102,8 +102,8 @@ All will converge to same state and have final value = 15
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
-| Handler | `PNCounterSB` | `increasePayload(uint32_t replicaID, T payload)`, `.decreasePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.serializeObject())`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<PNCounterSB> handlers)` | `int`, `char` |
-| Metadata | `GCounterMetadata` |   `.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayloadT()`,`.queryPayloadP()`, `.queryPayloadN()`, `.increasePayload(T positivePayload)`, `.decreasePayload(T negativePayload)`, `.setPayloadT(T payload)` , `.setPayloadP(T payload)` , `.setPayloadN(T payload)` | `int`, `char` |
+| Handler | `PNCounterSB` | `increasePayload(uint32_t replicaID, T payload)`, `.decreasePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.serializeObject())`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<PNCounterSB> handlers)` | `int`, `char`,  `bool`, `double` |
+| Metadata | `GCounterMetadata` |   `.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayloadT()`,`.queryPayloadP()`, `.queryPayloadN()`, `.increasePayload(T positivePayload)`, `.decreasePayload(T negativePayload)`, `.setPayloadT(T payload)` , `.setPayloadP(T payload)` , `.setPayloadN(T payload)` | `int`, `char`,  `bool`, `double`  |
 
 
 | Supported Operations (Handler) | Functionality | 
@@ -167,6 +167,73 @@ Replica 1B = 9
 Replica 1C = Replica1A = 176 
 Sum = 176+9 = 185
 */
+```
+
+<h3> Operation Grow Counter</h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `CounterOB` | Tas Explain | `int`, `char` ,  `bool`, `double` |
+| Metadata | `CounterMetadata` | Tas Explain   | `int`, `char` ,  `bool`, `double`  |
+
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+Tas Explain | Tas Explain |
+
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+Tas Explain | Tas Explain |
+
+
+<h4> Example </h4>
+
+```cpp
+//Tas Explain
+```
+
+<h3> Grow-Only Set</h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `GSetSB` | `.insert(uint32_t replicaID, T value)`, `.insert(uint32_t replicaID, std::vector<T> values)`, `.updateInternalPayload()`, `.compare(GSetSB<T> handler, uint32_t setId)`, `.compare_sets(std::set<T> set1, std::set<T> set2)`, `.queryId() `, `.queryPayloadwithID(uint32_t replicaID)` , `.addExternalReplica(std::vector<GSetMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GSetSB> handlers)`   | `int`, `char` ,  `bool`, `string`, `double`  |
+| Metadata | `GSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.setPayload(std::set<T> payload)`,`queryPayload()`, `.insert(T value) `, ` .insert(std::vector<T> values) ` | `int`, `char` ,  `bool`, `string`, `double`   |
+
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.insert(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler |
+`.insert(uint32_t replicaID, std::vector<T> values)` |  Add multiple element into the metadata by using the ID via the handler |
+`.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`.compare(GSetSB<T> handler, uint32_t setId)` | Winston Explain | 
+`.compare_sets(std::set<T> set1, std::set<T> set2)` | Compare two sets to see if they are a match |
+`.queryId() ` | Gets the payload of the metadata using ID | 
+`.queryPayloadwithID(uint32_t replicaID)` | Get the metadata by using the ID | 
+`.addExternalReplica(std::vector<GSetMetadata<T>> external_replica_metadata)` | Add as many metadatas into the handler  |
+`.updateLocalExternalPayload(std::vector<GSetSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+ `.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the ID of the metadata |
+`.setPayload(std::set<T> payload)` | Set the payload |
+`.queryPayload()` | Get all the elements inserted into the set |
+`.insert(T value) ` | Insert an element into the set |
+`.insert(std::vector<T> values) ` | Insert multiple elements into the set |
+
+<h4> Example </h4>
+
+```cpp
+crdt::state::GSetSB<uint32_t> handler1(1); //Represents Server 1
+crdt::state::GSetMetadata<uint32_t> replica1A(1,2); //id = 1, set =  {2}
+crdt::state::GSetMetadata<uint32_t> replica1B(1,4); //id = 1 --> First Conflict, set =  {4}
+crdt::state::GSetMetadata<uint32_t> replica1C(1,6); //id = 1 --> Second Conflict, set = {6}
+handler1.addExternalReplica({replica1A,replica1B,replica1C}); //Add to server and resolve Conflict
+for (int i: handler1.queryPayload()) cout << i; // Will print (2 4 6)   
 ```
 
 
