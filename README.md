@@ -141,13 +141,18 @@ crdt::state::PNCounterMetadata<uint32_t> replica1A(2,0); //id = 2
 crdt::state::PNCounterMetadata<uint32_t> replica1B(3,0); //id = 3
 replica1A.increasePayload(6);
 replica1A.increasePayload(7);
-replica1A.increasePayload(8); // Postive Counter -> (7 + 6 + 8) = 21
+replica1A.increasePayload(8); 
+// Postive Counter -> (7 + 6 + 8) = 21
 replica1B.increasePayload(6);
 replica1B.increasePayload(3);
-replica1B.increasePayload(5); // Postive Counter -> (6 + 3 + 5) = 14
-replica1A.decreasePayload(6); // Negative Counter --> 6, Counter = Positive Counter - Negative Counter --> (21) - (6) = 15
-replica1B.decreasePayload(5); // Negative Counter --> 5, Counter = Positive Counter - Negative Counter --> (14) - (5) = 9
-crdt::state::PNCounterMetadata<uint32_t> replica1C(2,200); //Conflict with replica1A because matching id = 2, Postive Counter -> 200
+replica1B.increasePayload(5); 
+// Postive Counter -> (6 + 3 + 5) = 14
+replica1A.decreasePayload(6); 
+// Negative Counter --> 6, Counter = Positive Counter - Negative Counter --> (21) - (6) = 15
+replica1B.decreasePayload(5); 
+// Negative Counter --> 5, Counter = Positive Counter - Negative Counter --> (14) - (5) = 9
+crdt::state::PNCounterMetadata<uint32_t> replica1C(2,200); 
+//Conflict with replica1A because matching id = 2, Postive Counter -> 200
 replica1C.decreasePayload(4);
 replica1C.decreasePayload(20);
 // Negative Counter --> (20 + 4) = 24,  Counter = Positive Counter - Negative Counter --> (200) - (24) = 185
