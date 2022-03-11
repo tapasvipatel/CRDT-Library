@@ -44,7 +44,7 @@ to server networks
 <h2 id="features"> 📃 Features </h2>
 This libary currently supports a combined of 12 CRDTs.
 
-## Counters
+<h3> Counters </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
