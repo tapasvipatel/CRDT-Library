@@ -102,24 +102,24 @@ All will converge to same state and have final value = 15
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
-| Handler | `PNCounterSB` | `increasePayload(uint32_t replicaID, T payload)`, `.decreasePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.serializeObject())`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<PNCounterSB> handlers)` | `int`, `char`,  `bool`, `double` |
+| Handler | `PNCounterSB` | `.increasePayload(uint32_t replicaID, T payload)`, `.decreasePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.serializeObject())`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<PNCounterSB> handlers)` | `int`, `char`,  `bool`, `double` |
 | Metadata | `GCounterMetadata` |   `.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayloadT()`,`.queryPayloadP()`, `.queryPayloadN()`, `.increasePayload(T positivePayload)`, `.decreasePayload(T negativePayload)`, `.setPayloadT(T payload)` , `.setPayloadP(T payload)` , `.setPayloadN(T payload)` | `int`, `char`,  `bool`, `double`  |
 
 
 | Supported Operations (Handler) | Functionality | 
 |----------|------------|
- `increasePayload(uint32_t replicaID, T payload)` | Increases metadata by the payload using the ID of the metadata |
+`.increasePayload(uint32_t replicaID, T payload)` | Increases metadata by the payload using the ID of the metadata |
 `.decreasePayload(uint32_t replicaID, T payload)` |  Decreases metadata by the payload using the ID of the metadata |
 `.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
 `.serializeObject())` | Tas Explain | 
 `.queryPayload()` | Get the payload of all the metadatas |
- `.queryPayloadwithID(uint32_t replicaID)` | Gets the payload of the metadata using ID | 
- `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)` | Add as many metadatas as you want to the handler. 
- `.updateLocalExternalPayload(std::vector<PNCounterSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+`.queryPayloadwithID(uint32_t replicaID)` | Gets the payload of the metadata using ID | 
+`.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)` | Add as many metadatas as you want to the handler. 
+`.updateLocalExternalPayload(std::vector<PNCounterSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
- `.serialize()`  | Tas Explain |
+`.serialize()`  | Tas Explain |
 `.serializeFile(std::string pathToFile)`  | Tas Explain |
 `.deserialize(std::string s)` | Tas Explain |
 `.deserializeFile(std::string jsonString)` | Tas Explain | 
@@ -206,7 +206,7 @@ Tas Explain | Tas Explain |
 `.insert(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler |
 `.insert(uint32_t replicaID, std::vector<T> values)` |  Add multiple element into the metadata by using the ID via the handler |
 `.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
-`.compare(GSetSB<T> handler, uint32_t setId)` | Winston Explain | 
+`.compare(GSetSB<T> handler, uint32_t setId)` | Checks if metadata exists in the handler via ID | 
 `.compare_sets(std::set<T> set1, std::set<T> set2)` | Compare two sets to see if they are a match |
 `.queryId() ` | Gets the payload of the metadata using ID | 
 `.queryPayloadwithID(uint32_t replicaID)` | Get the metadata by using the ID | 
@@ -215,7 +215,7 @@ Tas Explain | Tas Explain |
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
- `.serialize()`  | Tas Explain |
+`.serialize()`  | Tas Explain |
 `.serializeFile(std::string pathToFile)`  | Tas Explain |
 `.deserialize(std::string s)` | Tas Explain |
 `.deserializeFile(std::string jsonString)` | Tas Explain | 
@@ -235,6 +235,58 @@ crdt::state::GSetMetadata<uint32_t> replica1C(1,6); //id = 1 --> Second Conflict
 handler1.addExternalReplica({replica1A,replica1B,replica1C}); //Add to server and resolve Conflict
 for (int i: handler1.queryPayload()) cout << i; // Will print (2 4 6)   
 ```
+
+<h3> Or Set</h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `ORSetSB` | `.insert(uint32_t replicaID, T value)`, `.insert(uint32_t replicaID, std::vector<T> values)`, `.fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)`, `.updateInternalPayload()`, `.compare(ORSetSB<T> handler, uint32_t vectorId) `, `.compare_vectors(std::vector<T> vector1, std::vector<T> vector2)`, `.queryId()` , `.queryPayload()`, `.queryORSet()` , `.queryPayloadwithID(uint32_t replicaID)`, `.queryORSetwithID(uint32_t replicaID)` , `.addExternalReplica(std::vector<ORSetMetadata<T>> external_replica_metadata, std::unordered_map<uint32_t,std::vector<T>> removed_items = {})`, `.updateLocalExternalPayload(std::vector<ORSetSB> handlers,  std::unordered_map<uint32_t,std::vector<T>> removed_items = {})`  | `int`, `char` ,  `bool`, `string`, `double`  |
+| Metadata | `ORSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.setPayload(std::set<T> payload)`,`queryPayload()`, `.queryORSet() `,  `.insert(T value) ` , `.insert(std::vector<T> values)` , `.remove(T value)`  | `int`, `char` ,  `bool`, `string`, `double`   |
+
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.insert(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler |
+`.insert(uint32_t replicaID, std::vector<T> values)` |  Add multiple element into the metadata by using the ID via the handler |
+`.fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)` | Helper function to fix conflicts within handler |
+ `.compare(ORSetSB<T> handler, uint32_t vectorId) ` | Checks if metadata is found within the handler | 
+`.compare_sets(std::set<T> set1, std::set<T> set2)` | Compare two sets to see if they are a match |
+`.queryPayload()` | Gets the payload of the metadata using ID | 
+`.queryORSet()` | Winston Explain | 
+`.queryPayloadwithID(uint32_t replicaID)`| Get the metadata inside the handler via ID  |
+`.queryORSetwithID(uint32_t replicaID)` | Winston Explain |
+`.addExternalReplica(std::vector<ORSetMetadata<T>> external_replica_metadata, std::unordered_map<uint32_t,std::vector<T>> removed_items = {})` |  Add as many metadatas into the handler  |
+`.updateLocalExternalPayload(std::vector<ORSetSB> handlers,  std::unordered_map<uint32_t,std::vector<T>> removed_items = {})` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+ 
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the ID of the metadata |
+`.setPayload(std::set<T> payload)` | Set the payload |
+`.queryORSet() ` | Winston Explain |
+`.insert(T value) ` | Insert value into the set |
+`.insert(std::vector<T> values)` | Insert multiple values into the set |
+`.remove(T value)` | Remove value from the set |
+
+<h4> Example </h4>
+
+```cpp
+crdt::state::ORSetSB<uint32_t> handler(1); //Represents Server 1
+crdt::state::ORSetMetadata<uint32_t> replica1A(3,{1,2}); //id = 3 (Conflict) -> Set = {1,2}
+crdt::state::ORSetMetadata<uint32_t> replica1B(3,{3,4}); //id = 3 (Conflict) -> Set = {3,4}
+crdt::state::ORSetMetadata<uint32_t> replica1C(3,{5,6}); //id = 3 (Conflict) -> Set = {5,6}
+replica1A.remove(2); //id = 3 (Conflict) -> Set = {1}
+replica1B.remove(4); //id = 3 (Conflict) -> Set = {3}
+std::vector<uint32_t> removed_items1 = {3,4}; 
+handler.addExternalReplica({replica1A,replica1B,replica3C}, {{replica1A.queryId(),removed_items1}});
+for (int i: handler.queryORSetwithID(3)) cout << i;  //Converge and flix all conflicts
+// Will print (1, 5, 6)
+```
+
 
 
 <h2 id="showcase"> 🖼 Showcase - TrelloRDT </h2>
