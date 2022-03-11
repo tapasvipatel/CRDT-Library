@@ -58,7 +58,7 @@ the CRDT to the server, add the metadata to the handler.
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
 | Handler | `GCounterSB` | `.updatePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<GCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GCounterSB> handlers)` | `int`, `char` |
-| Metadata | `GCounterMetadata` |   `serialize()`,`serializeFile(std::string pathToFile)`, `deserialize(std::string s)`, `deserializeFile(std::string jsonString)`, `queryId()`, `queryPayload()`, `updatePayload(T payload)`, `setPayload(T payload)`    | `int`, `char` |
+| Metadata | `GCounterMetadata` |   `.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayload()`, `.updatePayload(T payload)`, `.setPayload(T payload)`    | `int`, `char` |
 
 
 | Supported Operations (Handler) | Functionality | 
@@ -73,14 +73,14 @@ the CRDT to the server, add the metadata to the handler.
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
- `serialize()`  | Tas Explain |
-`serializeFile(std::string pathToFile)`  | Tas Explain |
-`deserialize(std::string s)` | Tas Explain |
-`deserializeFile(std::string jsonString)` | Tas Explain | 
-`queryId()` | Get the ID of the metadata
-`queryPayload()` | Get the payload of the metadata
-`updatePayload(T payload)` | Update the payload of of the metadata
-`setPayload(T payload)`  | Set the payload of the metadata
+ `.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the ID of the metadata
+`.queryPayload()` | Get the payload of the metadata
+`.updatePayload(T payload)` | Update the payload of of the metadata
+`.setPayload(T payload)`  | Set the payload of the metadata
 
 <h4> Example </h4>
 
