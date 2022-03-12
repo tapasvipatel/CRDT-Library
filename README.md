@@ -536,6 +536,56 @@ for (int i: handler1.queryPayloadVector()) cout << i; // Will print (45, 40, 35,
 ```
 
 
+<h3> Grow-Only Map </h3>
+
+| Name | Identifier | Supported Operations | Data types supported | 
+|------|------------|----------|------------|
+| Handler | `GMapSB` | `.insert(uint32_t replicaID, K key, T value)`, `.updateIncrease(uint32_t replicaID, K key, T value)`,  `fixlocalConflict(K key, T value)`, `.queryPayload()`, `.updateInternalPayload(GMapMetadata<K,T> metadata , bool externalCall = false)` ,`.queryId()`, `.queryPayload(K key)`,  `.queryPayloadwithID(K mapId, K key) `, `queryAllKeys()`, `.queryAllValues()`, `.fixSameKeyConflict(GMapMetadata<K,T>& metadata)`, `.addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GMapSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `GMapMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayloadValue(K key) ` , `.insert(K key, T value)`, `updateIncrease(K key, T increment)` , `.updateDecrease(K key, T decrement)` , `.queryPayload() const`, `.getKey(T value)`  | `int`, `char` ,  `bool`, `string`, `double` |
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+ `.insert(uint32_t replicaID, K key, T value)` | Insert <Key,Value> into metadata via ID |
+ `.updateIncrease(uint32_t replicaID, K key, T value)` | Update the metadata <Key,Value> via ID |
+ `fixlocalConflict(K key, T value)`| Helper function used to fix conflicts |
+ `.queryPayload()` |  Returns all the maps within the handler |
+ `.updateInternalPayload(GMapMetadata<K,T> metadata , bool externalCall = false)` ,`.queryId()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+ `.queryPayload(K key)` | Returns all the values that matches the key passed into handler |
+ `.queryPayloadwithID(K mapId, K key) `| Return a specific map value via ID and key within handler |
+ `.queryAllKeys()`| Returns all the keys within the handler |
+ `.queryAllValues()` | Returns all the values within the handler |
+ `.fixSameKeyConflict(GMapMetadata<K,T>& metadata)`| Main Function to resolve Conflicts | 
+ `.addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)`| Add as many metadatas into the handler |
+ `.updateLocalExternalPayload(std::vector<GMapSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers  |
+
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryPayloadValue(K key) ` | Returns the value within the map given key |
+`.insert(K key, T value)` | Insert <Key,Value> pair into the map |
+`updateIncrease(K key, T increment)` | Increase the key by value of increment |
+`.updateDecrease(K key, T decrement)` | Decrease the key by value of decrement |
+`.queryPayload() const`| Returns the map |
+`.getKey(T value)` | Given the value, return the first key that matches |
+<h4> Example </h4>
+
+```cpp
+crdt::state::GMapSB<uint32_t, uint32_t> handler(1); //Represents Server 1
+crdt::state::GMapMetadata<uint32_t, uint32_t> replica1A(0,10,1); // id = 0, map = { (10 : 1) }
+crdt::state::GMapMetadata<uint32_t, uint32_t> replica1B(0,10,2);  //Conflict  id = 0, map = { (10 : 2) }
+crdt::state::GMapMetadata<uint32_t, uint32_t> replica1C(0,10,3); //Conflict id = 0, map = { (10 : 3) } 
+//Merging Policy for Map --> Greater Value Wins
+handler.addExternalReplica({replica1A, replica1B, replica1C }); //Add, fix and merge conflict
+for (int i: handler.queryAllKeys()) cout << i; //Will print(10)
+for (int i: handler.queryAllValues()) cout << i; //Will print(3)
+```
+
+
+
 
 
 
