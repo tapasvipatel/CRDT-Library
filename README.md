@@ -417,7 +417,7 @@ for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
 |------|------------|----------|----------|
-A multi-set where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are sorted from least to greatest` `+More memory efficient compared to LWW` | Rushab Explain | Takes the union |
+A multi-set where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are sorted from least to greatest` `+More memory efficient compared to LWW` | To obtain chat log. Each message sent between multiple users is saved in the set. Since no message can be deleted, the uncensored log can be obtained | Takes the union |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -462,6 +462,10 @@ for (int i: handler1.queryPayload()) cout << i;
 ```
 
 <h3 id="LWWSet"> Last-Write-Wins Multiset </h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A multi-set where allowing for insertion and deletion |   `+Allow duplicate elements` `+Support removing elements` `+Elements are sorted from least to greatest` `+More memory efficient compared to LWW` | For the same shopping cart shared between multiple users | The last time stamp wins |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -515,6 +519,10 @@ for (int i: handler1.queryPayload()) cout << i; //Should print (30, 40)
 ```
 <h3 id="Vector"> Grow-Only Vector</h3>
 
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A array where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are put in the order they come in` | To view the order at which users clock in at work. | First Write Wins |
+
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
 | Handler | `VectorSB` | `.push_back(uint32_t replicaID, T value)`, `.push_back(uint32_t replicaID,std::vector<T> v) `, `.fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)`, `.updateInternalPayload()`, `.compare(VectorSB<T> handler, uint32_t vectorId) `,`.compare_vectors(std::vector<T> vector1, std::vector<T> vector2)` , `.compare_vectors(std::vector<T> vector1, std::vector<T> vector2)`, `.queryId()` , `.queryPayload()` , `.queryPayloadwithID(uint32_t replicaID)` , `.addExternalReplica(std::vector<VectorMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<VectorSB> handlers)`  | `int`, `char` ,  `bool`, `string`, `double`  |
@@ -562,6 +570,10 @@ for (int i: handler.queryPayload()) cout << i; //Will print(1,2,3,2,4,5,6)
 
 <h3 id="GPQ"> Grow-Only PriorityQueue </h3>
 
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A priority_queue where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are sorted from greatest to least` `-Does not support random access` | To determine task priority | Takes the union |
+
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
 | Handler | `PriorityQueueSB` | `.fixlocalConflict(std::priority_queue<T> pq1, std::priority_queue<T> pq2)`, `.updateInternalPayload()`,  `queryId() `, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)` ,`.queryPayloadVector()`, `.convertPQtoVector(std::priority_queue<T> replica)`,  `.addExternalReplica(std::vector<PriorityQueueMetadata<T>> external_replica_metadata)`, `updateLocalExternalPayload(std::vector<PriorityQueueSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
@@ -571,7 +583,7 @@ for (int i: handler.queryPayload()) cout << i; //Will print(1,2,3,2,4,5,6)
 |----------|------------|
 `.fixlocalConflict(std::priority_queue<T> pq1, std::priority_queue<T> pq2)`| Helper function to fix conflicts between two priority_queues |
 `.updateInternalPayload()`| Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
-`queryId() `| Get the ID of the metadata |
+`.queryId() `| Get the ID of the metadata |
 `.queryPayload()`| Return a priority_queue that is a combined of all the metadata in the handler | 
 `.queryPayloadwithID(uint32_t replicaID)` | Return a priority_queue in the handler given the id |
 `.queryPayloadVector()`| Convert `.queryPayload()` to a vector and return. Useful because priority_queues do not have iterators |  
@@ -613,6 +625,10 @@ for (int i: handler1.queryPayloadVector()) cout << i; // Will print (45, 40, 35,
 
 <h3 id="GMAPA"> Grow-Only Map (Generic) </h3>
 
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A map where only <key,value> pairs are allowed to be added |   `-Keys have to be unique`  `-Does not support removing elements` `+Keys are sorted from least to greatest` | Photo collaborator application settings | Greater value wins |
+
 | Name | Identifier | Supported Operations | Data types supported | 
 |------|------------|----------|------------|
 | Handler | `GMapSB` | `.insert(uint32_t replicaID, K key, T value)`, `.updateIncrease(uint32_t replicaID, K key, T value)`,  `fixlocalConflict(K key, T value)`, `.queryPayload()`, `.updateInternalPayload(GMapMetadata<K,T> metadata , bool externalCall = false)` ,`.queryId()`, `.queryPayload(K key)`,  `.queryPayloadwithID(K mapId, K key) `, `queryAllKeys()`, `.queryAllValues()`, `.fixSameKeyConflict(GMapMetadata<K,T>& metadata)`, `.addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GMapSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
@@ -622,7 +638,7 @@ for (int i: handler1.queryPayloadVector()) cout << i; // Will print (45, 40, 35,
 |----------|------------|
  `.insert(uint32_t replicaID, K key, T value)` | Insert <Key,Value> into metadata via ID |
  `.updateIncrease(uint32_t replicaID, K key, T value)` | Update the metadata <Key,Value> via ID |
- `fixlocalConflict(K key, T value)`| Helper function used to fix conflicts |
+ `.fixlocalConflict(K key, T value)`| Helper function used to fix conflicts |
  `.queryPayload()` |  Returns all the maps within the handler |
  `.updateInternalPayload(GMapMetadata<K,T> metadata , bool externalCall = false)` ,`.queryId()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
  `.queryPayload(K key)` | Returns all the values that matches the key passed into handler |
@@ -661,6 +677,10 @@ for (int i: handler.queryAllValues()) cout << i; //Will print(3)
 
 <h3 id="GMAPB"> Grow-Only Map (String Focused) </h3>
 
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A map where only <key,value> pairs are allowed. |   `-Keys have to be unique` `+Keys do not have to be string` `-Value must be string`  `-Does not support other data structures except string` `+Keys are sorted from least to greatest` | Collaberated word document, where key = page number and value is the text on each page | Union of conflict strings |
+
 | Name | Identifier | Supported Operations | Data types supported (Key) | Data types supported (Value) |  
 |------|------------|----------|------------| ------------|
 | Handler | `GMapSBString` |  `.fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)`, `.updateInternalPayload(GMapMetadata<K,T> metadata, bool externalCall = false)`, `.queryId()`,  `.queryAllKeys()`, `.queryAllValues()`, `.queryPayloadwithID(K mapId, K key)` ,  `.fixSameKeyConflict(GMapMetadata<K,T>& metadata)`, `.addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GMapSBString> handlers)` | `int`, `char` , `bool`, `string`, `double`  | `string` |
@@ -697,6 +717,10 @@ for (int i: handler.queryAllValues()) cout << i; //Will print("Hello Hello Hello
 ```
 
 <h3 id="String"> Mutable String </h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A mutable string where the text can be modified |   `+Support deletion of characters at any position` `+Support insertion of characters at any position` `+Ordering of characters in the string do not change` `-Does not always give the intended merge results that end-user wants` | Any collaborator text editor applications | Resolve conflict based on index of characters |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
