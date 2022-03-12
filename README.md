@@ -8,7 +8,7 @@
 
 ------------------
 
-![](https://img.shields.io/badge/Version-Version%201.0-green) ![](https://img.shields.io/badge/Language-C%2B%2B%2011-brightgreen) ![](https://img.shields.io/badge/Build-Passing-green) ![](https://img.shields.io/badge/Framework-SFML%2C%20TGUI-blue) ![](https://img.shields.io/badge/Pipeline-Catch2-orange) ![](https://img.shields.io/badge/Operating%20System-Ubuntu%2020.04-yellow) 
+![](https://img.shields.io/badge/Version-Version%201.0-green) ![](https://img.shields.io/badge/Language-C%2B%2B%2011-brightgreen) ![](https://img.shields.io/badge/Build-Passing-green) ![](https://img.shields.io/badge/Graphics_Framework-SFML%2C%20TGUI-blue) ![](https://img.shields.io/badge/Pipeline-Catch2-orange) ![](https://img.shields.io/badge/Operating%20System-Ubuntu%2020.04-yellow) 
 
 <div align="center">
   <h3>Table of Contents</h3>
@@ -23,6 +23,8 @@
   <a href="#showcase">Application </a>
   — 
   <a href="#UnitTesting">CI/CD Framework</a>
+  — 
+  <a href="#Contribute">Contribute</a>
   — 
   <a href="#license">License</a>
 </div>
@@ -47,13 +49,54 @@ for anyone wanted to create an application using CRDTs in C++ enviroment.
 
 
 <h2 id="setup"> ⚙ Set Up </h2>
-This libary has only been validated on Linux OS, and support for Windows/MAC will be provided at a later time. To set up 
+This libary has only been validated on Linux OS, and support for Windows/MAC will be provided at a later time. To use the libary itself:
+
+**Tas Explain.**
+
+To launch the Trello-Clone:
+
+**Tas Explain.**
 
 <h2 id="guide"> 🐕‍🦺 Guide for CRDT data types</h2>
-Each CRDT class has a handler and a metadata class. On each of your server, you create the handler once. To actually instatiate the CRDT data structure use the metadata. To add
-the CRDT to the server, add the metadata to the handler. 
 
-<h3> Grow Only Counter </h3>
+```
+Each CRDT class has a handler and a metadata class. On each of your server, you create the handler once. 
+To actually instatiate the CRDT data structure use the metadata. 
+To add the CRDT to the server, add the metadata to the handler. 
+```
+<div align="center">
+  <h3>CRDTs Supported</h3>
+  <a href="#GrowCounter">Grow Only Counter</a>
+  — 
+  <a href="#PNCounter">Positive Negative Counter</a>
+  — 
+  <a href="#OperationCounter">Operation Grow Counter</a>
+  — 
+  <a href="#GSet">Grow Only Set</a>
+  — 
+  <a href="#OrSet">Or-Set</a>
+  — 
+  <a href="#2PSet">Two-Phasee Set</a>
+   — 
+  <a href="#GMS">Grow-Only Multiset</a>
+   — 
+  <a href="#LWWSet">Last-Write-Wins Multiset</a>
+   — 
+  <a href="#Vector">Grow-Only Vector</a>
+   — 
+  <a href="#GPQ">Grow-Only PriorityQueue</a>
+   — 
+  <a href="#GMAPA">Grow-Only Map (Generic)</a>
+   — 
+  <a href="#GMAPB">Grow-Only Map (String Focused)</a>
+   — 
+  <a href="#String">Mutable String</a>
+</div>
+<hr>
+
+
+
+<h3 id="GrowCounter"> Grow Only Counter </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -98,7 +141,7 @@ All will converge to same state and have final value = 15
 */
 ```
 
-<h3> Positive Negative Counter </h3>
+<h3 id="PNCounter"> Positive Negative Counter </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -169,7 +212,7 @@ Sum = 176+9 = 185
 */
 ```
 
-<h3> Operation Grow Counter</h3>
+<h3 id="OperationCounter"> Operation Grow Counter</h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -193,7 +236,7 @@ Tas Explain | Tas Explain |
 //Tas Explain
 ```
 
-<h3> Grow-Only Set</h3>
+<h3 id="GSet"> Grow-Only Set</h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -236,7 +279,7 @@ handler1.addExternalReplica({replica1A,replica1B,replica1C}); //Add to server an
 for (int i: handler1.queryPayload()) cout << i; // Will print (2 4 6)   
 ```
 
-<h3> Or-Set</h3>
+<h3 id="OrSet"> Or-Set</h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -288,7 +331,7 @@ for (int i: handler.queryORSetwithID(3)) cout << i;  //Converge and flix all con
 // Will print (1, 5, 6)
 ```
 
-<h3> Two-Phase Set </h3>
+<h3 id="2PSet"> Two-Phase Set </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -342,7 +385,7 @@ Phase2Set = {3,4}
 for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
 ```
 
-<h3> Grow-Only Multiset </h3>
+<h3 id="GMS"> Grow-Only Multiset </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -386,7 +429,7 @@ for (int i: handler1.queryPayload()) cout << i;
 // Will print (5, 20 ,25 , 30 , 30 , 35, 40, 45}
 ```
 
-<h3> Last-Write-Wins Multiset </h3>
+<h3 id="LWWSet"> Last-Write-Wins Multiset </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -438,7 +481,7 @@ handler1.insert(0,6,{30,30}); // id = 0, time = 6, multiset = {30,30,40}
 handler1.remove(0,8,30); // id = 0, time = 8, multiset = {30,40}
 for (int i: handler1.queryPayload()) cout << i; //Should print (30, 40)
 ```
-<h3> Grow-Only Vector</h3>
+<h3 id="Vector"> Grow-Only Vector</h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -485,7 +528,7 @@ handler.addExternalReplica({replica1A,replica1B,replica1C}); //Insert into handl
 for (int i: handler.queryPayload()) cout << i; //Will print(1,2,3,2,4,5,6)
 ```
 
-<h3> Grow-Only PriorityQueue </h3>
+<h3 id="GPQ"> Grow-Only PriorityQueue </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -536,7 +579,7 @@ for (int i: handler1.queryPayloadVector()) cout << i; // Will print (45, 40, 35,
 ```
 
 
-<h3> Grow-Only Map (Generic) </h3>
+<h3 id="GMAPA"> Grow-Only Map (Generic) </h3>
 
 | Name | Identifier | Supported Operations | Data types supported | 
 |------|------------|----------|------------|
@@ -584,7 +627,7 @@ for (int i: handler.queryAllKeys()) cout << i; //Will print(10)
 for (int i: handler.queryAllValues()) cout << i; //Will print(3)
 ```
 
-<h3> Grow-Only Map (String Focused) </h3>
+<h3 id="GMAPB"> Grow-Only Map (String Focused) </h3>
 
 | Name | Identifier | Supported Operations | Data types supported (Key) | Data types supported (Value) |  
 |------|------------|----------|------------| ------------|
@@ -621,7 +664,7 @@ for (int i: handler.queryAllKeys()) cout << i; //Will print(10)
 for (int i: handler.queryAllValues()) cout << i; //Will print("Hello Hello HelloMelo")
 ```
 
-<h3> Mutable String </h3>
+<h3 id="String"> Mutable String </h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -660,9 +703,12 @@ for (int i: handler.queryAllValues()) cout << i; //Will print("Hello Hello Hello
 
 ```cpp
 crdt::operation::StringOB<std::string> handler1(1);
-crdt::operation::StringMetaData<std::string> replica1A(5, "Hello    World"); //id = 5, string = "Hello    World"
-crdt::operation::StringMetaData<std::string> replica1B(5, "Hello Sun      "); // Conflict id = 5, string = "Hello Sun      ")
-handler1.addExternalReplica({replica1A,replica1B}); //Add to handler1, handler1, fix conflict and merge
+crdt::operation::StringMetaData<std::string> replica1A(5, "Hello    World"); 
+//id = 5, string = "Hello    World"
+crdt::operation::StringMetaData<std::string> replica1B(5, "Hello Sun      "); 
+// Conflict id = 5, string = "Hello Sun      ")
+handler1.addExternalReplica({replica1A,replica1B}); 
+//Add to handler1, handler1, fix conflict and merge
 cout << handler1.queryPayload(); //Will print ("Hello Sun World")
 ```
 
@@ -673,6 +719,22 @@ cout << handler1.queryPayload(); //Will print ("Hello Sun World")
 <h2 id="showcase"> 🖼 Showcase - TrelloRDT </h2>
 
 <h2 id="UnitTesting">✅ CI/CD Integration - Catch2 </h2>
+For our testing framework and Github workflow we are using Catch2. All our unit tests can be found in the directory:
+
+`/tests/test.cpp`. If you notice any issues, please leave an Issue Request. 
+If you want to contribute any new test cases, please add the test case in and create a PR.
+
+
+<h2 id="Contribute">🤝 Contribute </h2>
+Have an data structure in mind such as a binary tree or 2D arrays and want to attempt to make it into a CRDT? No open-source libary
+can grow without the help of the community and would love your contributions in helping to add more CRDTs to this libary. To add a new
+CRDT to this libary, go to either: 
+
+```/src/operation_based``` 
+or `/src/state_based`  and create your CRDT. Remember to add the CRDT in the 
+`/src/CrdtObject.hpp`. Once you are done create some unit tests for it under `/tests/test.cpp` to validate your results. 
+Then leave a PR and if everything looks good, it will get merged into the repository. 
+We greatly apperciate anyone who contributes or leaves feedback. 
 
 <h2 id="license"> 📝 License </h2>
 
