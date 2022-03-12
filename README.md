@@ -608,7 +608,6 @@ MetaData is the same as Generic Map
 `.updateLocalExternalPayload(std::vector<GMapSBString> handlers)` |  Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers  |
 
 
-
 <h4> Example </h4>
 
 ```cpp
@@ -622,6 +621,50 @@ for (int i: handler.queryAllKeys()) cout << i; //Will print(10)
 for (int i: handler.queryAllValues()) cout << i; //Will print("Hello Hello HelloMelo")
 ```
 
+<h3> Mutable String </h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `StringOB` | `.fixConflict(std::string conflictA, std::string conflictB)`, `.updateInternalPayload()`,  `queryId() `, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)` ,`.insert(uint32_t replicaID, int pos, std::string payload)`, `.clear(uint32_t replicaID)`, `.erase(uint32_t replicaID, int startIndex, int endIndex)`, `.setStringTo(uint32_t replicaID, std::string payload)` , `.addExternalReplica(std::vector<StringMetaData<T>> external_replica_metadata)` , `.updateLocalExternalPayload(std::vector<StringOB> handlers)` | `string` |
+| Metadata | `StringMetaData` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryPayload()` , `.setPayload(std::string payload)`, `.insert(int pos, std::string payload)`, `.clear()` , `.erase(int startIndex, int endIndex)`  | `string`    |
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+ `.fixConflict(std::string conflictA, std::string conflictB)` | Helper function for handler to fix conflicts between metadata
+ `.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+ `queryId() ` | Get the ID of the metadata | 
+`.queryPayload()` | Returns the merged variant of all the strings in the handler |
+ `.queryPayloadwithID(uint32_t replicaID)` | Get the string metadata given ID |
+ `.insert(uint32_t replicaID, int pos, std::string payload)`| Insert text into the string metadata given position | 
+ `.clear(uint32_t replicaID)` | Clear all the strings in the handler |
+ `.erase(uint32_t replicaID, int startIndex, int endIndex)` | Erase text from the metadata in the handler given position |
+ `.setStringTo(uint32_t replicaID, std::string payload)` | Update the metadata in handler to new string value |
+ `.addExternalReplica(std::vector<StringMetaData<T>> external_replica_metadata)` | Add as many metadatas into the handler |
+ `.updateLocalExternalPayload(std::vector<StringOB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers | 
+
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the id of the String |
+`.queryPayload()` | Return the string |
+`.setPayload(std::string payload)` | Initialize the string to the intended value |
+`.insert(int pos, std::string payload)` | Insert text into the string given position |
+`.clear()` | Clear the entire string |
+`.erase(int startIndex, int endIndex)` | Erase text in the sting given position |
+
+<h4> Example </h4>
+
+```cpp
+crdt::operation::StringOB<std::string> handler1(1);
+crdt::operation::StringMetaData<std::string> replica1A(5, "Hello    World"); //id = 5, string = "Hello    World"
+crdt::operation::StringMetaData<std::string> replica1B(5, "Hello Sun      "); // Conflict id = 5, string = "Hello Sun      ")
+handler1.addExternalReplica({replica1A,replica1B}); //Add to handler1, handler1, fix conflict and merge
+cout << handler1.queryPayload(); //Will print ("Hello Sun World")
+```
 
 
 
