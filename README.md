@@ -98,6 +98,11 @@ To add the CRDT to the server, add the metadata to the handler.
 
 <h3 id="GrowCounter"> Grow Only Counter </h3>
 
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A counter that can only increase upwards. |  `+More memory efficient compared to other counters` `+Better performance compared to other counters` `-Does not support decrease operation` | Keeping track of everyone's ages as age can never go downwards. | Pick the greater value to resolve conflicts |
+
+
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
 | Handler | `GCounterSB` | `.updatePayload(uint32_t replicaID, T payload)`, `.updateInternalPayload()`, `.queryId()`, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<GCounterMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GCounterSB> handlers)` | `int`, `char`,  `bool` , `double` |
@@ -142,6 +147,10 @@ All will converge to same state and have final value = 15
 ```
 
 <h3 id="PNCounter"> Positive Negative Counter </h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A counter that can go upwards and downwards |  `+Less memory efficient compared to other counters` `+Worst performance compared to other counters` `-Supports both increase and decrease increments` | User is modifying Reddit Comment thread both on his laptop and phone at the same time | Take the max of the positive counter. Take the max of the negative counter. The payload is the sum of the positive and negative counter. 
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -214,6 +223,13 @@ Sum = 176+9 = 185
 
 <h3 id="OperationCounter"> Operation Grow Counter</h3>
 
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+Tas Explain |  `Tas Explain` | Tas Explain | Tas Explain |
+
+
+
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
 | Handler | `CounterOB` | Tas Explain | `int`, `char` ,  `bool`, `double` |
@@ -237,6 +253,10 @@ Tas Explain | Tas Explain |
 ```
 
 <h3 id="GSet"> Grow-Only Set</h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A set that only elements can be added to it |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `-Cannot remove an added element` `+Better performance and more memory efficient compared to other sets` | Winston Explain | Take the union of the conflicted sets |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -280,6 +300,10 @@ for (int i: handler1.queryPayload()) cout << i; // Will print (2 4 6)
 ```
 
 <h3 id="OrSet"> Or-Set</h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A set allowing to insert and remove elements |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `+Can remove elments` `-Worst performance and more memory efficient compared to other sets` | Winston Explain | Winston Explain |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -332,6 +356,10 @@ for (int i: handler.queryORSetwithID(3)) cout << i;  //Converge and flix all con
 ```
 
 <h3 id="2PSet"> Two-Phase Set </h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A set allowing to insert and remove elements |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `-Once an element is removed, cannot be added back in again` `+Average performance and more memory efficient compared to other sets` | A MMORPG where the set holds user information. If the user is banned, cannot be added back in again. | Takes the union |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -386,6 +414,10 @@ for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
 ```
 
 <h3 id="GMS"> Grow-Only Multiset </h3>
+
+| What is it? | Capability | Practical UseCases | Merging Policy | 
+|------|------------|----------|----------|
+A multi-set where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are sorted from least to greatest` `+More memory efficient compared to LWW` | Rushab Explain | Takes the union |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
