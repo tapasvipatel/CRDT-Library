@@ -485,6 +485,57 @@ handler.addExternalReplica({replica1A,replica1B,replica1C}); //Insert into handl
 for (int i: handler.queryPayload()) cout << i; //Will print(1,2,3,2,4,5,6)
 ```
 
+<h3> Grow-Only PriorityQueue </h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `PriorityQueueSB` | `.fixlocalConflict(std::priority_queue<T> pq1, std::priority_queue<T> pq2)`, `.updateInternalPayload()`,  `queryId() `, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)` ,`.queryPayloadVector()`, `.convertPQtoVector(std::priority_queue<T> replica)`,  `.addExternalReplica(std::vector<PriorityQueueMetadata<T>> external_replica_metadata)`, `updateLocalExternalPayload(std::vector<PriorityQueueSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `PriorityQueueMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.push(T value)` , `.push(std::vector<T> value)`, `.setPayload(std::priority_queue<T> payload)` , `.queryPayload()`  | `int`, `char` ,  `bool`, `string`, `double`   |
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.fixlocalConflict(std::priority_queue<T> pq1, std::priority_queue<T> pq2)`| Helper function to fix conflicts between two priority_queues |
+`.updateInternalPayload()`| Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`queryId() `| Get the ID of the metadata |
+`.queryPayload()`| Return a priority_queue that is a combined of all the metadata in the handler | 
+`.queryPayloadwithID(uint32_t replicaID)` | Return a priority_queue in the handler given the id |
+`.queryPayloadVector()`| Convert `.queryPayload()` to a vector and return. Useful because priority_queues do not have iterators |  
+`.convertPQtoVector(std::priority_queue<T> replica)`| Converts the passed in priority_queue in vector data stucture added an iterator |
+`.addExternalReplica(std::vector<PriorityQueueMetadata<T>> external_replica_metadata)`| Add as many metadatas into the handler |
+`updateLocalExternalPayload(std::vector<PriorityQueueSB> handlers)`| Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers | 
+
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the id of the multiset |
+`.push(T value)` | Insert a value inside the priority_queue |
+`.push(std::vector<T> value)` | Insert multiple values inside the priority_queue |
+`.setPayload(std::priority_queue<T> payload)` | Initialize the priority_queue |
+`.queryPayload()` | Return the priority_queue |
+<h4> Example </h4>
+
+```cpp
+crdt::state::PriorityQueueSB<uint32_t> handler1(1);
+crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0,5); //id = 0, priority_queue = {5}
+crdt::state::PriorityQueueMetadata<uint32_t> replica1B(0);  //Conflict id = 0, priority_queue = {}
+crdt::state::PriorityQueueMetadata<uint32_t> replica1C(0); //Conflict id = 0, priority_queue = {}
+replica1A.push(20); //id = 0, priority_queue = {20,5}
+replica1A.push(25); //id = 0, priority_queue = {25,20,5}
+replica1B.push(30); //id = 0, priority_queue = {30}
+replica1B.push(35); //id = 0, priority_queue = {35,30}
+replica1C.push(40); //id = 0, priority_queue = {40}
+replica1C.push(45); //id = 0, priority_queue = {45,40}
+replica1C.push(30); //id = 0, priority_queue = {45,40,30}
+replica1C.push(30); //id = 0, priority_queue = {45,40,30,30}
+handler1.addExternalReplica({replica1A,replica1B,replica1C}); //Add to handler1, handler1, fix conflict and merge
+for (int i: handler1.queryPayloadVector()) cout << i; // Will print (45, 40, 35, 30, 30, 25, 20, 5)
+```
+
+
 
 
 
