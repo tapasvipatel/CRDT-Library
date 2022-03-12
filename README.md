@@ -236,7 +236,7 @@ handler1.addExternalReplica({replica1A,replica1B,replica1C}); //Add to server an
 for (int i: handler1.queryPayload()) cout << i; // Will print (2 4 6)   
 ```
 
-<h3> Or Set</h3>
+<h3> Or-Set</h3>
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -294,6 +294,59 @@ for (int i: handler.queryORSetwithID(3)) cout << i;  //Converge and flix all con
 |------|------------|----------|------------|
 | Handler | `TwoPSetSB` | `.insert(uint32_t replicaID, T value)`, `.insert(uint32_t replicaID, std::vector<T> values)`, `.updateInternalPayload()`, `queryId()`, `queryPayload() `, `.queryTombstone()`, `.queryTwoPSet()` , `.lookup(T e)`, `.lookupwithID(T e, uint32_t replicaID)` , `.queryTwoPSetwithID(uint32_t replicaID)`, `addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)` , `updateLocalExternalPayload(std::vector<TwoPSetSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
 | Metadata | `TwoPSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.setPayload(std::set<T> payload)`,`.setTombstone(std::set<T> tombstone)` ,`.queryPayload()`,`.queryTombstone()` , `.insert(T value)` , `.insert(std::vector<T> values)` , `.remove(T value)`  | `int`, `char` ,  `bool`, `string`, `double`   |
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.insert(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler |
+`.insert(uint32_t replicaID, std::vector<T> values)` |  Add multiple element into the metadata by using the ID via the handler |
+`.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`queryId()` | Get the ID of the metadata | 
+`.queryPayload()` | Gets all the first-phase sets in handler | 
+`.queryTombstone()` | Gets all the second-phase sets in handler | 
+`.queryTwoPSet()` | Gets the payload of all the metadatas in handler | 
+`.lookupwithID(T e, uint32_t replicaID)` | See if metadata exists via ID |
+`.queryTwoPSetwithID(uint32_t replicaID)` | Return specific metadata in the handler |
+`addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)` | Add as many metadatas into the handler |
+`updateLocalExternalPayload(std::vector<TwoPSetSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers  |
+
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()`|  Get the ID of the metadata  |
+`.setPayload(std::set<T> payload)`| Insert the first-phase set into the 2P set |
+`.setTombstone(std::set<T> tombstone)` | Insert the second-phase set into the 2P set |
+`.queryPayload()`, | Return the first-phase set |
+`.queryTombstone()` | Return the second-phase set | 
+`.insert(T value)` | Insert a element into the set |
+`.insert(std::vector<T> values)` | Insert multiple values into the set |
+`.remove(T value)` | Remove element from the set |
+
+```cpp
+crdt::state::TwoPSetSB<uint32_t> handler(1); //Represents Server 1
+crdt::state::TwoPSetMetadata<uint32_t> replica1A(3,{1,2,3}); //id = 3 (Conflict) -> Phase1Set = {1,2,3}
+crdt::state::TwoPSetMetadata<uint32_t> replica1B(3,{2,3,4}); //id = 3 (Conflict) -> Phase1Set = {2,3,4}
+crdt::state::TwoPSetMetadata<uint32_t> replica1C(3,{4,5,6}); //id = 3 (Conflict) -> Phase1Set = {4,5,6}
+replica2A.remove(3); //id = 3 (Conflict) -> Phase1Set = {1,2,3} , Phase2Set = {3}
+replica2C.remove(4); //id = 3 (Conflict) ->  Phase1Set = {2,3,4}, Phase2Set = {4}
+handler.addExternalReplica({replica2A,replica2B,replica2C});
+/*
+For id = 3 ->
+Phase1Set = {1,2,3,4,5,6}
+Phase2Set = {3,4}
+*/
+for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
+```
+
+<h3> Grow-Only Multiset </h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `MultiSetSB` | `.insert(uint32_t replicaID, T value)`, `.insert(uint32_t replicaID, std::vector<T> values)`, `.updateInternalPayload()`, `queryId()`, `queryPayload() `, `.queryTombstone()`, `.queryTwoPSet()` , `.lookup(T e)`, `.lookupwithID(T e, uint32_t replicaID)` , `.queryTwoPSetwithID(uint32_t replicaID)`, `addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)` , `updateLocalExternalPayload(std::vector<TwoPSetSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `MultiSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.setPayload(std::set<T> payload)`,`.setTombstone(std::set<T> tombstone)` ,`.queryPayload()`,`.queryTombstone()` , `.insert(T value)` , `.insert(std::vector<T> values)` , `.remove(T value)`  | `int`, `char` ,  `bool`, `string`, `double`   |
 
 | Supported Operations (Handler) | Functionality | 
 |----------|------------|
