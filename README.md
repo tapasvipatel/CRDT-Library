@@ -536,7 +536,7 @@ for (int i: handler1.queryPayloadVector()) cout << i; // Will print (45, 40, 35,
 ```
 
 
-<h3> Grow-Only Map </h3>
+<h3> Grow-Only Map (Generic) </h3>
 
 | Name | Identifier | Supported Operations | Data types supported | 
 |------|------------|----------|------------|
@@ -582,6 +582,44 @@ crdt::state::GMapMetadata<uint32_t, uint32_t> replica1C(0,10,3); //Conflict id =
 handler.addExternalReplica({replica1A, replica1B, replica1C }); //Add, fix and merge conflict
 for (int i: handler.queryAllKeys()) cout << i; //Will print(10)
 for (int i: handler.queryAllValues()) cout << i; //Will print(3)
+```
+
+<h3> Grow-Only Map (String Focused) </h3>
+
+| Name | Identifier | Supported Operations | Data types supported (Key) | Data types supported (Value) |  
+|------|------------|----------|------------| ------------|
+| Handler | `GMapSBString` |  `.fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)`, `.updateInternalPayload(GMapMetadata<K,T> metadata, bool externalCall = false)`, `.queryId()`,  `.queryAllKeys()`, `.queryAllValues()`, `.queryPayloadwithID(K mapId, K key)` ,  `.fixSameKeyConflict(GMapMetadata<K,T>& metadata)`, `.addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<GMapSBString> handlers)` | `int`, `char` , `bool`, `string`, `double`  | `string` |
+
+```cpp
+MetaData is the same as Generic Map
+```
+
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)` | Helper function to fix conflcits between strings in metadata |
+`.updateInternalPayload(GMapMetadata<K,T> metadata, bool externalCall = false)` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`.queryId()` | Get the id of the handler |
+`.queryAllKeys()` | Returns all the keys within the handler |
+`.queryAllValues()` | Returns all the values within the handler |
+`.queryPayloadwithID(K mapId, K key)` |  Return a specific map value via ID and key within handler |
+`.fixSameKeyConflict(GMapMetadata<K,T>& metadata)` | Main Function to resolve Conflicts | 
+`.addExternalReplica(std::vector<GMapMetadata<K,T>> external_replica_metadata)` |  Add as many metadatas into the handler |
+`.updateLocalExternalPayload(std::vector<GMapSBString> handlers)` |  Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers  |
+
+
+
+<h4> Example </h4>
+
+```cpp
+crdt::state::GMapSB<uint32_t, uint32_t> handler(1); //Represents Server 1
+crdt::state::GMapMetadata<uint32_t, std::string> replica1A(0,10,"Hello"); // id = 0, map = { (10 : "Hello") }
+crdt::state::GMapMetadata<uint32_t, std::string> replica1B(0,10,"HelloMelo"); // Conflict  id = 0, map = { (10 : "HelloMelo") }
+crdt::state::GMapMetadata<uint32_t, std::string> replica1C(0,10,"Hello Hello"); // Conflict id = 0, map = { (10 : "Hello Hello") } 
+//Merging Policy for Map --> Union to resolve conflict
+handler.addExternalReplica({replica1A, replica1B, replica1C }); //Add, fix and merge conflict
+for (int i: handler.queryAllKeys()) cout << i; //Will print(10)
+for (int i: handler.queryAllValues()) cout << i; //Will print("Hello Hello HelloMelo")
 ```
 
 
