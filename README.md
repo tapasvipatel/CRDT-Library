@@ -324,6 +324,7 @@ for (int i: handler.queryORSetwithID(3)) cout << i;  //Converge and flix all con
 `.insert(T value)` | Insert a element into the set |
 `.insert(std::vector<T> values)` | Insert multiple values into the set |
 `.remove(T value)` | Remove element from the set |
+<h4> Example </h4>
 
 ```cpp
 crdt::state::TwoPSetSB<uint32_t> handler(1); //Represents Server 1
@@ -345,22 +346,21 @@ for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
-| Handler | `MultiSetSB` | `.insert(uint32_t replicaID, T value)`, `.insert(uint32_t replicaID, std::vector<T> values)`, `.updateInternalPayload()`, `queryId()`, `queryPayload() `, `.queryTombstone()`, `.queryTwoPSet()` , `.lookup(T e)`, `.lookupwithID(T e, uint32_t replicaID)` , `.queryTwoPSetwithID(uint32_t replicaID)`, `addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)` , `updateLocalExternalPayload(std::vector<TwoPSetSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
-| Metadata | `MultiSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.setPayload(std::set<T> payload)`,`.setTombstone(std::set<T> tombstone)` ,`.queryPayload()`,`.queryTombstone()` , `.insert(T value)` , `.insert(std::vector<T> values)` , `.remove(T value)`  | `int`, `char` ,  `bool`, `string`, `double`   |
+| Handler | `MultiSetSB` | `.fixlocalConflict(std::multiset<T> multisetA, std::multiset<T> multisetB)`, `.insert(uint32_t replicaID, std::vector<T> value)`, `.updateInternalPayload()`,  `queryId() `, `.queryPayload()`, `.queryPayloadwithID(uint32_t replicaID)` , `.addExternalReplica(std::vector<MultiSetMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<MultiSetSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `MultiSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.insert(T value)` , `.setPayload(std::multiset<T> payload)` , `.queryPayload()`  | `int`, `char` ,  `bool`, `string`, `double`   |
 
 | Supported Operations (Handler) | Functionality | 
 |----------|------------|
-`.insert(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler |
-`.insert(uint32_t replicaID, std::vector<T> values)` |  Add multiple element into the metadata by using the ID via the handler |
-`.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
-`queryId()` | Get the ID of the metadata | 
-`.queryPayload()` | Gets all the first-phase sets in handler | 
-`.queryTombstone()` | Gets all the second-phase sets in handler | 
-`.queryTwoPSet()` | Gets the payload of all the metadatas in handler | 
-`.lookupwithID(T e, uint32_t replicaID)` | See if metadata exists via ID |
-`.queryTwoPSetwithID(uint32_t replicaID)` | Return specific metadata in the handler |
-`addExternalReplica(std::vector<TwoPSetMetadata<T>> external_replica_metadata)` | Add as many metadatas into the handler |
-`updateLocalExternalPayload(std::vector<TwoPSetSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers  |
+ `.fixlocalConflict(std::multiset<T> multisetA, std::multiset<T> multisetB)`| Fix Conflict between two multisets |
+ `.insert(uint32_t replicaID, std::vector<T> value)` | Insert a value into the metadata given the ID |
+ `.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+ `queryId() ` | Get the ID of the metadata |
+ `.queryPayload()` | Return a multiset that is a combined of all the metadata in the handler |
+ `.queryPayloadwithID(uint32_t replicaID)` | Return a multiset in the handler given the id | 
+ `.addExternalReplica(std::vector<MultiSetMetadata<T>> external_replica_metadata)`| Add as many metadatas into the handler |
+ `.updateLocalExternalPayload(std::vector<MultiSetSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+
+
 
 
 | Supported Operations (Metadata) | Functionality | 
@@ -369,31 +369,24 @@ for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
 `.serializeFile(std::string pathToFile)`  | Tas Explain |
 `.deserialize(std::string s)` | Tas Explain |
 `.deserializeFile(std::string jsonString)` | Tas Explain | 
-`.queryId()`|  Get the ID of the metadata  |
-`.setPayload(std::set<T> payload)`| Insert the first-phase set into the 2P set |
-`.setTombstone(std::set<T> tombstone)` | Insert the second-phase set into the 2P set |
-`.queryPayload()`, | Return the first-phase set |
-`.queryTombstone()` | Return the second-phase set | 
-`.insert(T value)` | Insert a element into the set |
-`.insert(std::vector<T> values)` | Insert multiple values into the set |
-`.remove(T value)` | Remove element from the set |
-
-
+`.queryId()` | Get the id of the multiset |
+`.insert(T value)` | Insert a value inside the multiset |
+`.setPayload(std::multiset<T> payload)` | Initialize the multiset |
+`.queryPayload()` | Return the multiset |
+<h4> Example </h4>
 
 ```cpp
-crdt::state::TwoPSetSB<uint32_t> handler(1); //Represents Server 1
-crdt::state::TwoPSetMetadata<uint32_t> replica1A(3,{1,2,3}); //id = 3 (Conflict) -> Phase1Set = {1,2,3}
-crdt::state::TwoPSetMetadata<uint32_t> replica1B(3,{2,3,4}); //id = 3 (Conflict) -> Phase1Set = {2,3,4}
-crdt::state::TwoPSetMetadata<uint32_t> replica1C(3,{4,5,6}); //id = 3 (Conflict) -> Phase1Set = {4,5,6}
-replica2A.remove(3); //id = 3 (Conflict) -> Phase1Set = {1,2,3} , Phase2Set = {3}
-replica2C.remove(4); //id = 3 (Conflict) ->  Phase1Set = {2,3,4}, Phase2Set = {4}
-handler.addExternalReplica({replica2A,replica2B,replica2C});
-/*
-For id = 3 ->
-Phase1Set = {1,2,3,4,5,6}
-Phase2Set = {3,4}
-*/
-for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
+crdt::state::MultiSetSB<uint32_t> handler1(1); //Represents Server 1
+crdt::state::MultiSetMetadata<uint32_t> replica1A(0,5); //id = 0, multiset = {5}
+crdt::state::MultiSetMetadata<uint32_t> replica1B(0); //conflict id = 0, multiset = {}
+crdt::state::MultiSetMetadata<uint32_t> replica1C(0); //conflict id = 0, multiset = {}
+replica1A.insert({20,25,30}); //id = 0, multiset = {5,20,25,30}
+replica1B.insert({30,35}); //id = 0, multiset = {30,35}
+replica1C.insert({40,45,30,30}); //id = 0, multiset = {30,30,40,45}
+handler1.addExternalReplica({replica1A,replica1B,replica1C});
+std::multiset<uint32_t> test1 = {5,20,25,30,30,35,40,45};
+for (int i: handler1.queryPayload()) cout << i; 
+// Will print (5, 20 ,25 , 30 , 30 , 35, 40, 45}
 ```
 
 
