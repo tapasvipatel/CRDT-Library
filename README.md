@@ -438,6 +438,53 @@ handler1.insert(0,6,{30,30}); // id = 0, time = 6, multiset = {30,30,40}
 handler1.remove(0,8,30); // id = 0, time = 8, multiset = {30,40}
 for (int i: handler1.queryPayload()) cout << i; //Should print (30, 40)
 ```
+<h3> Grow-Only Vector</h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `VectorSB` | `.push_back(uint32_t replicaID, T value)`, `.push_back(uint32_t replicaID,std::vector<T> v) `, `.fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)`, `.updateInternalPayload()`, `.compare(VectorSB<T> handler, uint32_t vectorId) `,`.compare_vectors(std::vector<T> vector1, std::vector<T> vector2)` , `.compare_vectors(std::vector<T> vector1, std::vector<T> vector2)`, `.queryId()` , `.queryPayload()` , `.queryPayloadwithID(uint32_t replicaID)` , `.addExternalReplica(std::vector<VectorMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<VectorSB> handlers)`  | `int`, `char` ,  `bool`, `string`, `double`  |
+| Metadata | `VectorMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.setPayload(std::set<T> payload)`,`queryPayload()`, `.push_back(T value) `,  `.push_back(std::vector<T> v)  ` ,  `.clear()`  | `int`, `char` ,  `bool`, `string`, `double`   |
+
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.push_back(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler | 
+`.push_back(uint32_t replicaID,std::vector<T> v) `| Add multiple element into the metadata by using the ID via the handler | 
+`.fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)` | Helper function to fix conflicts within handler |
+`.updateInternalPayload()`|  Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`.compare(VectorSB<T> handler, uint32_t vectorId) ` | Checks if metadata is found within the handler |
+`.compare_vectors(std::vector<T> vector1, std::vector<T> vector2)` | Compare two vectors to see if they are a match |
+`.queryId()` | Gets the payload of the metadata using ID |
+`.queryPayloadwithID(uint32_t replicaID)` | Get the metadata inside the handler via ID  |
+`.addExternalReplica(std::vector<VectorMetadata<T>> external_replica_metadata)` | Add as many metadatas into the handler |
+`.updateLocalExternalPayload(std::vector<VectorSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+
+ 
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the ID of the metadata |
+`.setPayload(std::set<T> payload)`| Intialize the vector |
+`queryPayload()`| Return the vector |
+`.push_back(T value) ` | Insert element into vector |
+`.push_back(std::vector<T> v)  ` | Insert multiple elements into the vector |
+`.clear()` | Clear the vector |
+
+<h4> Example </h4>
+
+```cpp
+crdt::state::VectorSB<uint32_t> handler(1); //Represents Server 1
+crdt::state::VectorMetadata<uint32_t> replica1A(3,{1,2,3}); //id = 3, vector = {1,2,3}
+crdt::state::VectorMetadata<uint32_t> replica1B(3,{2,3,4,2}); //Conflict, id = 3, vector = {2,3,4,2}
+crdt::state::VectorMetadata<uint32_t> replica1C(3,{4,5,6}); //Conflict, id = 3, vector = {4,5,6}
+handler.addExternalReplica({replica1A,replica1B,replica1C}); //Insert into handler, merge and fix conflict
+for (int i: handler.queryPayload()) cout << i; //Will print(1,2,3,2,4,5,6)
+```
+
 
 
 
