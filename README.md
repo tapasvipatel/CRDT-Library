@@ -360,9 +360,6 @@ for (int i: handler.queryTwoPSet()) cout << i; // Will print (1, 2 ,5, 6)
  `.addExternalReplica(std::vector<MultiSetMetadata<T>> external_replica_metadata)`| Add as many metadatas into the handler |
  `.updateLocalExternalPayload(std::vector<MultiSetSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
 
-
-
-
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
 `.serialize()`  | Tas Explain |
@@ -387,6 +384,59 @@ handler1.addExternalReplica({replica1A,replica1B,replica1C});
 std::multiset<uint32_t> test1 = {5,20,25,30,30,35,40,45};
 for (int i: handler1.queryPayload()) cout << i; 
 // Will print (5, 20 ,25 , 30 , 30 , 35, 40, 45}
+```
+
+<h3> Last-Write-Wins Multiset </h3>
+
+| Name | Identifier | Supported Operations | Data types supported |
+|------|------------|----------|------------|
+| Handler | `LWWMultiSetSB` | `.insert(uint32_t replicaID, long long int timestamp, T value) `, `.insert(uint32_t replicaID, long long int timestamp, std::vector<T> value) `, `.remove(uint32_t replicaID, long long int timestamp, T value) `,  `.remove(uint32_t replicaID, long long int timestamp, std::vector<T> value)  `, `.updateInternalPayload()`, `.queryId()` , `.queryLWWMultiSet()`, `.queryLWWMultiSetwithID(uint32_t replicaID)`, `.addExternalReplica(std::vector<LWWMultiSetMetadata<T>> external_replica_metadata)`, `.updateLocalExternalPayload(std::vector<LWWMultiSetSB> handlers)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `LWWMultiSetMetadata` |`.serialize()`,`.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`, `.deserializeFile(std::string jsonString)`, `.queryId()`, `.queryId()` , `.queryTime()` , `.insert(long long int timestamp, T value)`, `.insert(long long int timestamp, std::vector<T> value)`, `.remove(long long int timestamp, T value)`, `.remove(long long int timestamp, std::vector<T> value)`, `.queryPayload()`, `.setPayload(std::multiset<T> payload, long long int timestamp)`, | `int`, `char` ,  `bool`, `string`, `double`   |
+
+| Supported Operations (Handler) | Functionality | 
+|----------|------------|
+`.insert(uint32_t replicaID, long long int timestamp, T value) ` | Insert element into multiset in handler via ID and timestamp | 
+`.insert(uint32_t replicaID, long long int timestamp, std::vector<T> value) ` | Insert multiple elements into multiset in handler via ID and timestamp |
+`.remove(uint32_t replicaID, long long int timestamp, T value) ` | Remove element from multiset in handler via ID and timestamp
+`.remove(uint32_t replicaID, long long int timestamp, std::vector<T> value)  `| Remove multiple elements from multiset in handler via ID and timestamp |
+`.updateInternalPayload()`, `.queryId()` |  Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`.queryLWWMultiSet()`| Returns all the elements of all the multisets within the handler |
+`.queryLWWMultiSetwithID(uint32_t replicaID)`| Return a multiset within the handler via ID |
+`.addExternalReplica(std::vector<LWWMultiSetMetadata<T>> external_replica_metadata)`| Add as many metadatas into the handler |
+`.updateLocalExternalPayload(std::vector<LWWMultiSetSB> handlers)` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+
+
+| Supported Operations (Metadata) | Functionality | 
+|----------|------------|
+`.serialize()`  | Tas Explain |
+`.serializeFile(std::string pathToFile)`  | Tas Explain |
+`.deserialize(std::string s)` | Tas Explain |
+`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.queryId()` | Get the id of the multiset |
+`.queryTime()` , `.insert(long long int timestamp, T value)` | Get the time of the last write for multiset |
+`.insert(long long int timestamp, std::vector<T> value)` | Insert element into multiset providing the time |
+`.remove(long long int timestamp, T value)`| Remove element from multiset proving the time. If time provided is less than the last write time, the remove operations will not remove |
+`.remove(long long int timestamp, std::vector<T> value)` |  Remove multiple elements from multiset providing the time. |
+`.queryPayload()`| Return the multiset |
+`.setPayload(std::multiset<T> payload, long long int timestamp)`| Intialize the multiset |
+<h4> Example </h4>
+
+```cpp
+crdt::state::LWWMultiSetSB<uint32_t> handler1(1); //Represents Server 1
+crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0); //id = 0, time = 0, multiset = {}
+crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0); //conflict id = 0, time = 0, multiset = {}
+crdt::state::LWWMultiSetMetadata<uint32_t> replica1C(0); //conflict id = 0, time = 0, multiset = {}
+replica1A.insert(0,{20,25,30}); //id = 0, time = 1, multiset = {20,25,30}
+replica1B.insert(1,{30,35}); // id = 0, time = 1, multiset = {30,35}
+replica1C.insert(2, {40,45,30,30}); // id = 0, time = 2, multiset = {30,30,40,45}
+handler1.addExternalReplica({replica1A,replica1B,replica1C}); //Added 3 replicas to handler and converge to fix conflict
+// the last time id = 0 was written was @ time = 2 --> merge to the multiset at time = 2 --> multiset = {30,30,40,45}
+handler1.remove(0,3,{30,30}); // id = 0, time = 3, multiset = {40,45}
+handler1.remove(0,4,30);  // id = 0, time = 4, multiset = {40,45}
+handler1.remove(0,5,{30,30,45}); // id = 0, time = 5, multiset = {40}
+handler1.insert(0,6,{30,30}); // id = 0, time = 6, multiset = {30,30,40}
+handler1.remove(0,8,30); // id = 0, time = 8, multiset = {30,40}
+for (int i: handler1.queryPayload()) cout << i; //Should print (30, 40)
 ```
 
 
