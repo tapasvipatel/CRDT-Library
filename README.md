@@ -46,8 +46,9 @@ to server networks
 
 
 <h2 id="features"> 📃 Features </h2>
-This libary currently supports a combined of 12 CRDTs. We have also created a Trello-clone that utilizes different CRDTs in this libary
-for anyone wanted to create an application using CRDTs in C++ enviroment. 
+This libary currently supports a combined of 12 CRDTs. We have also created a Trello-clone that utilizes different CRDTs in this libary.
+This is to showcase how CRDTs can be used in a practical application. 
+
 
 
 <h2 id="setup"> ⚙ Set Up </h2>
