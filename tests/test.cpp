@@ -1490,7 +1490,7 @@ TEST_CASE("Test GMapSB", "[classic]")
 		REQUIRE(handler2.queryAllValues() == test2);
 		REQUIRE(handler3.queryAllValues() == test2);
 	}
-	
+
 	SECTION("Test serialize function")
 	{
 		crdt::state::GMapMetadata<uint32_t, uint32_t> replica1A(0,10,1);
@@ -1656,8 +1656,6 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		crdt::state::PriorityQueueSB<uint32_t> handler3(3);
 		handler3.addExternalReplica({replica1E,replica1F});
 		REQUIRE(handler3.queryPayloadVector() == test2);
-
-
 	}
 
 	SECTION("Test Conflict on multiple Servers")
@@ -1719,22 +1717,102 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 	}
-
+	
 	SECTION("Test serialize function")
 	{
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1B(1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1C(2);
+		replica1A.push({1,2,3});
+		replica1B.push({4,5,6});
+		replica1C.push({7,8,9});
+
+		REQUIRE(replica1A.serialize() == "{\"id\":0,\"payload\":[3,2,1]}");
+		REQUIRE(replica1B.serialize() == "{\"id\":1,\"payload\":[6,5,4]}");
+		REQUIRE(replica1C.serialize() == "{\"id\":2,\"payload\":[9,8,7]}");
 	}
 
 	SECTION("Test deserialize function")
 	{
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1B(1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1C(2);
+		replica1A.push({1,2,3});
+		replica1B.push({4,5,6});
+		replica1C.push({7,8,9});
+
+		REQUIRE(replica1A.serialize() == "{\"id\":0,\"payload\":[3,2,1]}");
+		REQUIRE(replica1B.serialize() == "{\"id\":1,\"payload\":[6,5,4]}");
+		REQUIRE(replica1C.serialize() == "{\"id\":2,\"payload\":[9,8,7]}");
+
+		crdt::state::PriorityQueueMetadata<uint32_t> replica2A;
+		crdt::state::PriorityQueueMetadata<uint32_t> replica2B;
+		crdt::state::PriorityQueueMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"id\":0,\"payload\":[3,2,1]}");
+		REQUIRE(replica2B.serialize() == "{\"id\":1,\"payload\":[6,5,4]}");
+		REQUIRE(replica2C.serialize() == "{\"id\":2,\"payload\":[9,8,7]}");
 	}
 #ifdef LOCAL_TESTING
 	SECTION("Test serialize function saving to a file")
 	{
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1B(1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1C(2);
+		replica1A.push({1,2,3});
+		replica1B.push({4,5,6});
+		replica1C.push({7,8,9});
+
+		replica1A.serializeFile("../../tests/temp_data/priorityqueue1A.json");
+		replica1B.serializeFile("../../tests/temp_data/priorityqueue1B.json");
+		replica1C.serializeFile("../../tests/temp_data/priorityqueue1C.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/priorityqueue1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/priorityqueue1B.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/priorityqueue1C.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(replica1AString == replica1A.serialize());
+		REQUIRE(replica1BString == replica1B.serialize());
+		REQUIRE(replica1CString == replica1C.serialize());
 	}
 #endif
 #ifdef LOCAL_TESTING
 	SECTION("Test deserialize function reading from a file")
 	{
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1A(0);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1B(1);
+		crdt::state::PriorityQueueMetadata<uint32_t> replica1C(2);
+		replica1A.push({1,2,3});
+		replica1B.push({4,5,6});
+		replica1C.push({7,8,9});
+
+		replica1A.serializeFile("../../tests/temp_data/priorityqueue1A.json");
+		replica1B.serializeFile("../../tests/temp_data/priorityqueue1B.json");
+		replica1C.serializeFile("../../tests/temp_data/priorityqueue1C.json");
+
+		crdt::state::PriorityQueueMetadata<uint32_t> replica2A;
+		crdt::state::PriorityQueueMetadata<uint32_t> replica2B;
+		crdt::state::PriorityQueueMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/priorityqueue1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/priorityqueue1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/priorityqueue1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
 	}
 #endif
 }
