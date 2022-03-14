@@ -19,15 +19,15 @@ using std::filesystem::directory_iterator;
 tgui::Label::Ptr usersOnline;
 
 //taps
-string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/";
-crdt::state::VectorMetadata<string> backlogList;
-crdt::state::VectorSB<string> backlogServer;
-crdt::state::GSetMetadata<string> inprogressList;
-crdt::state::GSetSB<string> inprogressServer;
-crdt::state::ORSetMetadata<string> readytotestList;
-crdt::state::ORSetSB<string> readytotestServer;
-crdt::state::TwoPSetMetadata<string> completeList;
-crdt::state::TwoPSetSB<string> completeServer;
+string filePath = "/home/vishcapstone/Documents/CRDT-Library/trello_application/json/";
+crdt::state::LWWMultiSetMetadata<string> backlogList;
+crdt::state::LWWMultiSetSB<string> backlogServer;
+crdt::state::LWWMultiSetMetadata<string> inprogressList;
+crdt::state::LWWMultiSetSB<string> inprogressServer;
+crdt::state::LWWMultiSetMetadata<string> readytotestList;
+crdt::state::LWWMultiSetSB<string> readytotestServer;
+crdt::state::LWWMultiSetMetadata<string> completeList;
+crdt::state::LWWMultiSetSB<string> completeServer;
 crdt::state::LWWMultiSetMetadata<string> notaddedList;
 crdt::state::LWWMultiSetSB<string> notaddedServer;
 
@@ -217,7 +217,7 @@ userInfo endUser;
 void updateTableMaster(tgui::GuiBase &gui)
 {
     // backlog
-    vector<string> backlogPayload = backlogServer.queryPayload();
+    multiset<string> backlogPayload = backlogServer.queryPayload();
     int count = 0;
     for(auto element : backlogPayload)
     {
@@ -233,7 +233,7 @@ void updateTableMaster(tgui::GuiBase &gui)
     }
 
     // inprogress
-    set<string> inprogressPayload = inprogressServer.queryPayload();
+    multiset<string> inprogressPayload = inprogressServer.queryPayload();
     count = 0;
     for(auto element : inprogressPayload)
     {
@@ -249,7 +249,7 @@ void updateTableMaster(tgui::GuiBase &gui)
     }
 
     // readytotest
-    vector<string> readytotestPayload = readytotestServer.queryPayload();
+    multiset<string> readytotestPayload = readytotestServer.queryPayload();
     count = 0;
     for(auto element : readytotestPayload)
     {
@@ -265,7 +265,7 @@ void updateTableMaster(tgui::GuiBase &gui)
     }
 
     // complete
-    set<string> completePayload = completeServer.queryPayload();
+    multiset<string> completePayload = completeServer.queryPayload();
     count = 0;
     for(auto element : completePayload)
     {
@@ -372,10 +372,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     string notaddedFolder = rootFolder + "notadded";
 
     // Get backlog updates
-    vector<crdt::state::VectorMetadata<string>> backlogMetadataList;
+    vector<crdt::state::LWWMultiSetMetadata<string>> backlogMetadataList;
     for(auto & file : fs::directory_iterator(backlogFolder))
     {
-        crdt::state::VectorMetadata<std::string> replica;
+        crdt::state::LWWMultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         backlogMetadataList.push_back(replica);
     }
@@ -383,10 +383,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     backlogServer.addExternalReplica(backlogMetadataList);
 
     // Get complete updates
-    vector<crdt::state::TwoPSetMetadata<string>> completeMetadataList;
+    vector<crdt::state::LWWMultiSetMetadata<string>> completeMetadataList;
     for(auto & file : fs::directory_iterator(completeFolder))
     {
-        crdt::state::TwoPSetMetadata<string> replica;
+        crdt::state::LWWMultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         completeMetadataList.push_back(replica);
     }
@@ -394,10 +394,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     completeServer.addExternalReplica(completeMetadataList);
 
     // Get inprogress updates
-    vector<crdt::state::GSetMetadata<string>> inprogressMetadataList;
+    vector<crdt::state::LWWMultiSetMetadata<string>> inprogressMetadataList;
     for(auto & file : fs::directory_iterator(inprogressFolder))
     {
-        crdt::state::GSetMetadata<string> replica;
+        crdt::state::LWWMultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         inprogressMetadataList.push_back(replica);
     }
@@ -405,10 +405,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     inprogressServer.addExternalReplica(inprogressMetadataList);
 
     // Get readytotest updates
-    vector<crdt::state::ORSetMetadata<string>> readytotestMetadataList;
+    vector<crdt::state::LWWMultiSetMetadata<string>> readytotestMetadataList;
     for(auto & file : fs::directory_iterator(readytotestFolder))
     {
-        crdt::state::ORSetMetadata<string> replica;
+        crdt::state::LWWMultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         readytotestMetadataList.push_back(replica);
     }
@@ -547,7 +547,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
 
         switch (boardType) {
             case 1:
-                backlogList.push_back(_task);
+                backlogList.insert(0, _task);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
                 numTasksBacklog.increasePayload(1);
@@ -556,7 +556,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 2:
-                inprogressList.insert(_task);
+                inprogressList.insert(0, _task);
                 inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
                 inprogressServer.addExternalReplica({inprogressList});
                 numTasksInprogress.increasePayload(1);
@@ -565,7 +565,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 3:
-                readytotestList.insert(_task);
+                readytotestList.insert(0, _task);
                 readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
                 readytotestServer.addExternalReplica({readytotestList});
                 numTasksReadytotest.increasePayload(1);
@@ -574,7 +574,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 4:
-                completeList.insert(_task);
+                completeList.insert(0, _task);
                 completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
                 completeServer.addExternalReplica({completeList});
                 numTasksComplete.increasePayload(1);
@@ -634,7 +634,7 @@ void addBoard(tgui::GuiBase &gui, int boardType) {
         while (addWindow.pollEvent(event))
         {
             if (event.type == sf::Event::Closed) {
-                endUser.setUserStatus(0);
+                endUser.setUserStatus(1);
                 addWindow.close();
             }
                 
