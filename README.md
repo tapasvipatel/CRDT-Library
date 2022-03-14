@@ -24,6 +24,8 @@
   — 
   <a href="#UnitTesting">CI/CD Framework</a>
   — 
+  <a href="#Benchmark">Performance Analysis</a>
+  — 
   <a href="#Contribute">Contribute</a>
   — 
   <a href="#license">License</a>
@@ -781,11 +783,47 @@ For our testing framework and Github workflow we are using Catch2. All our unit 
 If you want to contribute any new test cases, please add the test case in and create a PR.
 
 
+
+
+<h2 id="Benchmark">🤝 Performance Analysis </h2>
+Here is a showcase of our benchmark analysis. To better showcase the advantage of C++ has over other framework we decided to compare it with an existing Python libary: https://github.com/anshulahuja98/python3-crdt. Special Credits to Geetesh Gupta and Anshul Ahuja who are the rightful owners of this libary. Please go and check them out as well.
+
+PC Specs for Benchmark:
+https://www.userbenchmark.com/UserRun/6945534
+
+| CRDT Type | Average merge Time - C++ (ns) | Average merge Time - Python (ns) |
+|------|------------|----------|
+| OB-Counter  | 98.11 (Not Valid Result) | N/A |
+| G-Set | 2672.79 | 4980.58 |
+| 2P-Set | 4359.16 | 7358.43 |
+| G-Counter | 1500.33 | 6421.28 |
+| Or-Set | 7487.43 | 13793.53 |
+| PN-Counter | 3279.23 | 7554.35 |
+| Multiset | 10034.91 | N/A |
+| *LWW-Multiset* | 8481.69 | 5234.63 |
+| *Mutable String* | 2770.35 | 2351.95 |
+| Vector | 2278.03 | N/A |
+| G-Map (Generic) | 7690.62 | N/A |
+| G-Map (String) | 567307 | N/A |
+| Priority Queue | 8739.66 | N/A |
+
+
+*Lww-Multiset* -> In the python libary a LWW-Set was used while ours is a LWW-Multiset. The difference is a multiset allows duplicate elements while a set does not.
+
+*Mutable String* -> The algorithm for merging was different compared to our one. Furthermore strings in C++ are mutable while in Python they are not. 
+
+
+<h1 align="center">
+  <img src=https://i.ibb.co/kXgDkwJ/Graph.jpg"></a>
+</h1>
+
+The raw data for the benchmark can be found under the folder:  ```/Final Benchmark Result```
+
 <h2 id="Contribute">🤝 Contribute </h2>
 Have an data structure in mind such as a binary tree or 2D arrays and want to attempt to make it into a CRDT? No open-source libary
 can grow without the help of the community and would love your contributions in helping to add more CRDTs to this libary. To add a new
 CRDT to this libary, go to either: 
-
+                   
 ```/src/operation_based``` 
 or `/src/state_based`  and create your CRDT. Remember to add the CRDT in the 
 `/src/CrdtObject.hpp`. Once you are done create some unit tests for it under `/tests/test.cpp` to validate your results. 
