@@ -1,7 +1,6 @@
 #!/bin/bash
 
 TESTING=0
-LOCAL_TESTING=0
 TRELLO_APPLICATION=0
 TEST_APPLICATION=0
 PERFORMANCE=0
@@ -13,7 +12,6 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 		-testing)
 		TESTING=1
-		LOCAL_TESTING=1
 		shift
 		;;
 	esac
@@ -60,7 +58,7 @@ cd build
 cmake_flags=''
 
 if [ $TESTING -eq 1 ]; then
-	cmake_flags=${cmake_flags}' -DBUILD_TESTING=1'
+	cmake_flags=${cmake_flags}' -DBUILD_TESTING=1 -DLOCAL_TESTING=1'
 fi
 
 if [ $TRELLO_APPLICATION -eq 1 ]; then

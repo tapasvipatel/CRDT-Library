@@ -178,7 +178,7 @@ TEST_CASE("Test GSetSB", "[classic]")
 		REQUIRE(replica1B.serialize() == "{\"id\":2,\"payload\":[6]}");
 		REQUIRE(replica1C.serialize() == "{\"id\":3,\"payload\":[9]}");
 	}
-
+#ifdef LOCAL_TESTING
 	SECTION("Test serialize function saving to a file")
 	{
 		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
@@ -205,7 +205,8 @@ TEST_CASE("Test GSetSB", "[classic]")
 		REQUIRE(replica1B.serialize() == replica1BString);
 		REQUIRE(replica1C.serialize() == replica1CString);
 	}
-
+#endif
+#ifdef LOCAL_TESTING
 	SECTION("Test deserialize function reading from a file")
 	{
 		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
@@ -229,7 +230,7 @@ TEST_CASE("Test GSetSB", "[classic]")
 		REQUIRE(replica1C.serialize() == replica2C.serialize());
 	}
 }
-
+#endif
 TEST_CASE("Test TwoPSetSB", "[classic]")
 {
 	SECTION("Test Insert Operation")

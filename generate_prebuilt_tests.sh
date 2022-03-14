@@ -4,7 +4,7 @@ rm -Rf build
 mkdir build
 cd build
 
-cmake_flags=${cmake_flags}' -DBUILD_TESTING=1'
+cmake_flags=${cmake_flags}' -DBUILD_TESTING=1 -DLOCAL_TESTING=0'
 
 cmake $cmake_flags ../ && make clean && make
 
