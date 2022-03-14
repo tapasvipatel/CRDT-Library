@@ -256,7 +256,7 @@ Tas Explain | Tas Explain |
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
 |------|------------|----------|----------|
-A set that only elements can be added to it |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `-Cannot remove an added element` `+Better performance and more memory efficient compared to other sets` | Winston Explain | Take the union of the conflicted sets |
+A set that only elements can be added to it |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `-Cannot remove an added element` `+Better performance and more memory efficient compared to other sets` | Add elements on the a list | Take the union of the conflicted sets |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -303,7 +303,7 @@ for (int i: handler1.queryPayload()) cout << i; // Will print (2 4 6)
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
 |------|------------|----------|----------|
-A set allowing to insert and remove elements |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `+Can remove elments` `-Worst performance and more memory efficient compared to other sets` | Winston Explain | Winston Explain |
+A set allowing to insert and remove elements. Similar to a 2PSet, but the element could be re-inserted after removal. |   `+Does not allow duplicate elements` `+Elements are sorted from least to greatest` `+Can remove elments` `-Worst performance and more memory efficient compared to other sets` | A shopping list or grocery list where user can add or delete item from it | Take the union of the conflicted sets |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
@@ -316,15 +316,15 @@ A set allowing to insert and remove elements |   `+Does not allow duplicate elem
 `.insert(uint32_t replicaID, T value)` | Add an element into the metadata by using the ID via the handler |
 `.insert(uint32_t replicaID, std::vector<T> values)` |  Add multiple element into the metadata by using the ID via the handler |
 `.fixLocalConflict(std::vector<T> vector1, std::vector<T> vector2)` | Helper function to fix conflicts within handler |
-`.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
- `.compare(ORSetSB<T> handler, uint32_t vectorId) ` | Checks if metadata is found within the handler | 
+`.updateInternalPayload()` | Merge all the CRDTs that it contains. Equivalent to doing a localMerge |
+ `.compare(ORSetSB<T> handler, uint32_t vectorId) ` | Check if metadata is found within the handler | 
 `.compare_sets(std::set<T> set1, std::set<T> set2)` | Compare two sets to see if they are a match |
-`.queryPayload()` | Gets the payload of the metadata using ID | 
-`.queryORSet()` | Winston Explain | 
+`.queryPayload()` | Get the payload of the metadata using ID | 
+`.queryORSet()` | Get the payload of all ORSet elements | 
 `.queryPayloadwithID(uint32_t replicaID)`| Get the metadata inside the handler via ID  |
-`.queryORSetwithID(uint32_t replicaID)` | Winston Explain |
+`.queryORSetwithID(uint32_t replicaID)` | Get the payload of the ORSet elements via ID |
 `.addExternalReplica(std::vector<ORSetMetadata<T>> external_replica_metadata, std::unordered_map<uint32_t,std::vector<T>> removed_items = {})` |  Add as many metadatas into the handler  |
-`.updateLocalExternalPayload(std::vector<ORSetSB> handlers,  std::unordered_map<uint32_t,std::vector<T>> removed_items = {})` | Fetches all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
+`.updateLocalExternalPayload(std::vector<ORSetSB> handlers,  std::unordered_map<uint32_t,std::vector<T>> removed_items = {})` | Fetch all the other handlers and does a merge. Equivalent of doing merge between multiple servers |
  
 
 | Supported Operations (Metadata) | Functionality | 
@@ -335,7 +335,7 @@ A set allowing to insert and remove elements |   `+Does not allow duplicate elem
 `.deserializeFile(std::string jsonString)` | Tas Explain | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)` | Set the payload |
-`.queryORSet() ` | Winston Explain |
+`.queryORSet() ` | Get the payload of the ORSet metadata |
 `.insert(T value) ` | Insert value into the set |
 `.insert(std::vector<T> values)` | Insert multiple values into the set |
 `.remove(T value)` | Remove value from the set |
