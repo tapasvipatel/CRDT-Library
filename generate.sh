@@ -1,9 +1,11 @@
 #!/bin/bash
 
 TESTING=0
+LOCAL_TESTING=0
 TRELLO_APPLICATION=0
 TEST_APPLICATION=0
 PERFORMANCE=0
+CLEAN=0
 
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -11,6 +13,7 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 		-testing)
 		TESTING=1
+		LOCAL_TESTING=1
 		shift
 		;;
 	esac
@@ -32,10 +35,26 @@ while [[ $# -gt 0 ]]; do
 		shift
 		;;
 	esac
+	case $key in
+		-clean)
+		CLEAN=1
+		shift
+		;;
+	esac
 done
 
-rm -Rf build
-mkdir build
+if [ $TESTING -eq 1 ]; then
+	cd tests
+	rm -Rf temp_data
+	mkdir temp_data
+	cd ..
+fi
+
+if [ $CLEAN -eq 1 ]; then
+	rm -Rf build
+	mkdir build
+fi
+
 cd build
 
 cmake_flags=''
@@ -54,6 +73,10 @@ fi
 
 if [ $PERFORMANCE -eq 1 ]; then
 	cmake_flags=${cmake_flags}' -DBUILD_PERFORMANCE=1'
+fi
+
+if [ $CLEAN -eq 1 ]; then
+	cmake_flags=${cmake_flags}' -DBUILD_CLEAN=1'
 fi
 
 cmake $cmake_flags ../ && make clean && make
