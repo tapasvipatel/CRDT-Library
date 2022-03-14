@@ -2,6 +2,8 @@
 #include <vector>
 #include <set>
 #include <chrono>
+#include <iostream>
+#include <fstream>
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch_all.hpp>
@@ -141,6 +143,90 @@ TEST_CASE("Test GSetSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == test);
 		REQUIRE(handler2.queryPayload() == test);
 		REQUIRE(handler3.queryPayload() == test);
+	}
+
+	SECTION("Test serialize function")
+	{
+		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
+		crdt::state::GSetMetadata<uint32_t> replica1B(2,6);
+		crdt::state::GSetMetadata<uint32_t> replica1C(3,9);
+
+		REQUIRE(replica1A.serialize() == "{\"id\":1,\"payload\":[3]}");
+		REQUIRE(replica1B.serialize() == "{\"id\":2,\"payload\":[6]}");
+		REQUIRE(replica1C.serialize() == "{\"id\":3,\"payload\":[9]}");
+	}
+
+	SECTION("Test deserialize function")
+	{
+		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
+		crdt::state::GSetMetadata<uint32_t> replica1B(2,6);
+		crdt::state::GSetMetadata<uint32_t> replica1C(3,9);
+
+		REQUIRE(replica1A.serialize() == "{\"id\":1,\"payload\":[3]}");
+		REQUIRE(replica1B.serialize() == "{\"id\":2,\"payload\":[6]}");
+		REQUIRE(replica1C.serialize() == "{\"id\":3,\"payload\":[9]}");
+
+		crdt::state::GSetMetadata<uint32_t> replica2A;
+		crdt::state::GSetMetadata<uint32_t> replica2B;
+		crdt::state::GSetMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica1A.serialize() == "{\"id\":1,\"payload\":[3]}");
+		REQUIRE(replica1B.serialize() == "{\"id\":2,\"payload\":[6]}");
+		REQUIRE(replica1C.serialize() == "{\"id\":3,\"payload\":[9]}");
+	}
+
+	SECTION("Test serialize function saving to a file")
+	{
+		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
+		crdt::state::GSetMetadata<uint32_t> replica1B(2,6);
+		crdt::state::GSetMetadata<uint32_t> replica1C(3,9);
+
+		replica1A.serializeFile("../../tests/temp_data/gset1A.json");
+		replica1B.serializeFile("../../tests/temp_data/gset1B.json");
+		replica1C.serializeFile("../../tests/temp_data/gset1C.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/gset1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/gset1B.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/gset1C.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(replica1A.serialize() == replica1AString);
+		REQUIRE(replica1B.serialize() == replica1BString);
+		REQUIRE(replica1C.serialize() == replica1CString);
+	}
+
+	SECTION("Test deserialize function reading from a file")
+	{
+		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
+		crdt::state::GSetMetadata<uint32_t> replica1B(2,6);
+		crdt::state::GSetMetadata<uint32_t> replica1C(3,9);
+
+		replica1A.serializeFile("../../tests/temp_data/gset1A.json");
+		replica1B.serializeFile("../../tests/temp_data/gset1B.json");
+		replica1C.serializeFile("../../tests/temp_data/gset1C.json");
+
+		crdt::state::GSetMetadata<uint32_t> replica2A;
+		crdt::state::GSetMetadata<uint32_t> replica2B;
+		crdt::state::GSetMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/gset1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/gset1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/gset1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
 	}
 }
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 TESTING=0
+LOCAL_TESTING=0
 TRELLO_APPLICATION=0
 TEST_APPLICATION=0
 PERFORMANCE=0
@@ -12,6 +13,7 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 		-testing)
 		TESTING=1
+		LOCAL_TESTING=1
 		shift
 		;;
 	esac
@@ -40,6 +42,13 @@ while [[ $# -gt 0 ]]; do
 		;;
 	esac
 done
+
+if [ $TESTING -eq 1 ]; then
+	cd tests
+	rm -Rf temp_data
+	mkdir temp_data
+	cd ..
+fi
 
 if [ $CLEAN -eq 1 ]; then
 	rm -Rf build
