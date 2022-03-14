@@ -144,7 +144,7 @@ TEST_CASE("Test GSetSB", "[classic]")
 		REQUIRE(handler2.queryPayload() == test);
 		REQUIRE(handler3.queryPayload() == test);
 	}
-
+	// taps
 	SECTION("Test serialize function")
 	{
 		crdt::state::GSetMetadata<uint32_t> replica1A(1,3);
@@ -174,9 +174,9 @@ TEST_CASE("Test GSetSB", "[classic]")
 		replica2B.deserialize(replica1B.serialize());
 		replica2C.deserialize(replica1C.serialize());
 
-		REQUIRE(replica1A.serialize() == "{\"id\":1,\"payload\":[3]}");
-		REQUIRE(replica1B.serialize() == "{\"id\":2,\"payload\":[6]}");
-		REQUIRE(replica1C.serialize() == "{\"id\":3,\"payload\":[9]}");
+		REQUIRE(replica2A.serialize() == "{\"id\":1,\"payload\":[3]}");
+		REQUIRE(replica2B.serialize() == "{\"id\":2,\"payload\":[6]}");
+		REQUIRE(replica2C.serialize() == "{\"id\":3,\"payload\":[9]}");
 	}
 #ifdef LOCAL_TESTING
 	SECTION("Test serialize function saving to a file")
@@ -229,8 +229,8 @@ TEST_CASE("Test GSetSB", "[classic]")
 		REQUIRE(replica1B.serialize() == replica2B.serialize());
 		REQUIRE(replica1C.serialize() == replica2C.serialize());
 	}
-}
 #endif
+}
 TEST_CASE("Test TwoPSetSB", "[classic]")
 {
 	SECTION("Test Insert Operation")
@@ -399,6 +399,95 @@ TEST_CASE("Test TwoPSetSB", "[classic]")
 		REQUIRE(handler1.queryTwoPSet() == handler3.queryTwoPSet());
 		REQUIRE(handler2.queryTwoPSet() == handler3.queryTwoPSet());
 	}
+
+	SECTION("Test serialize function")
+	{
+		crdt::state::TwoPSetMetadata<uint32_t> replicaA(4,{3,6,9});
+		crdt::state::TwoPSetMetadata<uint32_t> replicaB(4,{2,4,6});
+		crdt::state::TwoPSetMetadata<uint32_t> replicaC(4,{1,2,3});
+
+		REQUIRE(replicaA.serialize() == "{\"id\":4,\"payload\":[3,6,9],\"tombstome\":[]}");
+		REQUIRE(replicaB.serialize() == "{\"id\":4,\"payload\":[2,4,6],\"tombstome\":[]}");
+		REQUIRE(replicaC.serialize() == "{\"id\":4,\"payload\":[1,2,3],\"tombstome\":[]}");
+	}
+
+	SECTION("Test deserialize function")
+	{
+		crdt::state::TwoPSetMetadata<uint32_t> replica1A(4,{3,6,9});
+		crdt::state::TwoPSetMetadata<uint32_t> replica1B(4,{2,4,6});
+		crdt::state::TwoPSetMetadata<uint32_t> replica1C(4,{1,2,3});
+
+		REQUIRE(replica1A.serialize() == "{\"id\":4,\"payload\":[3,6,9],\"tombstome\":[]}");
+		REQUIRE(replica1B.serialize() == "{\"id\":4,\"payload\":[2,4,6],\"tombstome\":[]}");
+		REQUIRE(replica1C.serialize() == "{\"id\":4,\"payload\":[1,2,3],\"tombstome\":[]}");
+
+		crdt::state::TwoPSetMetadata<uint32_t> replica2A;
+		crdt::state::TwoPSetMetadata<uint32_t> replica2B;
+		crdt::state::TwoPSetMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"id\":4,\"payload\":[3,6,9],\"tombstome\":[]}");
+		REQUIRE(replica2B.serialize() == "{\"id\":4,\"payload\":[2,4,6],\"tombstome\":[]}");
+		REQUIRE(replica2C.serialize() == "{\"id\":4,\"payload\":[1,2,3],\"tombstome\":[]}");
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+		crdt::state::TwoPSetMetadata<uint32_t> replica1A(4,{3,6,9});
+		crdt::state::TwoPSetMetadata<uint32_t> replica1B(4,{2,4,6});
+		crdt::state::TwoPSetMetadata<uint32_t> replica1C(4,{1,2,3});
+
+		replica1A.serializeFile("../../tests/temp_data/twopset1A.json");
+		replica1B.serializeFile("../../tests/temp_data/twopset1B.json");
+		replica1C.serializeFile("../../tests/temp_data/twopset1C.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/twopset1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/twopset1B.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/twopset1C.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(!(replica1AString == "{\"id\":4,\"payload\":[3,6,9],\"tombstome\":[]}"));
+		REQUIRE(!(replica1BString == "{\"id\":4,\"payload\":[2,4,6],\"tombstome\":[]}"));
+		REQUIRE(!(replica1CString == "{\"id\":4,\"payload\":[1,2,3],\"tombstome\":[]}"));
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+
+		crdt::state::TwoPSetMetadata<uint32_t> replica1A(4,{3,6,9});
+		crdt::state::TwoPSetMetadata<uint32_t> replica1B(4,{2,4,6});
+		crdt::state::TwoPSetMetadata<uint32_t> replica1C(4,{1,2,3});
+
+		replica1A.serializeFile("../../tests/temp_data/twopset1A.json");
+		replica1B.serializeFile("../../tests/temp_data/twopset1B.json");
+		replica1C.serializeFile("../../tests/temp_data/twopset1C.json");
+
+		
+
+		crdt::state::TwoPSetMetadata<uint32_t> replica2A;
+		crdt::state::TwoPSetMetadata<uint32_t> replica2B;
+		crdt::state::TwoPSetMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/twopset1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/twopset1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/twopset1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
+	}
+#endif
 }
 
 
@@ -476,6 +565,24 @@ TEST_CASE("Test VectorSB", "[classic]")
 		REQUIRE(handler2.queryPayload() == test);
 		REQUIRE(handler3.queryPayload() == test);
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test ORSetSB", "[classic]")
@@ -647,6 +754,24 @@ TEST_CASE("Test ORSetSB", "[classic]")
 		REQUIRE(handler2.queryORSetwithID(6) == test);
 		REQUIRE(handler3.queryORSetwithID(6) == test);
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 
@@ -750,6 +875,24 @@ TEST_CASE("Test GCounterSB", "[classic]")
 		REQUIRE(handler3.queryPayload() == handler4.queryPayload());
 		REQUIRE(handler.queryPayload() == handler4.queryPayload());
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test PNCounterSB", "[classic]")
@@ -882,6 +1025,24 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test GMapSB", "[classic]")
@@ -1060,6 +1221,24 @@ TEST_CASE("Test GMapSB", "[classic]")
 		REQUIRE(handler2.queryAllValues() == test2);
 		REQUIRE(handler3.queryAllValues() == test2);
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test PriorityQueueSB", "[classic]")
@@ -1203,6 +1382,24 @@ TEST_CASE("Test PriorityQueueSB", "[classic]")
 		REQUIRE(handler1.queryPayloadVector() == handler2.queryPayloadVector());
 		REQUIRE(handler2.queryPayloadVector() == handler3.queryPayloadVector());
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test MultiSetSB", "[classic]")
@@ -1301,6 +1498,23 @@ TEST_CASE("Test MultiSetSB", "[classic]")
 		REQUIRE(handler2.queryPayloadwithID(0) == handler3.queryPayloadwithID(0));
 	}
 
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test LWWMultiSetSB", "[classic]")
@@ -1394,6 +1608,24 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
+
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 TEST_CASE("Test SringOB", "[classic]")
@@ -1481,6 +1713,23 @@ TEST_CASE("Test SringOB", "[classic]")
 		REQUIRE(handler2.queryPayloadwithID(6) == handler3.queryPayloadwithID(6));
 	}
 
+	SECTION("Test serialize function")
+	{
+	}
+
+	SECTION("Test deserialize function")
+	{
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+	}
+#endif
 }
 
 
