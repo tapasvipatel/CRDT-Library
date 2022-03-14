@@ -804,7 +804,7 @@ https://www.userbenchmark.com/UserRun/6945534
 | *Mutable String* | 2770.35 | 2351.95 |
 | Vector | 2278.03 | N/A |
 | G-Map (Generic) | 7690.62 | N/A |
-| G-Map (String) | 567307 | N/A |
+| G-Map (String) | 192290 | N/A |
 | Priority Queue | 8739.66 | N/A |
 
 
