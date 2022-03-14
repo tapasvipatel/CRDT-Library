@@ -820,7 +820,7 @@ TEST_CASE("Test ORSetSB", "[classic]")
 		REQUIRE(handler2.queryORSetwithID(6) == test);
 		REQUIRE(handler3.queryORSetwithID(6) == test);
 	}
-	// taps
+
 	SECTION("Test serialize function")
 	{
 		crdt::state::ORSetMetadata<uint32_t> replica1A(4,{1,2,3});
@@ -1011,19 +1011,87 @@ TEST_CASE("Test GCounterSB", "[classic]")
 
 	SECTION("Test serialize function")
 	{
+		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica1B(1,15);
+		crdt::state::GCounterMetadata<uint32_t> replica1C(1,8);
+
+		REQUIRE(replica1A.serialize() == "{\"id\":1,\"payload\":6}");
+		REQUIRE(replica1B.serialize() == "{\"id\":1,\"payload\":15}");
+		REQUIRE(replica1C.serialize() == "{\"id\":1,\"payload\":8}");
 	}
 
 	SECTION("Test deserialize function")
 	{
+		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica1B(1,15);
+		crdt::state::GCounterMetadata<uint32_t> replica1C(1,8);
+
+		REQUIRE(replica1A.serialize() == "{\"id\":1,\"payload\":6}");
+		REQUIRE(replica1B.serialize() == "{\"id\":1,\"payload\":15}");
+		REQUIRE(replica1C.serialize() == "{\"id\":1,\"payload\":8}");
+
+		crdt::state::GCounterMetadata<uint32_t> replica2A;
+		crdt::state::GCounterMetadata<uint32_t> replica2B;
+		crdt::state::GCounterMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"id\":1,\"payload\":6}");
+		REQUIRE(replica2B.serialize() == "{\"id\":1,\"payload\":15}");
+		REQUIRE(replica2C.serialize() == "{\"id\":1,\"payload\":8}");
 	}
 #ifdef LOCAL_TESTING
 	SECTION("Test serialize function saving to a file")
 	{
+		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica1B(1,15);
+		crdt::state::GCounterMetadata<uint32_t> replica1C(1,8);
+
+		replica1A.serializeFile("../../tests/temp_data/gcounterA.json");
+		replica1B.serializeFile("../../tests/temp_data/gcounterB.json");
+		replica1C.serializeFile("../../tests/temp_data/gcounterC.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/gcounterA.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/gcounterB.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/gcounterC.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(replica1AString == replica1A.serialize());
+		REQUIRE(replica1BString == replica1B.serialize());
+		REQUIRE(replica1CString == replica1C.serialize());
 	}
 #endif
 #ifdef LOCAL_TESTING
 	SECTION("Test deserialize function reading from a file")
 	{
+		crdt::state::GCounterMetadata<uint32_t> replica1A(1,6);
+		crdt::state::GCounterMetadata<uint32_t> replica1B(1,15);
+		crdt::state::GCounterMetadata<uint32_t> replica1C(1,8);
+
+		replica1A.serializeFile("../../tests/temp_data/gcounter1A.json");
+		replica1B.serializeFile("../../tests/temp_data/gcounter1B.json");
+		replica1C.serializeFile("../../tests/temp_data/gcounter1C.json");
+
+		crdt::state::GCounterMetadata<uint32_t> replica2A;
+		crdt::state::GCounterMetadata<uint32_t> replica2B;
+		crdt::state::GCounterMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/gcounter1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/gcounter1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/gcounter1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
 	}
 #endif
 }
@@ -1158,7 +1226,7 @@ TEST_CASE("Test PNCounterSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
-
+	//taps
 	SECTION("Test serialize function")
 	{
 	}
