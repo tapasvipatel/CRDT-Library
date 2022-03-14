@@ -6,7 +6,9 @@ set(CMAKE_CXX_FLAGS "")
 set(CMAKE_CXX_FLAGS_DEBUG "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
-add_subdirectory(src)
+if(BUILD_CLEAN)
+    add_subdirectory(src)
+endif()
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
