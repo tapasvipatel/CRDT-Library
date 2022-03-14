@@ -785,7 +785,7 @@ If you want to contribute any new test cases, please add the test case in and cr
 
 
 
-<h2 id="Benchmark">🤝 Performance Analysis </h2>
+<h2 id="Benchmark">🧪 Performance Analysis </h2>
 Here is a showcase of our benchmark analysis. To better showcase the advantage of C++ has over other framework we decided to compare it with an existing Python libary: https://github.com/anshulahuja98/python3-crdt. Special Credits to Geetesh Gupta and Anshul Ahuja who are the rightful owners of this libary. Please go and check them out as well.
 
 PC Specs for Benchmark:
@@ -804,7 +804,7 @@ https://www.userbenchmark.com/UserRun/6945534
 | *Mutable String* | 2770.35 | 2351.95 |
 | Vector | 2278.03 | N/A |
 | G-Map (Generic) | 7690.62 | N/A |
-| G-Map (String) | 567307 | N/A |
+| G-Map (String) | 192290 | N/A |
 | Priority Queue | 8739.66 | N/A |
 
 
