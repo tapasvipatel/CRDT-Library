@@ -274,17 +274,73 @@ int main(int argc, char* argv[])
 		else if(list_tokens[0] == "print")
 		{
 			std::cout << "------------------------------------------" << std::endl;
+			
+			// GCounter
+			std::cout << "GCounter Value: " << std::to_string(gcounter1.queryPayload()) << std::endl;
+
+			// PNCounter
 			std::cout << "PNCounter Value: " << std::to_string(counter1.queryPayload()) << std::endl;
 
+			// TwoPSet
 			std::set<std::string> payload = set1.queryTwoPSet();
 			std::string setString = "{";
 			for(auto item : payload)
 			{
 				setString += item + ",";
 			}
-
 			setString += "}";
 			std::cout << "TwoPSet Value: " << setString << std::endl;
+
+			// GMap
+			std::map<int, int> gmap_payload = gmap1.getTotalPayload();
+			std::string gmapString = "{";
+			for(auto item : gmap_payload)
+			{
+				gmapString += "(" + std::to_string(item.first) + "," + std::to_string(item.second) + ")" + ",";
+			}
+			gmapString += "}";
+			std::cout << "GMap Value: " << gmapString << std::endl;
+
+			// GSet
+			std::set<std::string> gset_payload = gset1.queryPayload();
+			std::string gsetString = "{";
+			for(auto item : gset_payload)
+			{
+				gsetString += item + ",";
+			}
+			gsetString += "}";
+			std::cout << "GSet Value: " << gsetString << std::endl;
+
+			// Multiset
+			std::multiset<int> multiset_payload = multiset1.queryPayload();
+			std::string multisetString = "{";
+			for(auto item : multiset_payload)
+			{
+				multisetString += std::to_string(item) + ",";
+			}
+			multisetString += "}";
+			std::cout << "MultiSet Value: " << multisetString << std::endl;
+
+			// ORSet
+			std::vector<std::string> orset_payload = orset1.queryPayload();
+			std::string orsetString = "{";
+			for(auto item : orset_payload)
+			{
+				orsetString += item + ",";
+			}
+			orsetString += "}";
+			std::cout << "ORSet Value: " << orsetString << std::endl;
+
+			// Vector
+			std::vector<std::string> vector_payload = vector1.queryPayload();
+			std::string vectorString = "{";
+			for(auto item : vector_payload)
+			{
+				vectorString += item + ",";
+			}
+			vectorString += "}";
+			std::cout << "Vector Value: " << vectorString << std::endl;
+
 			std::cout << "------------------------------------------" << std::endl;
 		}
 		else if(list_tokens[0] == "sync")
@@ -305,6 +361,10 @@ int main(int argc, char* argv[])
 			{
 				std::cout << set1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[add, remove, serialize]" << std::endl;
+			}
 
 			set1.addExternalReplica({set1Metadata});
 		}
@@ -322,6 +382,10 @@ int main(int argc, char* argv[])
 			{
 				std::cout << counter1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[increase, decrease, serialize]" << std::endl;
+			}
 
 			counter1.addExternalReplica({counter1Metadata});
 		}
@@ -335,6 +399,12 @@ int main(int argc, char* argv[])
 			{
 				std::cout << gcounter1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[increase, serialize]" << std::endl;
+			}
+
+			gcounter1.addExternalReplica({gcounter1Metadata});
 		}
 		else if(list_tokens[0] == "gmap")
 		{
@@ -346,6 +416,12 @@ int main(int argc, char* argv[])
 			{
 				std::cout << gmap1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, serialize]" << std::endl;
+			}
+
+			gmap1.addExternalReplica({gmap1Metadata});
 		}
 		else if(list_tokens[0] == "gset")
 		{
@@ -357,6 +433,13 @@ int main(int argc, char* argv[])
 			{
 				std::cout << gset1Metadata.serialize() << std::endl;
 			}
+
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, serialize]" << std::endl;
+			}
+
+			gset1.addExternalReplica({gset1Metadata});
 		}
 		else if(list_tokens[0] == "multiset")
 		{
@@ -368,6 +451,12 @@ int main(int argc, char* argv[])
 			{
 				std::cout << multiset1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, serialize]" << std::endl;
+			}
+
+			multiset1.addExternalReplica({multiset1Metadata});
 		}
 		else if(list_tokens[0] == "orset")
 		{
@@ -379,6 +468,12 @@ int main(int argc, char* argv[])
 			{
 				std::cout << orset1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, serialize]" << std::endl;
+			}
+
+			orset1.addExternalReplica({orset1Metadata});
 		}
 		else if(list_tokens[0] == "vector")
 		{
@@ -390,6 +485,12 @@ int main(int argc, char* argv[])
 			{
 				std::cout << vector1Metadata.serialize() << std::endl;
 			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, serialize]" << std::endl;
+			}
+
+			vector1.addExternalReplica({vector1Metadata});
 		}
 	}
 

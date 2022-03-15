@@ -182,8 +182,6 @@ class GMapSB : CrdtObject<T>
     //key reprents the id of the replica
     std::unordered_map<uint32_t,std::map<K,T>> payload; 
 
-    std::map<K,T> totalPayload;
-
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -210,6 +208,7 @@ protected:
         return false;
     }
 public:
+    std::map<K,T> totalPayload;
     GMapSB()
     {
         ;
@@ -310,6 +309,11 @@ public:
             queryResults.push_back(value);
         }
         return queryResults;
+    }
+
+    std::map<K,T> getTotalPayload()
+    {
+        return this->totalPayload;
     }
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
