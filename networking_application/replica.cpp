@@ -26,7 +26,7 @@ int server_port;
 std::ofstream server_log;
 std::ofstream client_log;
 
-std::unordered_map<std::string, int> list_servers;
+std::vector<int> list_servers;
 
 // List of crdts for each replica
 crdt::state::TwoPSetSB<std::string> set1;
@@ -62,8 +62,13 @@ void handle_requests()
 	{
 		server_log << "SERVER: Accepted connection" << std::endl;
 		server_log << "SERVER: Processing request" << std::endl;
-		char* message = "HELLO WORLD";
-		write(new_connection_socket, message, strlen(message));
+
+		std::string message;
+		message += counter1Metadata.serialize();
+		message += "\n";
+		message += set1Metadata.serialize();
+
+		write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
 
 		if(!start_server)
 		{
@@ -80,30 +85,56 @@ void handle_requests()
 
 void generate_requests()
 {
-	client_log << "CLIENT: Initiating request" << std::endl;
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			client_log << "CLIENT: Initiating request" << std::endl;
 
-	// Initialize socket parameters
-	int socket_client;
-	struct sockaddr_in client_sockaddr;
-	char response[5000];
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
 
-	socket_client = socket(AF_INET, SOCK_STREAM, 0);
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
 
-	// Initialize sockaddr structure
-	client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	client_sockaddr.sin_family = AF_INET;
-	client_sockaddr.sin_port = htons(server_port);
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
 
-	// Connect to specified port
-	connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
 
-	// Receive response from server
-	recv(socket_client, response, 5000, 0);
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
 
-	client_log << response << std::endl;
-	close(socket_client);
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
 
-	client_log << "CLIENT: Finished request" << std::endl;
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge pncounter
+			crdt::state::PNCounterMetadata<int> new_counter;
+			new_counter.deserialize(serialized_strings[0]);
+			counter1.addExternalReplica({counter1Metadata, new_counter});
+
+			// Merge twopset
+			crdt::state::TwoPSetMetadata<std::string> new_set;
+			new_set.deserialize(serialized_strings[1]);
+			set1.addExternalReplica({set1Metadata, new_set});
+
+			close(socket_client);
+			client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			client_log << "CLIENT: Finished request" << std::endl;
+		}
+	}
 }
 
 void client_requests()
@@ -121,6 +152,14 @@ int main(int argc, char* argv[])
 	server_ip_address = argv[2];
 	server_port = std::stoi(argv[3]);
 
+	// Initialize CRDTs
+	set1Metadata.id = server_port;
+	counter1Metadata.id = server_port;
+
+	// Initialize servers
+	list_servers.push_back(2020);
+	list_servers.push_back(2021);
+
 	start_server = true;
 	start_client = true;
 
@@ -130,12 +169,9 @@ int main(int argc, char* argv[])
 	client_log.open(client_log_path);
 
 	std::thread server_thread(handle_requests);
-	std::thread client_thread(client_requests);
+	//std::thread client_thread(client_requests);
 
 	std::string input_command = "";
-
-	// Initialize CRDTs
-	set1Metadata.id = server_port;
 
 	while(input_command.compare("exit"))
 	{
@@ -204,11 +240,15 @@ int main(int argc, char* argv[])
 
 			counter1.addExternalReplica({counter1Metadata});
 		}
+		else if(list_tokens[0] == "sync")
+		{
+			generate_requests();
+		}
 	}
 
 	start_server = false;
 	start_client = false;
-	client_thread.join();
+	//client_thread.join();
 
 	server_log.close();
 	client_log.close();
