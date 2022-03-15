@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(crdt-networking-application VERSION 1.0.0 LANGUAGES CXX)
+project(crdt-replica-application VERSION 1.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS "")
-set(CMAKE_CXX_FLAGS_DEBUG "")
-set(CMAKE_CXX_FLAGS_RELEASE "")
+link_directories(replica ${CMAKE_BINARY_DIR}/src)
+add_executable(replica replica.cpp)
 
-add_subdirectory(server)
-add_subdirectory(client)
+target_link_libraries(replica libcrdt.a -pthread)
