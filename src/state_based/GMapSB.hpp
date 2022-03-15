@@ -88,7 +88,8 @@ public:
         
         for(auto value : this->payload)
         {
-            internal[std::to_string(value.first)] = std::to_string(value.second);
+            //json internalPayload(value.second);
+            internal[std::to_string(value.first)] = value.second;
         }
 
         j["payload"] = internal.dump();
@@ -127,7 +128,7 @@ public:
         {
             std::string value = it.value();
             value.erase(remove(value.begin(), value.end(), '"'), value.end());
-            this->payload[std::stoi(it.key())] = std::stoi(value);
+            this->payload[std::stoi(it.key())] = value;
         }
     }
 
@@ -413,6 +414,12 @@ public:
     {
         ;
     }
+
+    void setID(uint32_t id)
+    {
+        this->id = id;
+    }
+
     std::string fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)
     {
         std::multiset<std::string> mergeStringA;
@@ -514,6 +521,11 @@ public:
     {
         return this->totalPayload[key];
     }
+
+    std::map<K,T> getTotalPayload()
+    {
+        return this->totalPayload;
+    } 
 
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
