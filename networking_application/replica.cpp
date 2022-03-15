@@ -16,6 +16,12 @@ ALL CREDITS GIVEN TO THIS WEBSITE AND ITS AUTHORS FOR SIMPLIFYING THE PROCESS TO
 
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/TwoPSetSB.hpp"
+#include "../src/state_based/GCounterSB.hpp"
+#include "../src/state_based/GMapSB.hpp"
+#include "../src/state_based/GSetSB.hpp"
+#include "../src/state_based/MultiSetSB.hpp"
+#include "../src/state_based/ORSetSB.hpp"
+#include "../src/state_based/VectorSB.hpp"
 
 bool start_server;
 bool start_client;
@@ -34,6 +40,24 @@ crdt::state::TwoPSetMetadata<std::string> set1Metadata;
 
 crdt::state::PNCounterSB<int> counter1;
 crdt::state::PNCounterMetadata<int> counter1Metadata;
+
+crdt::state::GCounterSB<int> gcounter1;
+crdt::state::GCounterMetadata<int> gcounter1Metadata;
+
+crdt::state::GMapSB<int, int> gmap1;
+crdt::state::GMapMetadata<int, int> gmap1Metadata;
+
+crdt::state::GSetSB<std::string> gset1;
+crdt::state::GSetMetadata<std::string> gset1Metadata;
+
+crdt::state::MultiSetSB<int> multiset1;
+crdt::state::MultiSetMetadata<int> multiset1Metadata;
+
+crdt::state::ORSetSB<std::string> orset1;
+crdt::state::ORSetMetadata<std::string> orset1Metadata;
+
+crdt::state::VectorSB<std::string> vector1;
+crdt::state::VectorMetadata<std::string> vector1Metadata;
 
 void handle_requests()
 {
@@ -67,6 +91,18 @@ void handle_requests()
 		message += counter1Metadata.serialize();
 		message += "\n";
 		message += set1Metadata.serialize();
+		message += "\n";
+		message += gcounter1Metadata.serialize();
+		message += "\n";
+		message += gmap1Metadata.serialize();
+		message += "\n";
+		message += gset1Metadata.serialize();
+		message += "\n";
+		message += multiset1Metadata.serialize();
+		message += "\n";
+		message += orset1Metadata.serialize();
+		message += "\n";
+		message += vector1Metadata.serialize();
 
 		write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
 
@@ -130,6 +166,36 @@ void generate_requests()
 			new_set.deserialize(serialized_strings[1]);
 			set1.addExternalReplica({set1Metadata, new_set});
 
+			// Merge gcounter
+			crdt::state::GCounterMetadata<int> new_gcounter;
+			new_gcounter.deserialize(serialized_strings[2]);
+			gcounter1.addExternalReplica({gcounter1Metadata, new_gcounter});
+
+			// Merge gmap
+			crdt::state::GMapMetadata<int, int> new_gmap;
+			new_gmap.deserialize(serialized_strings[3]);
+			gmap1.addExternalReplica({gmap1Metadata, new_gmap});
+
+			// Merge gset
+			crdt::state::GSetMetadata<std::string> new_gset;
+			new_gset.deserialize(serialized_strings[4]);
+			gset1.addExternalReplica({gset1Metadata, new_gset});
+
+			// Merge multiset
+			crdt::state::MultiSetMetadata<int> new_multiset;
+			new_multiset.deserialize(serialized_strings[5]);
+			multiset1.addExternalReplica({multiset1Metadata, new_multiset});
+
+			// Merge orset
+			crdt::state::ORSetMetadata<std::string> new_orset;
+			new_orset.deserialize(serialized_strings[6]);
+			orset1.addExternalReplica({orset1Metadata, new_orset});
+
+			// Merge vector
+			crdt::state::VectorMetadata<std::string> new_vector;
+			new_vector.deserialize(serialized_strings[7]);
+			vector1.addExternalReplica({vector1Metadata, new_vector});
+
 			close(socket_client);
 			client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
 			client_log << "CLIENT: Finished request" << std::endl;
@@ -178,6 +244,11 @@ int main(int argc, char* argv[])
 		std::cout << ">> ";
 		std::getline(std::cin, input_command);
 
+		if(input_command.length() == 0)
+		{
+			continue;
+		}
+
 		std::stringstream temp_string_stream(input_command);
 		std::string temp;
 		std::vector<std::string> list_tokens;
@@ -188,12 +259,21 @@ int main(int argc, char* argv[])
 
 		if(list_tokens[0] == "available")
 		{
+			std::cout << "------------------------------------------" << std::endl;
 			std::cout << "Available CRDTs" << std::endl;
-			std::cout << "> PNCounter" << std::endl;
-			std::cout << "> TwoPSet" << std::endl;
+			std::cout << "> PNCounter<int>" << std::endl;
+			std::cout << "> TwoPSet<string>" << std::endl;
+			std::cout << "> GCounter<int>" << std::endl;
+			std::cout << "> GMap<int, int>" << std::endl;
+			std::cout << "> GSet<string>" << std::endl;
+			std::cout << "> MultiSet<int>" << std::endl;
+			std::cout << "> ORSet<string>" << std::endl;
+			std::cout << "> Vector<string>" << std::endl;
+			std::cout << "------------------------------------------" << std::endl;
 		}
 		else if(list_tokens[0] == "print")
 		{
+			std::cout << "------------------------------------------" << std::endl;
 			std::cout << "PNCounter Value: " << std::to_string(counter1.queryPayload()) << std::endl;
 
 			std::set<std::string> payload = set1.queryTwoPSet();
@@ -205,8 +285,13 @@ int main(int argc, char* argv[])
 
 			setString += "}";
 			std::cout << "TwoPSet Value: " << setString << std::endl;
+			std::cout << "------------------------------------------" << std::endl;
 		}
-		else if(list_tokens[0] == "set")
+		else if(list_tokens[0] == "sync")
+		{
+			generate_requests();
+		}
+		else if(list_tokens[0] == "twopset")
 		{
 			if(list_tokens[1] == "add")
 			{
@@ -240,9 +325,71 @@ int main(int argc, char* argv[])
 
 			counter1.addExternalReplica({counter1Metadata});
 		}
-		else if(list_tokens[0] == "sync")
+		else if(list_tokens[0] == "gcounter")
 		{
-			generate_requests();
+			if(list_tokens[1] == "increase")
+			{
+				gcounter1Metadata.updatePayload(std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << gcounter1Metadata.serialize() << std::endl;
+			}
+		}
+		else if(list_tokens[0] == "gmap")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				gmap1Metadata.insert(std::stoi(list_tokens[2]), std::stoi(list_tokens[3]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << gmap1Metadata.serialize() << std::endl;
+			}
+		}
+		else if(list_tokens[0] == "gset")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				gset1Metadata.insert(list_tokens[2]);
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << gset1Metadata.serialize() << std::endl;
+			}
+		}
+		else if(list_tokens[0] == "multiset")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				multiset1Metadata.insert(std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << multiset1Metadata.serialize() << std::endl;
+			}
+		}
+		else if(list_tokens[0] == "orset")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				orset1Metadata.insert(list_tokens[2]);
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << orset1Metadata.serialize() << std::endl;
+			}
+		}
+		else if(list_tokens[0] == "vector")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				vector1Metadata.push_back(list_tokens[2]);
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << vector1Metadata.serialize() << std::endl;
+			}
 		}
 	}
 
