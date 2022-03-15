@@ -88,7 +88,8 @@ public:
         
         for(auto value : this->payload)
         {
-            internal[std::to_string(value.first)] = std::to_string(value.second);
+            json internalPayload(value.second);
+            internal[std::to_string(value.first)] = internalPayload;
         }
 
         j["payload"] = internal.dump();
@@ -514,6 +515,11 @@ public:
     {
         return this->totalPayload[key];
     }
+
+    std::map<K,T> getTotalPayload()
+    {
+        return this->totalPayload;
+    } 
 
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)

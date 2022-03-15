@@ -18,6 +18,9 @@ using namespace std;
 using std::filesystem::directory_iterator;
 tgui::Label::Ptr usersOnline;
 
+crdt::state::GMapMetadata<int32_t, string> priorityList;
+crdt::state::GMapSBString<int32_t, string> priorityListServer;
+
 //taps
 string filePath = "/home/vishcapstone/Documents/CRDT-Library/trello_application/json/";
 crdt::state::LWWMultiSetMetadata<string> backlogList;
@@ -46,6 +49,8 @@ crdt::state::PNCounterSB<uint32_t> numTasksCompleteServer;
 
 crdt::state::PNCounterMetadata<uint32_t> numTasksNotadded;
 crdt::state::PNCounterSB<uint32_t> numTasksNotaddedServer;
+
+int32_t globalTime = 0;
 
 class userInfo {
 private:
@@ -235,9 +240,9 @@ void updateTableMaster(tgui::GuiBase &gui)
     // inprogress
     multiset<string> inprogressPayload = inprogressServer.queryPayload();
     count = 0;
-    for(auto element : inprogressPayload)
+    for(auto element = inprogressPayload.begin(); element != inprogressPayload.end(); element++)
     {
-        auto inprogress = tgui::Button::create(element);
+        auto inprogress = tgui::Button::create(*element);
         inprogress->setSize({"12%", "12%"});
         int y = count + 308;
         count += 150;
@@ -294,6 +299,30 @@ void updateTableMaster(tgui::GuiBase &gui)
         notadded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         notadded->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(notadded);
+    }
+
+    // priority list
+    map<int32_t, string> prioritylistPayload = priorityListServer.getTotalPayload();
+    count = 0;
+    int iteration = 0;
+    
+    for (auto i = prioritylistPayload.rbegin(); i != prioritylistPayload.rend(); i++)
+    {
+        if (iteration == 5)
+        {
+            break;
+        }
+
+        auto priorityListButton = tgui::Button::create(i->second);
+        priorityListButton->setSize({"10%, 10%"});
+        int y = count + 258;
+        count += 100;
+        string y_position = to_string(y);
+        priorityListButton->setPosition(1610, y);
+        priorityListButton->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        priorityListButton->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(priorityListButton);
+        iteration++;
     }
 
     // update counters on the screen
@@ -545,9 +574,17 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         cout << "Task: " << _task << endl;
         cout << "Urgency: " << _urgency << endl;
 
+        string _data = _urgency + ". " + _task;
+
+        int32_t key = stoi(_urgency);
+
+        priorityList.insert(key, _task);
+        priorityList.serializeFile(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+
         switch (boardType) {
             case 1:
-                backlogList.insert(0, _task);
+                backlogList.insert(globalTime, _task);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
                 numTasksBacklog.increasePayload(1);
@@ -556,7 +593,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 2:
-                inprogressList.insert(0, _task);
+                inprogressList.insert(globalTime, _task);
                 inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
                 inprogressServer.addExternalReplica({inprogressList});
                 numTasksInprogress.increasePayload(1);
@@ -565,7 +602,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 3:
-                readytotestList.insert(0, _task);
+                readytotestList.insert(globalTime, _task);
                 readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
                 readytotestServer.addExternalReplica({readytotestList});
                 numTasksReadytotest.increasePayload(1);
@@ -574,7 +611,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 4:
-                completeList.insert(0, _task);
+                completeList.insert(globalTime, _task);
                 completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
                 completeServer.addExternalReplica({completeList});
                 numTasksComplete.increasePayload(1);
@@ -584,7 +621,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 break;
             case 5:
                 //auto temp = std::chrono::system_clock::now();
-                notaddedList.insert(0, _task);
+                notaddedList.insert(globalTime, _task);
                 notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
                 notaddedServer.addExternalReplica({notaddedList});
                 numTasksNotadded.increasePayload(1);
@@ -593,6 +630,8 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
         }
+
+        globalTime += 1;
     }
 }
 
@@ -676,6 +715,14 @@ void loadWidgets2(tgui::GuiBase &gui)
     logOut ->getRenderer()->setBackgroundColor(tgui::Color::Red);
     logOut ->getRenderer()->setTextColor(tgui::Color::White);
     gui.add(logOut); 
+
+    // Priority List Button
+    auto priorityListHeader = tgui::Button::create("Priority");
+    priorityListHeader ->setSize({"10%", "10%"});
+    priorityListHeader ->setPosition({"87%", "15.0%"});
+    priorityListHeader ->getRenderer()->setBackgroundColor(tgui::Color::White);
+    priorityListHeader ->getRenderer()->setTextColor(tgui::Color::Red);
+    gui.add(priorityListHeader); 
 
     //Backlog button
     auto backlog = tgui::Button::create("Backlog");
