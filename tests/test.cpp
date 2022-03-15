@@ -562,8 +562,7 @@ TEST_CASE("Test VectorSB", "[classic]")
 		REQUIRE(handler2.queryPayload() == test);
 		REQUIRE(handler3.queryPayload() == test);
 	}
-
-	// taps
+	
 	SECTION("Test serialize function")
 	{
 		crdt::state::VectorMetadata<uint32_t> replica1A(4,{3,6,9});
@@ -2103,7 +2102,7 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
-	
+
 	SECTION("Test serialize function")
 	{
 		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,{5,5},0);
@@ -2278,23 +2277,78 @@ TEST_CASE("Test SringOB", "[classic]")
 
 	SECTION("Test serialize function")
 	{
+		crdt::operation::StringMetaData<std::string> replica1A(0, "Hello           is");
+		crdt::operation::StringMetaData<std::string> replica1B(0, "Hello My");
+		crdt::operation::StringMetaData<std::string> replica1C(0, "Hello      name is Bob");
+
+		REQUIRE(replica1A.serialize() == "{\"id\":0,\"payload\":\"Hello           is\"}");
+		REQUIRE(replica1B.serialize() == "{\"id\":0,\"payload\":\"Hello My\"}");
+		REQUIRE(replica1C.serialize() == "{\"id\":0,\"payload\":\"Hello      name is Bob\"}");
 	}
 
 	SECTION("Test deserialize function")
 	{
+		crdt::operation::StringMetaData<std::string> replica1A(0, "Hello           is");
+		crdt::operation::StringMetaData<std::string> replica1B(0, "Hello My");
+		crdt::operation::StringMetaData<std::string> replica1C(0, "Hello      name is Bob");
+
+		REQUIRE(replica1A.serialize() == "{\"id\":0,\"payload\":\"Hello           is\"}");
+		REQUIRE(replica1B.serialize() == "{\"id\":0,\"payload\":\"Hello My\"}");
+		REQUIRE(replica1C.serialize() == "{\"id\":0,\"payload\":\"Hello      name is Bob\"}");
+
+		crdt::operation::StringMetaData<std::string> replica2A;
+		crdt::operation::StringMetaData<std::string> replica2B;
+		crdt::operation::StringMetaData<std::string> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"id\":0,\"payload\":\"Hello           is\"}");
+		REQUIRE(replica2B.serialize() == "{\"id\":0,\"payload\":\"Hello My\"}");
+		REQUIRE(replica2C.serialize() == "{\"id\":0,\"payload\":\"Hello      name is Bob\"}");
 	}
 #ifdef LOCAL_TESTING
 	SECTION("Test serialize function saving to a file")
 	{
+		crdt::operation::StringMetaData<std::string> replica1A(0, "Hellois");
+		crdt::operation::StringMetaData<std::string> replica1B(0, "HelloMy");
+
+		replica1A.serializeFile("../../tests/temp_data/string1A.json");
+		replica1B.serializeFile("../../tests/temp_data/string1B.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/string1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/string1B.json");
+        replica1Bi >> replica1BString;
+
+        REQUIRE(replica1AString == replica1A.serialize());
+		REQUIRE(replica1BString == replica1B.serialize());
 	}
 #endif
 #ifdef LOCAL_TESTING
 	SECTION("Test deserialize function reading from a file")
 	{
+		crdt::operation::StringMetaData<std::string> replica1A(0, "Hellois");
+		crdt::operation::StringMetaData<std::string> replica1B(0, "HelloMy");
+
+		replica1A.serializeFile("../../tests/temp_data/string1A.json");
+		replica1B.serializeFile("../../tests/temp_data/string1B.json");
+
+		crdt::operation::StringMetaData<std::string> replica2A;
+		crdt::operation::StringMetaData<std::string> replica2B;
+
+		replica2A.deserializeFile("../../tests/temp_data/string1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/string1B.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
 	}
 #endif
 }
-
 
 // Performance Benchmark
 TEST_CASE("Performance Benchmark", "[classic]")
