@@ -1,3 +1,9 @@
 CLIENT: Initiating request
 
 CLIENT: Finished request
+CLIENT: Initiating request
+HELLO WORLD
+CLIENT: Finished request
+CLIENT: Initiating request
+HELLO WORLD
+CLIENT: Finished request

@@ -12,18 +12,10 @@ ALL CREDITS GIVEN TO THIS WEBSITE AND ITS AUTHORS FOR SIMPLIFYING THE PROCESS TO
 #include <unistd.h>
 #include <thread>
 #include <chrono>
+#include <sstream>
 
 #include "../src/state_based/PNCounterSB.hpp"
-#include "../src/state_based/GCounterSB.hpp"
-#include "../src/state_based/GMapSB.hpp"
-#include "../src/state_based/GSetSB.hpp"
-#include "../src/state_based/MultiSetSB.hpp"
-#include "../src/state_based/ORSetSB.hpp"
-#include "../src/state_based/PriorityQueueSB.hpp"
 #include "../src/state_based/TwoPSetSB.hpp"
-#include "../src/state_based/VectorSB.hpp"
-#include "../src/operation_based/StringOB.hpp"
-#include "../src/state_based/LWWMultiSetSB.hpp"
 
 bool start_server;
 bool start_client;
@@ -31,10 +23,17 @@ std::string server_name;
 std::string server_ip_address;
 int server_port;
 
-std::unordered_map<std::string, int> list_servers;
-
 std::ofstream server_log;
 std::ofstream client_log;
+
+std::unordered_map<std::string, int> list_servers;
+
+// List of crdts for each replica
+crdt::state::TwoPSetSB<std::string> set1;
+crdt::state::TwoPSetMetadata<std::string> set1Metadata;
+
+crdt::state::PNCounterSB<int> counter1;
+crdt::state::PNCounterMetadata<int> counter1Metadata;
 
 void handle_requests()
 {
@@ -93,7 +92,7 @@ void generate_requests()
 	// Initialize sockaddr structure
 	client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	client_sockaddr.sin_family = AF_INET;
-	client_sockaddr.sin_port = htons(8080);
+	client_sockaddr.sin_port = htons(server_port);
 
 	// Connect to specified port
 	connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
@@ -112,7 +111,7 @@ void client_requests()
 	while(start_client)
 	{
 		generate_requests();
-		sleep(5);
+		sleep(15);
 	}
 }
 
@@ -121,10 +120,6 @@ int main(int argc, char* argv[])
 	server_name = argv[1];
 	server_ip_address = argv[2];
 	server_port = std::stoi(argv[3]);
-
-	std::cout << server_name << std::endl;
-	std::cout << server_ip_address << std::endl;
-	std::cout << server_port << std::endl;
 
 	start_server = true;
 	start_client = true;
@@ -139,11 +134,76 @@ int main(int argc, char* argv[])
 
 	std::string input_command = "";
 
+	// Initialize CRDTs
+	set1Metadata.id = server_port;
+
 	while(input_command.compare("exit"))
 	{
 		std::cout << ">> ";
-		std::cin >> input_command;
-		std::cout << input_command << std::endl;
+		std::getline(std::cin, input_command);
+
+		std::stringstream temp_string_stream(input_command);
+		std::string temp;
+		std::vector<std::string> list_tokens;
+		while(temp_string_stream >> temp)
+		{
+			list_tokens.push_back(temp);
+		}
+
+		if(list_tokens[0] == "available")
+		{
+			std::cout << "Available CRDTs" << std::endl;
+			std::cout << "> PNCounter" << std::endl;
+			std::cout << "> TwoPSet" << std::endl;
+		}
+		else if(list_tokens[0] == "print")
+		{
+			std::cout << "PNCounter Value: " << std::to_string(counter1.queryPayload()) << std::endl;
+
+			std::set<std::string> payload = set1.queryTwoPSet();
+			std::string setString = "{";
+			for(auto item : payload)
+			{
+				setString += item + ",";
+			}
+
+			setString += "}";
+			std::cout << "TwoPSet Value: " << setString << std::endl;
+		}
+		else if(list_tokens[0] == "set")
+		{
+			if(list_tokens[1] == "add")
+			{
+				set1Metadata.insert(list_tokens[2]);
+			}
+			else if(list_tokens[1] == "remove")
+			{
+				set1Metadata.remove(list_tokens[2]);
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << set1Metadata.serialize() << std::endl;
+			}
+
+			set1.addExternalReplica({set1Metadata});
+		}
+		else if(list_tokens[0] == "pncounter")
+		{
+			if(list_tokens[1] == "increase")
+			{
+				counter1Metadata.increasePayload(std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "decrease")
+			{
+				counter1Metadata.decreasePayload(std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << counter1Metadata.serialize() << std::endl;
+			}
+
+			counter1.addExternalReplica({counter1Metadata});
+		}
 	}
 
 	start_server = false;
