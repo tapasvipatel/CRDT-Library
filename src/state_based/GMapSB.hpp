@@ -88,8 +88,8 @@ public:
         
         for(auto value : this->payload)
         {
-            json internalPayload(value.second);
-            internal[std::to_string(value.first)] = internalPayload;
+            //json internalPayload(value.second);
+            internal[std::to_string(value.first)] = value.second;
         }
 
         j["payload"] = internal.dump();
@@ -128,7 +128,7 @@ public:
         {
             std::string value = it.value();
             value.erase(remove(value.begin(), value.end(), '"'), value.end());
-            this->payload[std::stoi(it.key())] = std::stoi(value);
+            this->payload[std::stoi(it.key())] = value;
         }
     }
 
@@ -414,6 +414,12 @@ public:
     {
         ;
     }
+
+    void setID(uint32_t id)
+    {
+        this->id = id;
+    }
+
     std::string fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)
     {
         std::multiset<std::string> mergeStringA;
