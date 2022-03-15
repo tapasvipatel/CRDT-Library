@@ -1912,7 +1912,7 @@ TEST_CASE("Test MultiSetSB", "[classic]")
 		REQUIRE(handler1.queryPayloadwithID(0) == handler2.queryPayloadwithID(0));
 		REQUIRE(handler2.queryPayloadwithID(0) == handler3.queryPayloadwithID(0));
 	}
-	//taps
+
 	SECTION("Test serialize function")
 	{
 		crdt::state::MultiSetMetadata<uint32_t> replica1A(0);
@@ -2103,22 +2103,90 @@ TEST_CASE("Test LWWMultiSetSB", "[classic]")
 		REQUIRE(handler1.queryPayload() == handler2.queryPayload());
 		REQUIRE(handler2.queryPayload() == handler3.queryPayload());
 	}
-
+	
 	SECTION("Test serialize function")
 	{
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,{5,5},0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,{5,5,7},1);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1C(0,{5,10,15},2);
+
+		REQUIRE(replica1A.serialize() == "{\"currentTime\":0,\"id\":0,\"payload\":{\"0\":[5,5]},\"tombstone\":null}");
+		REQUIRE(replica1B.serialize() == "{\"currentTime\":1,\"id\":0,\"payload\":{\"1\":[5,5,7]},\"tombstone\":null}");
+		REQUIRE(replica1C.serialize() == "{\"currentTime\":2,\"id\":0,\"payload\":{\"2\":[5,10,15]},\"tombstone\":null}");
 	}
 
 	SECTION("Test deserialize function")
 	{
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,{5,5},0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,{5,5,7},1);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1C(0,{5,10,15},2);
+
+		REQUIRE(replica1A.serialize() == "{\"currentTime\":0,\"id\":0,\"payload\":{\"0\":[5,5]},\"tombstone\":null}");
+		REQUIRE(replica1B.serialize() == "{\"currentTime\":1,\"id\":0,\"payload\":{\"1\":[5,5,7]},\"tombstone\":null}");
+		REQUIRE(replica1C.serialize() == "{\"currentTime\":2,\"id\":0,\"payload\":{\"2\":[5,10,15]},\"tombstone\":null}");
+
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica2A;
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica2B;
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"currentTime\":0,\"id\":0,\"payload\":{\"0\":[5,5]},\"tombstone\":null}");
+		REQUIRE(replica2B.serialize() == "{\"currentTime\":1,\"id\":0,\"payload\":{\"1\":[5,5,7]},\"tombstone\":null}");
+		REQUIRE(replica2C.serialize() == "{\"currentTime\":2,\"id\":0,\"payload\":{\"2\":[5,10,15]},\"tombstone\":null}");
 	}
 #ifdef LOCAL_TESTING
 	SECTION("Test serialize function saving to a file")
 	{
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,{5,5},0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,{5,5,7},1);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1C(0,{5,10,15},2);
+
+		replica1A.serializeFile("../../tests/temp_data/lwwmultiset1A.json");
+		replica1B.serializeFile("../../tests/temp_data/lwwmultiset1B.json");
+		replica1C.serializeFile("../../tests/temp_data/lwwmultiset1C.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/lwwmultiset1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/lwwmultiset1B.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/lwwmultiset1C.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(replica1AString == replica1A.serialize());
+		REQUIRE(replica1BString == replica1B.serialize());
+		REQUIRE(replica1CString == replica1C.serialize());
 	}
 #endif
 #ifdef LOCAL_TESTING
 	SECTION("Test deserialize function reading from a file")
 	{
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1A(0,{5,5},0);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1B(0,{5,5,7},1);
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica1C(0,{5,10,15},2);
+
+		replica1A.serializeFile("../../tests/temp_data/lwwmultiset1A.json");
+		replica1B.serializeFile("../../tests/temp_data/lwwmultiset1B.json");
+		replica1C.serializeFile("../../tests/temp_data/lwwmultiset1C.json");
+
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica2A;
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica2B;
+		crdt::state::LWWMultiSetMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/lwwmultiset1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/lwwmultiset1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/lwwmultiset1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
 	}
 #endif
 }
