@@ -5,6 +5,7 @@ TRELLO_APPLICATION=0
 TEST_APPLICATION=0
 PERFORMANCE=0
 CLEAN=0
+NETWORKING=0
 
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -36,6 +37,12 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 		-clean)
 		CLEAN=1
+		shift
+		;;
+	esac
+	case $key in
+		-networking)
+		NETWORKING=1
 		shift
 		;;
 	esac
@@ -75,6 +82,10 @@ fi
 
 if [ $CLEAN -eq 1 ]; then
 	cmake_flags=${cmake_flags}' -DBUILD_CLEAN=1'
+fi
+
+if [ $NETWORKING -eq 1 ]; then
+	cmake_flags=${cmake_flags}' -DBUILD_NETWORKING=1'
 fi
 
 cmake $cmake_flags ../ && make clean && make

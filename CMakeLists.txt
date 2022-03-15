@@ -25,3 +25,7 @@ endif()
 if(BUILD_PERFORMANCE)
     add_subdirectory(performance)
 endif()
+
+if(BUILD_NETWORKING)
+    add_subdirectory(networking_application)
+endif()
