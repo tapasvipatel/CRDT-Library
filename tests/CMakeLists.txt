@@ -6,8 +6,6 @@ add_compile_definitions(BUILD_TESTING=1)
 
 if(LOCAL_TESTING)
     add_compile_definitions(LOCAL_TESTING=1)
-else()
-	add_compile_definitions(LOCAL_TESTING=0)
 endif()
 
 link_directories(crdt_test ${CMAKE_BINARY_DIR}/src)
