@@ -89,7 +89,7 @@ public:
         for(auto value : this->payload)
         {
             //json internalPayload(value.second);
-            internal[std::to_string(value.first)] = value.second;
+            internal[std::to_string(value.first)] = std::to_string(value.second);
         }
 
         j["payload"] = internal.dump();
