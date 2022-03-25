@@ -818,7 +818,7 @@ https://www.userbenchmark.com/UserRun/6945534
   <img src=https://i.ibb.co/kXgDkwJ/Graph.jpg"></a>
 </h1>
 
-The raw data for the benchmark can be found under the folder:  ```/Final Benchmark Result```
+The raw data for the benchmark can be found under the folder:  ```/benchmark```
 
 <h2 id="Contribute">🤝 Contribute </h2>
 Have an data structure in mind such as a binary tree or 2D arrays and want to attempt to make it into a CRDT? No open-source libary
