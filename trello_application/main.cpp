@@ -5,6 +5,7 @@
 #include <TGUI/TGUI.hpp>
 #include "userLogin.hpp"
 #include "../src/state_based/LWWMultiSetSB.hpp"
+#include "../src/state_based/MultiSetSB.hpp"
 #include "../src/state_based/VectorSB.hpp"
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/GMapSB.hpp"
@@ -18,18 +19,21 @@ using namespace std;
 using std::filesystem::directory_iterator;
 tgui::Label::Ptr usersOnline;
 
+crdt::state::GMapMetadata<int32_t, string> priorityList;
+crdt::state::GMapSBString<int32_t, string> priorityListServer;
+
 //taps
-string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/";
-crdt::state::VectorMetadata<string> backlogList;
-crdt::state::VectorSB<string> backlogServer;
-crdt::state::GSetMetadata<string> inprogressList;
-crdt::state::GSetSB<string> inprogressServer;
-crdt::state::ORSetMetadata<string> readytotestList;
-crdt::state::ORSetSB<string> readytotestServer;
-crdt::state::TwoPSetMetadata<string> completeList;
-crdt::state::TwoPSetSB<string> completeServer;
-crdt::state::LWWMultiSetMetadata<string> notaddedList;
-crdt::state::LWWMultiSetSB<string> notaddedServer;
+string filePath = "/home/vishcapstone/Documents/CRDT-Library/trello_application/json/";
+crdt::state::MultiSetMetadata<string> backlogList;
+crdt::state::MultiSetSB<string> backlogServer;
+crdt::state::MultiSetMetadata<string> inprogressList;
+crdt::state::MultiSetSB<string> inprogressServer;
+crdt::state::MultiSetMetadata<string> readytotestList;
+crdt::state::MultiSetSB<string> readytotestServer;
+crdt::state::MultiSetMetadata<string> completeList;
+crdt::state::MultiSetSB<string> completeServer;
+crdt::state::MultiSetMetadata<string> notaddedList;
+crdt::state::MultiSetSB<string> notaddedServer;
 
 // Counters
 crdt::state::PNCounterMetadata<uint32_t> numTasksBacklog;
@@ -46,6 +50,8 @@ crdt::state::PNCounterSB<uint32_t> numTasksCompleteServer;
 
 crdt::state::PNCounterMetadata<uint32_t> numTasksNotadded;
 crdt::state::PNCounterSB<uint32_t> numTasksNotaddedServer;
+
+int32_t globalTime = 0;
 
 class userInfo {
 private:
@@ -217,8 +223,9 @@ userInfo endUser;
 void updateTableMaster(tgui::GuiBase &gui)
 {
     // backlog
-    vector<string> backlogPayload = backlogServer.queryPayload();
+    multiset<string> backlogPayload = backlogServer.queryPayload();
     int count = 0;
+    int deleteCount = 0;
     for(auto element : backlogPayload)
     {
         auto backlog = tgui::Button::create(element);
@@ -230,14 +237,25 @@ void updateTableMaster(tgui::GuiBase &gui)
         backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         backlog->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(backlog);
+
+        auto backlogDelete = tgui::Button::create("-");
+        backlogDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        backlogDelete->setPosition(242, deleteY);
+        backlogDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        backlogDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        backlogDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(backlogDelete);
     }
 
     // inprogress
-    set<string> inprogressPayload = inprogressServer.queryPayload();
+    multiset<string> inprogressPayload = inprogressServer.queryPayload();
     count = 0;
-    for(auto element : inprogressPayload)
+    deleteCount = 0;
+    for(auto element = inprogressPayload.begin(); element != inprogressPayload.end(); element++)
     {
-        auto inprogress = tgui::Button::create(element);
+        auto inprogress = tgui::Button::create(*element);
         inprogress->setSize({"12%", "12%"});
         int y = count + 308;
         count += 150;
@@ -246,11 +264,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         inprogress->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         inprogress->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(inprogress);
+
+        auto inprogressDelete = tgui::Button::create("-");
+        inprogressDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        inprogressDelete->setPosition(558, deleteY);
+        inprogressDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        inprogressDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        inprogressDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(inprogressDelete);
     }
 
     // readytotest
-    vector<string> readytotestPayload = readytotestServer.queryPayload();
+    multiset<string> readytotestPayload = readytotestServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element : readytotestPayload)
     {
         auto readytotest = tgui::Button::create(element);
@@ -262,11 +291,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         readytotest->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         readytotest->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(readytotest);
+
+        auto readytotestDelete = tgui::Button::create("-");
+        readytotestDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        readytotestDelete->setPosition(872, deleteY);
+        readytotestDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        readytotestDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        readytotestDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(readytotestDelete);
     }
 
     // complete
-    set<string> completePayload = completeServer.queryPayload();
+    multiset<string> completePayload = completeServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element : completePayload)
     {
         auto complete = tgui::Button::create(element);
@@ -278,11 +318,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         complete->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         complete->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(complete);
+
+        auto completeDelete = tgui::Button::create("-");
+        completeDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        completeDelete->setPosition(1186, deleteY);
+        completeDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        completeDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        completeDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(completeDelete);
     }
 
     // notadded
     multiset<string> notaddedPayload = notaddedServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element : notaddedPayload)
     {
         auto notadded = tgui::Button::create(element);
@@ -294,6 +345,41 @@ void updateTableMaster(tgui::GuiBase &gui)
         notadded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         notadded->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(notadded);
+
+        auto notaddedDelete = tgui::Button::create("-");
+        notaddedDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        notaddedDelete->setPosition(1500, deleteY);
+        notaddedDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        notaddedDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        notaddedDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(notaddedDelete);
+    }
+
+    // priority list
+    map<int32_t, string> prioritylistPayload = priorityListServer.getTotalPayload();
+    count = 0;
+    int iteration = 0;
+    
+    for (auto i = prioritylistPayload.rbegin(); i != prioritylistPayload.rend(); i++)
+    {
+        if (iteration == 5)
+        {
+            break;
+        }
+
+        string data = to_string(i->first) + ". " + i->second;
+        auto priorityListButton = tgui::Button::create(data);
+        priorityListButton->setSize({"10%, 10%"});
+        int y = count + 258;
+        count += 100;
+        string y_position = to_string(y);
+        priorityListButton->setPosition(1610, y);
+        priorityListButton->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+        priorityListButton->getRenderer()->setTextColor(tgui::Color::Black);
+        gui.add(priorityListButton);
+        iteration++;
     }
 
     // update counters on the screen
@@ -370,12 +456,13 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     string inprogressFolder = rootFolder + "inprogress";
     string readytotestFolder = rootFolder + "readytotest";
     string notaddedFolder = rootFolder + "notadded";
+    string prioritylistFolder = rootFolder + "prioritylist";
 
     // Get backlog updates
-    vector<crdt::state::VectorMetadata<string>> backlogMetadataList;
+    vector<crdt::state::MultiSetMetadata<string>> backlogMetadataList;
     for(auto & file : fs::directory_iterator(backlogFolder))
     {
-        crdt::state::VectorMetadata<std::string> replica;
+        crdt::state::MultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         backlogMetadataList.push_back(replica);
     }
@@ -383,10 +470,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     backlogServer.addExternalReplica(backlogMetadataList);
 
     // Get complete updates
-    vector<crdt::state::TwoPSetMetadata<string>> completeMetadataList;
+    vector<crdt::state::MultiSetMetadata<string>> completeMetadataList;
     for(auto & file : fs::directory_iterator(completeFolder))
     {
-        crdt::state::TwoPSetMetadata<string> replica;
+        crdt::state::MultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         completeMetadataList.push_back(replica);
     }
@@ -394,10 +481,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     completeServer.addExternalReplica(completeMetadataList);
 
     // Get inprogress updates
-    vector<crdt::state::GSetMetadata<string>> inprogressMetadataList;
+    vector<crdt::state::MultiSetMetadata<string>> inprogressMetadataList;
     for(auto & file : fs::directory_iterator(inprogressFolder))
     {
-        crdt::state::GSetMetadata<string> replica;
+        crdt::state::MultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         inprogressMetadataList.push_back(replica);
     }
@@ -405,10 +492,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     inprogressServer.addExternalReplica(inprogressMetadataList);
 
     // Get readytotest updates
-    vector<crdt::state::ORSetMetadata<string>> readytotestMetadataList;
+    vector<crdt::state::MultiSetMetadata<string>> readytotestMetadataList;
     for(auto & file : fs::directory_iterator(readytotestFolder))
     {
-        crdt::state::ORSetMetadata<string> replica;
+        crdt::state::MultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         readytotestMetadataList.push_back(replica);
     }
@@ -416,15 +503,26 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     readytotestServer.addExternalReplica(readytotestMetadataList);
 
     // Get notadded updates
-    vector<crdt::state::LWWMultiSetMetadata<string>> notaddedMetadataList;
+    vector<crdt::state::MultiSetMetadata<string>> notaddedMetadataList;
     for(auto & file : fs::directory_iterator(notaddedFolder))
     {
-        crdt::state::LWWMultiSetMetadata<string> replica;
+        crdt::state::MultiSetMetadata<string> replica;
         replica.deserializeFile(file.path());
         notaddedMetadataList.push_back(replica);
     }
 
     notaddedServer.addExternalReplica(notaddedMetadataList);
+
+    // Get priority list updates
+    vector<crdt::state::GMapMetadata<int32_t, string>> priorityMetadataList;
+    for(auto & file : fs::directory_iterator(prioritylistFolder))
+    {
+        crdt::state::GMapMetadata<int32_t, string> replica;
+        replica.deserializeFile_StringValue(file.path());
+        priorityMetadataList.push_back(replica);
+    }
+
+    priorityListServer.addExternalReplica(priorityMetadataList);
 
     // Get counter updates
     string numTasksBacklogFolder = rootFolder + "numtasksbacklog";
@@ -545,9 +643,17 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         cout << "Task: " << _task << endl;
         cout << "Urgency: " << _urgency << endl;
 
+        string _data = _urgency + ". " + _task;
+
+        int32_t key = stoi(_urgency);
+
+        priorityList.insert(key, _task);
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+
         switch (boardType) {
             case 1:
-                backlogList.push_back(_task);
+                backlogList.insert(_task);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
                 numTasksBacklog.increasePayload(1);
@@ -584,7 +690,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 break;
             case 5:
                 //auto temp = std::chrono::system_clock::now();
-                notaddedList.insert(0, _task);
+                notaddedList.insert(_task);
                 notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
                 notaddedServer.addExternalReplica({notaddedList});
                 numTasksNotadded.increasePayload(1);
@@ -593,6 +699,8 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
         }
+
+        globalTime += 1;
     }
 }
 
@@ -634,7 +742,7 @@ void addBoard(tgui::GuiBase &gui, int boardType) {
         while (addWindow.pollEvent(event))
         {
             if (event.type == sf::Event::Closed) {
-                endUser.setUserStatus(0);
+                endUser.setUserStatus(1);
                 addWindow.close();
             }
                 
@@ -676,6 +784,14 @@ void loadWidgets2(tgui::GuiBase &gui)
     logOut ->getRenderer()->setBackgroundColor(tgui::Color::Red);
     logOut ->getRenderer()->setTextColor(tgui::Color::White);
     gui.add(logOut); 
+
+    // Priority List Button
+    auto priorityListHeader = tgui::Button::create("Priority");
+    priorityListHeader ->setSize({"10%", "10%"});
+    priorityListHeader ->setPosition({"87%", "15.0%"});
+    priorityListHeader ->getRenderer()->setBackgroundColor(tgui::Color::White);
+    priorityListHeader ->getRenderer()->setTextColor(tgui::Color::Red);
+    gui.add(priorityListHeader); 
 
     //Backlog button
     auto backlog = tgui::Button::create("Backlog");
@@ -897,6 +1013,7 @@ void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBa
     completeServer.id = endUser.uniqueID;
     notaddedList.id = endUser.uniqueID;
     notaddedServer.id = endUser.uniqueID;
+    priorityListServer.setID(endUser.uniqueID);
 
     // Set id of all crdt counters
     numTasksBacklog.id = endUser.uniqueID;

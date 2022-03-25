@@ -46,8 +46,9 @@ to server networks
 
 
 <h2 id="features"> 📃 Features </h2>
-This libary currently supports a combined of 12 CRDTs. We have also created a Trello-clone that utilizes different CRDTs in this libary
-for anyone wanted to create an application using CRDTs in C++ enviroment. 
+This libary currently supports a combined of 12 CRDTs. We have also created a Trello-clone that utilizes different CRDTs in this libary.
+This is to showcase how CRDTs can be used in a practical application. 
+
 
 
 <h2 id="setup"> ⚙ Set Up </h2>
@@ -786,7 +787,7 @@ If you want to contribute any new test cases, please add the test case in and cr
 
 
 <h2 id="Benchmark">🧪 Performance Analysis </h2>
-Here is a showcase of our benchmark analysis. To better showcase the advantage of C++ has over other framework we decided to compare it with an existing Python libary: https://github.com/anshulahuja98/python3-crdt. Special Credits to Geetesh Gupta and Anshul Ahuja who are the rightful owners of this libary. Please go and check them out as well.
+Here is a showcase of our benchmark analysis. Our benchmark criteria was to measure how long it took for each CRDT to perform 100 merge and then divide the total time by 100 to get the average time for 1 merge operation. To better showcase the advantage of C++ has over other framework we decided to compare it with an existing Python libary: https://github.com/anshulahuja98/python3-crdt. Special Credits to Geetesh Gupta and Anshul Ahuja who are the rightful owners of this libary. Please go and check them out as well.
 
 PC Specs for Benchmark:
 https://www.userbenchmark.com/UserRun/6945534

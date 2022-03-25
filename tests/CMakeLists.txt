@@ -4,6 +4,10 @@ project(crdt-test VERSION 1.0.0 LANGUAGES CXX)
 
 add_compile_definitions(BUILD_TESTING=1)
 
+if(LOCAL_TESTING)
+    add_compile_definitions(LOCAL_TESTING=1)
+endif()
+
 link_directories(crdt_test ${CMAKE_BINARY_DIR}/src)
 add_executable(crdt_test test.cpp)
 

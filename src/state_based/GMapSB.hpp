@@ -88,7 +88,25 @@ public:
         
         for(auto value : this->payload)
         {
+            //json internalPayload(value.second);
             internal[std::to_string(value.first)] = std::to_string(value.second);
+        }
+
+        j["payload"] = internal.dump();
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void serializeFile_StringValue(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internal;
+        
+        for(auto value : this->payload)
+        {
+            //json internalPayload(value.second);
+            internal[std::to_string(value.first)] = value.second;
         }
 
         j["payload"] = internal.dump();
@@ -128,6 +146,25 @@ public:
             std::string value = it.value();
             value.erase(remove(value.begin(), value.end(), '"'), value.end());
             this->payload[std::stoi(it.key())] = std::stoi(value);
+        }
+    }
+
+    void deserializeFile_StringValue(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        std::string payload_string = j["payload"];
+        json internal = json::parse(payload_string);
+
+        for(json::iterator it = internal.begin(); it != internal.end(); ++it)
+        {
+            std::string value = it.value();
+            value.erase(remove(value.begin(), value.end(), '"'), value.end());
+            this->payload[std::stoi(it.key())] = value;
         }
     }
 
@@ -181,8 +218,6 @@ class GMapSB : CrdtObject<T>
     //key reprents the id of the replica
     std::unordered_map<uint32_t,std::map<K,T>> payload; 
 
-    std::map<K,T> totalPayload;
-
     std::unordered_map<uint32_t,GMapMetadata<K,T>> replica_metadata;
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -209,6 +244,7 @@ protected:
         return false;
     }
 public:
+    std::map<K,T> totalPayload;
     GMapSB()
     {
         ;
@@ -309,6 +345,11 @@ public:
             queryResults.push_back(value);
         }
         return queryResults;
+    }
+
+    std::map<K,T> getTotalPayload()
+    {
+        return this->totalPayload;
     }
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)
@@ -413,6 +454,12 @@ public:
     {
         ;
     }
+
+    void setID(uint32_t id)
+    {
+        this->id = id;
+    }
+
     std::string fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)
     {
         std::multiset<std::string> mergeStringA;
@@ -514,6 +561,11 @@ public:
     {
         return this->totalPayload[key];
     }
+
+    std::map<K,T> getTotalPayload()
+    {
+        return this->totalPayload;
+    } 
 
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)

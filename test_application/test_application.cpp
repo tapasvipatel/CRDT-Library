@@ -174,20 +174,3 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-
-/*
-	Testing JSON related functionality
-
-
-	json j;
-
-	j["pi"] = 123;
-	j["name"] = "taps";
-
-	std::cout << j << std::endl;
-
-	std::ofstream o("sample.json");
-	o << j << std::endl;
-	return 0;
-
-*/
