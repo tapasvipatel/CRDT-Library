@@ -792,21 +792,21 @@ Here is a showcase of our benchmark analysis. Our benchmark criteria was to meas
 PC Specs for Benchmark:
 https://www.userbenchmark.com/UserRun/6945534
 
-| CRDT Type | Average merge Time - C++ (ns) | Average merge Time - Python (ns) |
+| CRDT Type | Average merge Time - C++ (msec) | Average merge Time - Python (msec) |
 |------|------------|----------|
-| OB-Counter  | 98.11 (Not Valid Result) | N/A |
-| G-Set | 2672.79 | 4980.58 |
-| 2P-Set | 4359.16 | 7358.43 |
-| G-Counter | 1500.33 | 6421.28 |
-| Or-Set | 7487.43 | 13793.53 |
-| PN-Counter | 3279.23 | 7554.35 |
-| Multiset | 10034.91 | N/A |
-| *LWW-Multiset* | 8481.69 | 5234.63 |
-| *Mutable String* | 2770.35 | 2351.95 |
-| Vector | 2278.03 | N/A |
-| G-Map (Generic) | 7690.62 | N/A |
-| G-Map (String) | 192290 | N/A |
-| Priority Queue | 8739.66 | N/A |
+| TwoPTwoPGraph  | 0.00708377 | N/A |
+| G-Set | 0.00267279 | 0.00498058 |
+| 2P-Set | 0.00435916 | 0.00735843 |
+| G-Counter | 0.00150033 | 0.00642128 |
+| Or-Set | 0.00748743 | 0.01379353 |
+| PN-Counter | 0.00327923 | 0.00755435 |
+| Multiset | 0.01003491 | N/A |
+| *LWW-Multiset* | 0.00848169 | 0.00523463 |
+| *Mutable String* | 0.00277035 | 0.00235195 |
+| Vector | 0.00227803 | N/A |
+| G-Map (Generic) | 0.00769062 | N/A |
+| G-Map (String) | 0.19229 | N/A |
+| Priority Queue | 0.00873966 | N/A |
 
 
 *Lww-Multiset* -> In the python libary a LWW-Set was used while ours is a LWW-Multiset. The difference is a multiset allows duplicate elements while a set does not.
