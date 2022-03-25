@@ -498,17 +498,17 @@ void TwoPTwoPGraphPerformance()
 int main(int argc, char* argv[])
 {
 	// performance
-	//PNCounterPerformance();
-	//GCounterPerformance();
-	//GMapPerformance();
-	//LWWMultiSetPerformance();
-	//MultiSetPerformance();
-	//ORSetPerformance();
-	//PriorityQueuePerformance();
-	//TwoPSetPerformance();
-	//GSetPerformance();
-	//StringPerformance();
-	//VectorPerformance();
+	PNCounterPerformance();
+	GCounterPerformance();
+	GMapPerformance();
+	LWWMultiSetPerformance();
+	MultiSetPerformance();
+	ORSetPerformance();
+	PriorityQueuePerformance();
+	TwoPSetPerformance();
+	GSetPerformance();
+	StringPerformance();
+	VectorPerformance();
 	TwoPTwoPGraphPerformance();
 
 	return 0;
