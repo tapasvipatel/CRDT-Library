@@ -2895,7 +2895,7 @@ TEST_CASE("Performance Benchmark", "[classic]")
 
 		long double duration = 0;
 
-		for (int i = 0; i < 33; i++) {
+		for (int i = 0; i < 100; i++) {
 
 			crdt::state::PNCounterSB<uint32_t> handler1(1); //Represents Server 1
 			crdt::state::PNCounterSB<uint32_t> handler2(2); //Represents Server 2
@@ -3021,6 +3021,85 @@ TEST_CASE("Performance Benchmark", "[classic]")
 		}
 		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
 	}
+
+	SECTION("Performance benchmark for G-Map (String)")
+	{
+		std::cout<<"Performance benchmark for G-Map (String): \n";
+
+		long double duration = 0;
+
+		for (int i = 0; i < 33; i++) {
+
+			crdt::state::GMapSBString<uint32_t, std::string> handler1(1);
+		crdt::state::GMapSBString<uint32_t, std::string> handler2(2); 
+		crdt::state::GMapSBString<uint32_t, std::string> handler3(3);
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1A(0,10,"Hello");
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1B(0,10,"HelloMelo");
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1C(0,10,"Hello Hello");
+		handler1.addExternalReplica({replica1A});
+		handler2.addExternalReplica({replica1B});
+		handler3.addExternalReplica({replica1C});
+		REQUIRE(handler2.queryPayloadwithID(0,10) != handler1.queryPayloadwithID(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) != handler2.queryPayloadwithID(0,10));
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler3.queryPayloadwithID(0,10) == "Hello Hello HelloMelo");
+		REQUIRE(handler2.queryPayloadwithID(0,10) == handler1.queryPayloadwithID(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) == handler2.queryPayloadwithID(0,10));
+		replica1A.insert(1,"Hello, my name is Bob!");
+		handler1.addExternalReplica({replica1A});
+		auto t1 = std::chrono::high_resolution_clock::now(); //First Merge
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		auto t2 = std::chrono::high_resolution_clock::now();
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count(); //First Merge Complete
+		REQUIRE(handler1.queryPayloadwithID(0,1) == handler2.queryPayloadwithID(0,1));
+		REQUIRE(handler2.queryPayloadwithID(0,1) == handler3.queryPayloadwithID(0,1));
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1D(1,10,"ABC");
+		handler3.addExternalReplica({replica1D});
+		replica1D.insert(10,"DEF");
+		handler2.addExternalReplica({replica1D});
+		replica1D.insert(10,"U");
+		handler1.addExternalReplica({replica1D});
+		auto t3 = std::chrono::high_resolution_clock::now(); //Second Merge
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		auto t4 = std::chrono::high_resolution_clock::now(); //Second Merge Complete
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		
+		duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3).count(); //Second Merge Complete
+		REQUIRE(handler1.queryPayloadwithID(1,10) == "ABC DEF U");
+		REQUIRE(handler1.queryPayloadwithID(1,10) == handler2.queryPayloadwithID(1,10));
+		REQUIRE(handler2.queryPayloadwithID(1,10) == handler3.queryPayloadwithID(1,10));
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1E(2,10,"ASDHUIFDHIUSDHFUI");
+		handler2.addExternalReplica({replica1E});
+		auto t5 = std::chrono::high_resolution_clock::now(); //Third Merge
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		auto t6 = std::chrono::high_resolution_clock::now(); //Third Merge Complete
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		
+		duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t6 - t5).count(); //Second Merge Complete
+
+		REQUIRE(handler1.queryPayloadwithID(2,10) == handler2.queryPayloadwithID(2,10));
+		REQUIRE(handler2.queryPayloadwithID(2,10) == handler3.queryPayloadwithID(2,10));
+		REQUIRE(handler1.queryPayload(1) == handler2.queryPayload(1));
+		REQUIRE(handler2.queryPayload(1) == handler3.queryPayload(1));
+		std::vector<uint32_t> test1 = {1,10};
+		REQUIRE(handler1.queryAllKeys() == test1);
+		REQUIRE(handler2.queryAllKeys() == test1);
+		REQUIRE(handler3.queryAllKeys() == test1);
+		std::vector<std::string> test2 = { "Bob! Hello, is my name", "ABC ASDHUIFDHIUSDHFUI DEF Hello Hello HelloMelo U"};
+		REQUIRE(handler1.queryAllValues() == test2);
+		REQUIRE(handler2.queryAllValues() == test2);
+		REQUIRE(handler3.queryAllValues() == test2);			
+		}
+		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
+	}
+
+
 
 	SECTION("Performance benchmark for Priority Queue")
 	{
