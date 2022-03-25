@@ -128,7 +128,7 @@ public:
         {
             std::string value = it.value();
             value.erase(remove(value.begin(), value.end(), '"'), value.end());
-            this->payload[std::stoi(it.key())] = value;
+            this->payload[std::stoi(it.key())] = std::stoi(value);
         }
     }
 

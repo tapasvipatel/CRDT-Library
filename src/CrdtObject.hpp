@@ -51,7 +51,8 @@ enum CrdtType
     PriorityQueueSBType,
     MultiSetSBType,
     LWWMultiSetSBType,
-    StringOBType
+    StringOBType,
+    TwoPTwoPGraphSBType
 };
 
 class CrdtMetaData
