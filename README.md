@@ -284,7 +284,7 @@ Sum = 176+9 = 185
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
 |------|------------|----------|----------|
-Tas Explain |  `Tas Explain` | Tas Explain | Tas Explain |
+A Graph CRDT capable of storing vertices and edges |  `+No graph data type in STL` `-Does not support adding back a removed edge` | Keeping track of network partitions | Takes the union |
 
 
 
@@ -307,7 +307,21 @@ Tas Explain | Tas Explain |
 <h4> Example </h4>
 
 ```cpp
-//Tas Explain
+crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0);  // Server 1
+crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1); // Replica 1
+crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);  // Replica 2
+crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);  // Replica 3
+
+replica1A.insertVertice(20);
+replica1B.insertVertice(21);
+replica1C.insertVertice(22);
+
+replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+// Handler now contains vertices and edges from all replicas
+handler.addExternalReplica({replica1A,replica1B,replica1C});
 ```
 
 <h3 id="GSet"> Grow-Only Set</h3>
