@@ -2441,6 +2441,43 @@ TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
 		std::set<uint32_t> tempHandler2 = {20, 21, 22, 23, 24, 25, 26, 27, 28};
 		REQUIRE(handler.queryVertices() == tempHandler2);
 	}
+	SECTION("Test Remove Edges Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(23, 24));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(24, 25));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(25, 26));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(26, 27));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(27, 28));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(28, 29));
+
+		std::set<std::pair<uint32_t, uint32_t>> tempA = {{20, 21}, {21, 22}, {22, 23}};
+		std::set<std::pair<uint32_t, uint32_t>> tempB = {{23, 24}, {24, 25}, {25, 26}};
+		std::set<std::pair<uint32_t, uint32_t>> tempC = {{26, 27}, {27, 28}, {28, 29}};
+
+		REQUIRE(replica1A.queryEdges() == tempA);
+		REQUIRE(replica1B.queryEdges() == tempB);
+		REQUIRE(replica1C.queryEdges() == tempC);
+
+		replica1A.removeEdge({20, 21});
+		replica1B.removeEdge({23, 24});
+		replica1C.removeEdge({26, 27});
+
+		std::set<std::pair<uint32_t, uint32_t>> tempA2 = {{21, 22}, {22, 23}};
+		std::set<std::pair<uint32_t, uint32_t>> tempB2 = {{24, 25}, {25, 26}};
+		std::set<std::pair<uint32_t, uint32_t>> tempC2 = {{27, 28}, {28, 29}};
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+		std::set<std::pair<uint32_t, uint32_t>> tempHandler2 = {{21, 22}, {22, 23}, {24, 25}, {25, 26}, {27, 28}, {28, 29}};
+		//REQUIRE(handler.queryEdges() == tempHandler2);
+	}
 }
 
 // Performance Benchmark
