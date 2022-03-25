@@ -54,11 +54,67 @@ This is to showcase how CRDTs can be used in a practical application.
 <h2 id="setup"> ⚙ Set Up </h2>
 This libary has only been validated on Linux OS, and support for Windows/MAC will be provided at a later time. To use the libary itself:
 
-**Tas Explain.**
+<h3 id="Dependencies"> Dependencies </h3>
 
-To launch the Trello-Clone:
+<h4 id="CMake"> CMake </h3>
 
-**Tas Explain.**
+```
+sudo-apt get install cmake
+```
+<h4 id="Catch2"> Catch2 </h3>
+
+```
+git clone https://github.com/catchorg/Catch2.git
+cd Catch2
+cmake -Bbuild -H. -DBUILD_TESTING=OFF
+sudo cmake --build build/ --target install
+```
+<h4 id="SFML"> SFML </h3>
+
+```
+sudo apt-get install libsfml-dev
+```
+<h4 id="TGUI"> TGUI </h3>
+
+```
+sudo add-apt-repository PPA:texus/tgui
+sudo apt-get update
+sudo apt-get install ligtgui-0.9-dev
+```
+
+<h3 id="BuildScripts"> Build Scripts </h3>
+
+```
+./generate.sh : Generate CRDT library and auxiliary binaries
+  * testing : test binary
+  * test_application: test application binary
+  * trello_application : trello application binary
+  * performance : performance binary
+  * clean : clean build of CRDT library
+  * networking : networking binary
+```
+
+```
+./generate_prebuilt.sh : Generate prebuilt versions of test cases for GitHub Workflow
+```
+
+<h3 id="RunScripts"> Run Scripts </h3>
+
+```
+run_performance.sh : Run performance binaries for all CRDTs
+```
+
+```
+run_test_application.sh : Run test application
+```
+
+```
+run_tests.sh : Run all tests
+```
+
+```
+run_trello_application.sh : Run single instance of trello application
+```
 
 <h2 id="guide"> 🐕‍🦺 Guide for CRDT data types</h2>
 
@@ -124,10 +180,10 @@ A counter that can only increase upwards. |  `+More memory efficient compared to
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
- `.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+ `.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata
 `.queryPayload()` | Get the payload of the metadata
 `.updatePayload(T payload)` | Update the payload of of the metadata
@@ -166,7 +222,6 @@ A counter that can go upwards and downwards |  `+Less memory efficient compared 
 `.increasePayload(uint32_t replicaID, T payload)` | Increases metadata by the payload using the ID of the metadata |
 `.decreasePayload(uint32_t replicaID, T payload)` |  Decreases metadata by the payload using the ID of the metadata |
 `.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
-`.serializeObject())` | Tas Explain | 
 `.queryPayload()` | Get the payload of all the metadatas |
 `.queryPayloadwithID(uint32_t replicaID)` | Gets the payload of the metadata using ID | 
 `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)` | Add as many metadatas as you want to the handler. 
@@ -174,10 +229,10 @@ A counter that can go upwards and downwards |  `+Less memory efficient compared 
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.queryPayloadT()` | Get the payload of the metadata |
 `.queryPayloadP()` | Get the payload of the positive counter|
@@ -281,10 +336,10 @@ A set that only elements can be added to it |   `+Does not allow duplicate eleme
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)` | Set the payload |
 `.queryPayload()` | Get all the elements inserted into the set |
@@ -332,10 +387,10 @@ A set allowing to insert and remove elements. Similar to a 2PSet, but the elemen
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)` | Set the payload |
 `.queryORSet() ` | Get the payload of the ORSet metadata |
@@ -386,10 +441,10 @@ A set allowing to insert and remove elements |   `+Does not allow duplicate elem
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()`|  Get the ID of the metadata  |
 `.setPayload(std::set<T> payload)`| Insert the first-phase set into the 2P set |
 `.setTombstone(std::set<T> tombstone)` | Insert the second-phase set into the 2P set |
@@ -440,10 +495,10 @@ A multi-set where only elements are allowed to be added |   `+Allow duplicate el
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the multiset |
 `.insert(T value)` | Insert a value inside the multiset |
 `.setPayload(std::multiset<T> payload)` | Initialize the multiset |
@@ -490,10 +545,10 @@ A multi-set where allowing for insertion and deletion |   `+Allow duplicate elem
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the multiset |
 `.queryTime()` , `.insert(long long int timestamp, T value)` | Get the time of the last write for multiset |
 `.insert(long long int timestamp, std::vector<T> value)` | Insert element into multiset providing the time |
@@ -549,10 +604,10 @@ A array where only elements are allowed to be added |   `+Allow duplicate elemen
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)`| Intialize the vector |
 `queryPayload()`| Return the vector |
@@ -597,10 +652,10 @@ A priority_queue where only elements are allowed to be added |   `+Allow duplica
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the multiset |
 `.push(T value)` | Insert a value inside the priority_queue |
 `.push(std::vector<T> value)` | Insert multiple values inside the priority_queue |
@@ -655,10 +710,10 @@ A map where only <key,value> pairs are allowed to be added |   `-Keys have to be
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryPayloadValue(K key) ` | Returns the value within the map given key |
 `.insert(K key, T value)` | Insert <Key,Value> pair into the map |
 `updateIncrease(K key, T increment)` | Increase the key by value of increment |
@@ -747,10 +802,10 @@ A mutable string where the text can be modified |   `+Support deletion of charac
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the String |
 `.queryPayload()` | Return the string |
 `.setPayload(std::string payload)` | Initialize the string to the intended value |
