@@ -2398,6 +2398,49 @@ TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
 
 		handler.addExternalReplica({replica1A,replica1B,replica1C});
 	}
+	SECTION("Test Remove Vertices Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1A.insertVertice(21);
+		replica1A.insertVertice(22);
+		replica1B.insertVertice(23);
+		replica1B.insertVertice(24);
+		replica1B.insertVertice(25);
+		replica1C.insertVertice(26);
+		replica1C.insertVertice(27);
+		replica1C.insertVertice(28);
+
+		std::set<uint32_t> tempA = {20, 21, 22};
+		std::set<uint32_t> tempB = {23, 24, 25};
+		std::set<uint32_t> tempC = {26, 27, 28};
+
+		REQUIRE(replica1A.queryVertices() == tempA);
+		REQUIRE(replica1B.queryVertices() == tempB);
+		REQUIRE(replica1C.queryVertices() == tempC);
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::set<uint32_t> tempHandler = {20, 21, 22, 23, 24, 25, 26, 27, 28};
+		REQUIRE(handler.queryVertices() == tempHandler);
+
+		replica1A.removeVertice(20);
+		replica1B.removeVertice(23);
+		replica1C.removeVertice(26);
+
+		std::set<uint32_t> tempA2 = {21, 22};
+		std::set<uint32_t> tempB2 = {24, 25};
+		std::set<uint32_t> tempC2 = {27, 28};
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::set<uint32_t> tempHandler2 = {20, 21, 22, 23, 24, 25, 26, 27, 28};
+		REQUIRE(handler.queryVertices() == tempHandler2);
+	}
 }
 
 // Performance Benchmark

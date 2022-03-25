@@ -211,7 +211,7 @@ public:
 
     void insertEdge(std::pair<T, T> value)
     {
-        this.edges.insert(value);
+        this->edges.insert(value);
     }
 
     void insertVertices(std::vector<T> values) 
