@@ -61,15 +61,19 @@ public:
         ;
     }
 
-/*
     std::string serialize()
     {
         json j;
         j["id"] = this->id;
-        json internalPayload(this->payload);
-        j["payload"] = internalPayload;
-        json internalTombstone(this->tombstone);
-        j["tombstome"] = internalTombstone;
+        json internalVertices(this->vertices);
+        j["vertices"] = internalVertices;
+        json internalVerticesTombstone(this->vertices_tombstone);
+        j["vertices_tombstone"] = internalVerticesTombstone;
+
+        json internalEdges(this->edges);
+        j["edges"] = internalEdges;
+        json internalEdgesTombstone(this->edges_tombstone);
+        j["edges_tombstone"] = internalEdgesTombstone;
 
         return j.dump();
     }
@@ -78,10 +82,16 @@ public:
     {
         json j;
         j["id"] = this->id;
-        json internalPayload(this->payload);
-        j["payload"] = internalPayload;
-        json internalTombstone(this->tombstone);
-        j["tombstone"] = internalTombstone;
+        json internalVertices(this->vertices);
+        j["vertices"] = internalVertices;
+        json internalVerticesTombstone(this->vertices_tombstone);
+        j["vertices_tombstone"] = internalVerticesTombstone;
+
+        json internalEdges(this->edges);
+        j["edges"] = internalEdges;
+        json internalEdgesTombstone(this->edges_tombstone);
+        j["edges_tombstone"] = internalEdgesTombstone;
+
         std::ofstream o(pathToFile);
         o << j << std::endl;
     }
@@ -91,16 +101,28 @@ public:
         json j = json::parse(s);
         this->id = j["id"];
 
-        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        for(json::iterator it = j["vertices"].begin(); it != j["vertices"].end(); ++it)
         {
             T value = *it;
-            this->payload.insert(value);
+            this->vertices.insert(value);
         }
 
-        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        for(json::iterator it = j["vertices_tombstone"].begin(); it != j["vertices_tombstone"].end(); ++it)
         {
             T value = *it;
-            this->tombstone.insert(value);
+            this->vertices_tombstone.insert(value);
+        }
+
+        for(json::iterator it = j["edges"].begin(); it != j["edges"].end(); ++it)
+        {
+            T value = *it;
+            this->edges.insert(value);
+        }
+
+        for(json::iterator it = j["edges_tombstone"].begin(); it != j["edges_tombstone"].end(); ++it)
+        {
+            T value = *it;
+            this->edges_tombstone.insert(value);
         }
     }
 
@@ -112,19 +134,30 @@ public:
 
         this->id = j["id"];
 
-        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        for(json::iterator it = j["vertices"].begin(); it != j["vertices"].end(); ++it)
         {
             T value = *it;
-            this->payload.insert(value);
+            this->vertices.insert(value);
         }
 
-        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        for(json::iterator it = j["vertices_tombstone"].begin(); it != j["vertices_tombstone"].end(); ++it)
         {
             T value = *it;
-            this->tombstone.insert(value);
+            this->vertices_tombstone.insert(value);
+        }
+
+        for(json::iterator it = j["edges"].begin(); it != j["edges"].end(); ++it)
+        {
+            T value = *it;
+            this->edges.insert(value);
+        }
+
+        for(json::iterator it = j["edges_tombstone"].begin(); it != j["edges_tombstone"].end(); ++it)
+        {
+            T value = *it;
+            this->edges_tombstone.insert(value);
         }
     }
-*/
 
     const uint32_t& queryId() const
     {
@@ -361,8 +394,8 @@ protected:
                 std::set<T> setAedges = search->second.queryEdges();
                 std::set<T> setBedges = metadata.queryEdges();
                 std::set_union(setAedges.begin(),setAedges.end(),setBedges.begin(),setBedges.end(),std::inserter(merged_set_edges,merged_set_edges.begin()));
-                metadata.setEd(merged_set_edges);
-                
+                metadata.setEdges(merged_set_edges);
+
                 std::set<T> merged_ts_edges;
                 std::set<T> tsA_edges = search->second.queryEdgesTombstone();
                 std::set<T> tsB_edges = metadata.queryEdgesTombstone();
