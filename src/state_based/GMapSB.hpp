@@ -97,6 +97,23 @@ public:
         o << j << std::endl;
     }
 
+    void serializeFile_StringValue(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internal;
+        
+        for(auto value : this->payload)
+        {
+            //json internalPayload(value.second);
+            internal[std::to_string(value.first)] = value.second;
+        }
+
+        j["payload"] = internal.dump();
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
     void deserialize(std::string s)
     {
         json j = json::parse(s);
@@ -129,6 +146,25 @@ public:
             std::string value = it.value();
             value.erase(remove(value.begin(), value.end(), '"'), value.end());
             this->payload[std::stoi(it.key())] = std::stoi(value);
+        }
+    }
+
+    void deserializeFile_StringValue(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        std::string payload_string = j["payload"];
+        json internal = json::parse(payload_string);
+
+        for(json::iterator it = internal.begin(); it != internal.end(); ++it)
+        {
+            std::string value = it.value();
+            value.erase(remove(value.begin(), value.end(), '"'), value.end());
+            this->payload[std::stoi(it.key())] = value;
         }
     }
 
