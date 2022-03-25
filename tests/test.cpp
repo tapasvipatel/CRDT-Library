@@ -2478,6 +2478,55 @@ TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
 		std::set<std::pair<uint32_t, uint32_t>> tempHandler2 = {{21, 22}, {22, 23}, {24, 25}, {25, 26}, {27, 28}, {28, 29}};
 		//REQUIRE(handler.queryEdges() == tempHandler2);
 	}
+
+	SECTION("Test serialize function")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		REQUIRE(replica1A.serialize() == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	}
+	SECTION("Test deserialize function")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		REQUIRE(replica1A.serialize() == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2A;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2B;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica2B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica2C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	}
 }
 
 // Performance Benchmark

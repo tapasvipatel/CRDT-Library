@@ -115,14 +115,12 @@ public:
 
         for(json::iterator it = j["edges"].begin(); it != j["edges"].end(); ++it)
         {
-            T value = *it;
-            this->edges.insert(value);
+            this->edges.insert(std::pair<T, T>((*it)[0], (*it)[1]));
         }
 
         for(json::iterator it = j["edges_tombstone"].begin(); it != j["edges_tombstone"].end(); ++it)
         {
-            T value = *it;
-            this->edges_tombstone.insert(value);
+            this->edges_tombstone.insert(std::pair<T, T>((*it)[0], (*it)[1]));
         }
     }
 
@@ -148,14 +146,12 @@ public:
 
         for(json::iterator it = j["edges"].begin(); it != j["edges"].end(); ++it)
         {
-            T value = *it;
-            this->edges.insert(value);
+            this->edges.insert(std::pair<T, T>((*it)[0], (*it)[1]));
         }
 
         for(json::iterator it = j["edges_tombstone"].begin(); it != j["edges_tombstone"].end(); ++it)
         {
-            T value = *it;
-            this->edges_tombstone.insert(value);
+            this->edges_tombstone.insert(std::pair<T, T>((*it)[0], (*it)[1]));
         }
     }
 
