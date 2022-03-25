@@ -19,9 +19,10 @@
 #include "../src/state_based/PriorityQueueSB.hpp"
 #include "../src/state_based/MultiSetSB.hpp"
 #include "../src/state_based/LWWMultiSetSB.hpp"
+#include "../src/state_based/TwoPTwoPGraphSB.hpp"
 #include "../src/operation_based/StringOB.hpp"
 
-/* To Tas, finish testing the validity of CounterDB from Rushab */
+
 TEST_CASE("Test CounterOB", "[classic]")
 {
 	SECTION("Test Overloaded Operators")
@@ -2348,6 +2349,55 @@ TEST_CASE("Test SringOB", "[classic]")
 		REQUIRE(replica1B.serialize() == replica2B.serialize());
 	}
 #endif
+}
+
+TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
+{
+	SECTION("Test Insert Vertices Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		std::set<uint32_t> tempA = {20};
+		std::set<uint32_t> tempB = {21};
+		std::set<uint32_t> tempC = {22};
+
+		REQUIRE(replica1A.queryVertices() == tempA);
+		REQUIRE(replica1B.queryVertices() == tempB);
+		REQUIRE(replica1C.queryVertices() == tempC);
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::set<uint32_t> tempHandler = {20, 21, 22};
+		REQUIRE(handler.queryVertices() == tempHandler);
+	}
+	SECTION("Test Insert Edges Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		std::set<std::pair<uint32_t, uint32_t>> tempA = {{20, 21}};
+		std::set<std::pair<uint32_t, uint32_t>> tempB = {{21, 22}};
+		std::set<std::pair<uint32_t, uint32_t>> tempC = {{22, 23}};
+
+		REQUIRE(replica1A.queryEdges() == tempA);
+		REQUIRE(replica1B.queryEdges() == tempB);
+		REQUIRE(replica1C.queryEdges() == tempC);
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+	}
 }
 
 // Performance Benchmark
