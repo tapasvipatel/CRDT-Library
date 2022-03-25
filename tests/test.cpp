@@ -2563,6 +2563,38 @@ TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
 		REQUIRE(replica1CString == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
 	}
 #endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		replica1A.serializeFile("../../tests/temp_data/twoptwopgraph1A.json");
+		replica1B.serializeFile("../../tests/temp_data/twoptwopgraph1B.json");
+		replica1C.serializeFile("../../tests/temp_data/twoptwopgraph1C.json");
+
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2A;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2B;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/twoptwopgraph1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/twoptwopgraph1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/twoptwopgraph1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
+	}
+#endif
 }
 
 // Performance Benchmark
