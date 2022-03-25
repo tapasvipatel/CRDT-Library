@@ -2527,6 +2527,42 @@ TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
 		REQUIRE(replica2B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
 		REQUIRE(replica2C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
 	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		replica1A.serializeFile("../../tests/temp_data/twoptwopgraph1A.json");
+		replica1B.serializeFile("../../tests/temp_data/twoptwopgraph1B.json");
+		replica1C.serializeFile("../../tests/temp_data/twoptwopgraph1C.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/twoptwopgraph1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/twoptwopgraph1B.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/twoptwopgraph1C.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(replica1AString == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1BString == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1CString == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	}
+#endif
 }
 
 // Performance Benchmark
