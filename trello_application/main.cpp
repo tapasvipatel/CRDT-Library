@@ -1,6 +1,11 @@
 #include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <stdio.h>
 #include <dirent.h>
 #include <chrono>
+#include <thread>
+#include <unistd.h>
 // #include <SFML/Graphics.hpp>
 #include <TGUI/TGUI.hpp>
 #include "userLogin.hpp"
@@ -23,7 +28,11 @@ crdt::state::GMapMetadata<int32_t, string> priorityList;
 crdt::state::GMapSBString<int32_t, string> priorityListServer;
 
 //taps
+//void automatic_merge(tgui::GuiBase &gui);
+//std::thread automatic_merge_thread;
+
 string filePath = "/home/vishcapstone/Documents/CRDT-Library/trello_application/json/";
+//string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/";
 crdt::state::MultiSetMetadata<string> backlogList;
 crdt::state::MultiSetSB<string> backlogServer;
 crdt::state::MultiSetMetadata<string> inprogressList;
@@ -995,6 +1004,8 @@ void login(tgui::EditBox::Ptr username, tgui::EditBox::Ptr password, tgui::GuiBa
         endUser.setUserStatus(1);
         endUser.mergeVectorCRDT();
         loadWidgets2(gui);
+        // Background thread to automatically update board
+        //automatic_merge_thread = std::thread(automatic_merge, std::ref(gui));
     }
     else
     {
@@ -1078,6 +1089,15 @@ void loadWidgets(tgui::GuiBase &gui, tgui::Label::Ptr &message)
 
 // -------------------------------------------------------------------------------------------------------------------//
 
+//void automatic_merge(tgui::GuiBase &gui)
+//{
+//    while(true)
+//    {
+//        sleep(10);
+//        convergeBoard(gui, 1);
+//    }
+//}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "TrelloRDT");
@@ -1108,5 +1128,6 @@ int main()
         window.display();
     }
     endUser.setUserStatus(0);
+    //exit(0);
     return 0;
 }
