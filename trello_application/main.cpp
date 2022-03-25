@@ -518,7 +518,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     for(auto & file : fs::directory_iterator(prioritylistFolder))
     {
         crdt::state::GMapMetadata<int32_t, string> replica;
-        replica.deserializeFile(file.path());
+        replica.deserializeFile_StringValue(file.path());
         priorityMetadataList.push_back(replica);
     }
 
@@ -648,7 +648,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         int32_t key = stoi(_urgency);
 
         priorityList.insert(key, _task);
-        priorityList.serializeFile(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
 
         switch (boardType) {
