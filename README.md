@@ -73,13 +73,13 @@ To add the CRDT to the server, add the metadata to the handler.
   — 
   <a href="#PNCounter">Positive Negative Counter</a>
   — 
-  <a href="#OperationCounter">Operation Grow Counter</a>
+  <a href="#2P Graph">Two Phase Two Phase Graph</a>
   — 
   <a href="#GSet">Grow Only Set</a>
   — 
   <a href="#OrSet">Or-Set</a>
   — 
-  <a href="#2PSet">Two-Phasee Set</a>
+  <a href="#2PSet">Two-Phase Set</a>
    — 
   <a href="#GMS">Grow-Only Multiset</a>
    — 
@@ -224,7 +224,7 @@ Sum = 176+9 = 185
 */
 ```
 
-<h3 id="OperationCounter"> Operation Grow Counter</h3>
+<h3 id="2P Graph"> Two Phase Two Phase Graph</h3>
 
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
@@ -794,7 +794,7 @@ https://www.userbenchmark.com/UserRun/6945534
 
 | CRDT Type | Average merge Time - C++ (msec) | Average merge Time - Python (msec) |
 |------|------------|----------|
-| TwoPTwoPGraph  | 0.00708377 | N/A |
+| 2P2P-Graph  | 0.00708377 | N/A |
 | G-Set | 0.00267279 | 0.00498058 |
 | 2P-Set | 0.00435916 | 0.00735843 |
 | G-Counter | 0.00150033 | 0.00642128 |
