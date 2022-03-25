@@ -3255,5 +3255,42 @@ TEST_CASE("Performance Benchmark", "[classic]")
 		}
 		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
 	}
+	SECTION("Performance benchmark for TwoPTwoPGraph")
+	{
+		std::cout<< "Performance benchmark for TwoPTwoPGraph: \n";
 
+		long double duration = 0;
+
+		for (int i = 0; i < 100; i++) {
+
+			crdt::state::TwoPTwoPGraphSB<uint32_t> handler1(0);
+			crdt::state::TwoPTwoPGraphSB<uint32_t> handler2(1);
+			crdt::state::TwoPTwoPGraphSB<uint32_t> handler3(2);
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replicaA(20);
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replicaB(30);
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replicaC(40);
+
+			replicaA.insertVertice(20);
+			replicaA.insertVertice(21);
+			replicaA.insertVertice(22);
+			replicaB.insertVertice(23);
+			replicaB.insertVertice(24);
+			replicaB.insertVertice(25);
+			replicaC.insertVertice(26);
+			replicaC.insertVertice(27);
+			replicaC.insertVertice(28);
+
+			std::set<uint32_t> tempA = {20, 21, 22};
+			std::set<uint32_t> tempB = {23, 24, 25};
+			std::set<uint32_t> tempC = {26, 27, 28};
+
+			auto t1 = std::chrono::high_resolution_clock::now();
+			handler1.addExternalReplica({replicaA});
+			handler2.addExternalReplica({replicaB});
+			handler3.addExternalReplica({replicaC});
+			auto t2 = std::chrono::high_resolution_clock::now();
+			duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+		}
+		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
+	}
 }
