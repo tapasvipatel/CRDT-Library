@@ -225,6 +225,7 @@ void updateTableMaster(tgui::GuiBase &gui)
     // backlog
     multiset<string> backlogPayload = backlogServer.queryPayload();
     int count = 0;
+    int deleteCount = 0;
     for(auto element : backlogPayload)
     {
         auto backlog = tgui::Button::create(element);
@@ -236,11 +237,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         backlog->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(backlog);
+
+        auto backlogDelete = tgui::Button::create("-");
+        backlogDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        backlogDelete->setPosition(242, deleteY);
+        backlogDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        backlogDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        backlogDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(backlogDelete);
     }
 
     // inprogress
     multiset<string> inprogressPayload = inprogressServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element = inprogressPayload.begin(); element != inprogressPayload.end(); element++)
     {
         auto inprogress = tgui::Button::create(*element);
@@ -252,11 +264,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         inprogress->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         inprogress->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(inprogress);
+
+        auto inprogressDelete = tgui::Button::create("-");
+        inprogressDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        inprogressDelete->setPosition(558, deleteY);
+        inprogressDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        inprogressDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        inprogressDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(inprogressDelete);
     }
 
     // readytotest
     multiset<string> readytotestPayload = readytotestServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element : readytotestPayload)
     {
         auto readytotest = tgui::Button::create(element);
@@ -268,11 +291,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         readytotest->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         readytotest->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(readytotest);
+
+        auto readytotestDelete = tgui::Button::create("-");
+        readytotestDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        readytotestDelete->setPosition(872, deleteY);
+        readytotestDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        readytotestDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        readytotestDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(readytotestDelete);
     }
 
     // complete
     multiset<string> completePayload = completeServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element : completePayload)
     {
         auto complete = tgui::Button::create(element);
@@ -284,11 +318,22 @@ void updateTableMaster(tgui::GuiBase &gui)
         complete->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         complete->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(complete);
+
+        auto completeDelete = tgui::Button::create("-");
+        completeDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        completeDelete->setPosition(1186, deleteY);
+        completeDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        completeDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        completeDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(completeDelete);
     }
 
     // notadded
     multiset<string> notaddedPayload = notaddedServer.queryPayload();
     count = 0;
+    deleteCount = 0;
     for(auto element : notaddedPayload)
     {
         auto notadded = tgui::Button::create(element);
@@ -300,6 +345,16 @@ void updateTableMaster(tgui::GuiBase &gui)
         notadded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
         notadded->getRenderer()->setTextColor(tgui::Color::Black);
         gui.add(notadded);
+
+        auto notaddedDelete = tgui::Button::create("-");
+        notaddedDelete->setSize(35, 35);
+        int deleteY = deleteCount + 374;
+        deleteCount += 150;
+        notaddedDelete->setPosition(1500, deleteY);
+        notaddedDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
+        notaddedDelete->getRenderer()->setTextColor(tgui::Color::Black);
+        notaddedDelete->getRenderer()->setTextStyle(tgui::Bold);
+        gui.add(notaddedDelete);
     }
 
     // priority list
