@@ -19,9 +19,10 @@
 #include "../src/state_based/PriorityQueueSB.hpp"
 #include "../src/state_based/MultiSetSB.hpp"
 #include "../src/state_based/LWWMultiSetSB.hpp"
+#include "../src/state_based/TwoPTwoPGraphSB.hpp"
 #include "../src/operation_based/StringOB.hpp"
 
-/* To Tas, finish testing the validity of CounterDB from Rushab */
+
 TEST_CASE("Test CounterOB", "[classic]")
 {
 	SECTION("Test Overloaded Operators")
@@ -2350,6 +2351,252 @@ TEST_CASE("Test SringOB", "[classic]")
 #endif
 }
 
+TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
+{
+	SECTION("Test Insert Vertices Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		std::set<uint32_t> tempA = {20};
+		std::set<uint32_t> tempB = {21};
+		std::set<uint32_t> tempC = {22};
+
+		REQUIRE(replica1A.queryVertices() == tempA);
+		REQUIRE(replica1B.queryVertices() == tempB);
+		REQUIRE(replica1C.queryVertices() == tempC);
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::set<uint32_t> tempHandler = {20, 21, 22};
+		REQUIRE(handler.queryVertices() == tempHandler);
+	}
+	SECTION("Test Insert Edges Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		std::set<std::pair<uint32_t, uint32_t>> tempA = {{20, 21}};
+		std::set<std::pair<uint32_t, uint32_t>> tempB = {{21, 22}};
+		std::set<std::pair<uint32_t, uint32_t>> tempC = {{22, 23}};
+
+		REQUIRE(replica1A.queryEdges() == tempA);
+		REQUIRE(replica1B.queryEdges() == tempB);
+		REQUIRE(replica1C.queryEdges() == tempC);
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+	}
+	SECTION("Test Remove Vertices Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1A.insertVertice(21);
+		replica1A.insertVertice(22);
+		replica1B.insertVertice(23);
+		replica1B.insertVertice(24);
+		replica1B.insertVertice(25);
+		replica1C.insertVertice(26);
+		replica1C.insertVertice(27);
+		replica1C.insertVertice(28);
+
+		std::set<uint32_t> tempA = {20, 21, 22};
+		std::set<uint32_t> tempB = {23, 24, 25};
+		std::set<uint32_t> tempC = {26, 27, 28};
+
+		REQUIRE(replica1A.queryVertices() == tempA);
+		REQUIRE(replica1B.queryVertices() == tempB);
+		REQUIRE(replica1C.queryVertices() == tempC);
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::set<uint32_t> tempHandler = {20, 21, 22, 23, 24, 25, 26, 27, 28};
+		REQUIRE(handler.queryVertices() == tempHandler);
+
+		replica1A.removeVertice(20);
+		replica1B.removeVertice(23);
+		replica1C.removeVertice(26);
+
+		std::set<uint32_t> tempA2 = {21, 22};
+		std::set<uint32_t> tempB2 = {24, 25};
+		std::set<uint32_t> tempC2 = {27, 28};
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+
+		std::set<uint32_t> tempHandler2 = {20, 21, 22, 23, 24, 25, 26, 27, 28};
+		REQUIRE(handler.queryVertices() == tempHandler2);
+	}
+	SECTION("Test Remove Edges Operation")
+	{
+		crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0); //Represents Server 1
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(23, 24));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(24, 25));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(25, 26));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(26, 27));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(27, 28));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(28, 29));
+
+		std::set<std::pair<uint32_t, uint32_t>> tempA = {{20, 21}, {21, 22}, {22, 23}};
+		std::set<std::pair<uint32_t, uint32_t>> tempB = {{23, 24}, {24, 25}, {25, 26}};
+		std::set<std::pair<uint32_t, uint32_t>> tempC = {{26, 27}, {27, 28}, {28, 29}};
+
+		REQUIRE(replica1A.queryEdges() == tempA);
+		REQUIRE(replica1B.queryEdges() == tempB);
+		REQUIRE(replica1C.queryEdges() == tempC);
+
+		replica1A.removeEdge({20, 21});
+		replica1B.removeEdge({23, 24});
+		replica1C.removeEdge({26, 27});
+
+		std::set<std::pair<uint32_t, uint32_t>> tempA2 = {{21, 22}, {22, 23}};
+		std::set<std::pair<uint32_t, uint32_t>> tempB2 = {{24, 25}, {25, 26}};
+		std::set<std::pair<uint32_t, uint32_t>> tempC2 = {{27, 28}, {28, 29}};
+
+		handler.addExternalReplica({replica1A,replica1B,replica1C});
+		std::set<std::pair<uint32_t, uint32_t>> tempHandler2 = {{21, 22}, {22, 23}, {24, 25}, {25, 26}, {27, 28}, {28, 29}};
+		//REQUIRE(handler.queryEdges() == tempHandler2);
+	}
+
+	SECTION("Test serialize function")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		REQUIRE(replica1A.serialize() == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	}
+	SECTION("Test deserialize function")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		REQUIRE(replica1A.serialize() == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2A;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2B;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2C;
+
+		replica2A.deserialize(replica1A.serialize());
+		replica2B.deserialize(replica1B.serialize());
+		replica2C.deserialize(replica1C.serialize());
+
+		REQUIRE(replica2A.serialize() == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica2B.serialize() == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica2C.serialize() == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	}
+#ifdef LOCAL_TESTING
+	SECTION("Test serialize function saving to a file")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		replica1A.serializeFile("../../tests/temp_data/twoptwopgraph1A.json");
+		replica1B.serializeFile("../../tests/temp_data/twoptwopgraph1B.json");
+		replica1C.serializeFile("../../tests/temp_data/twoptwopgraph1C.json");
+
+        std::string replica1AString;
+        std::ifstream replica1Ai("../../tests/temp_data/twoptwopgraph1A.json");
+        replica1Ai >> replica1AString;
+
+        std::string replica1BString;
+        std::ifstream replica1Bi("../../tests/temp_data/twoptwopgraph1B.json");
+        replica1Bi >> replica1BString;
+
+        std::string replica1CString;
+        std::ifstream replica1Ci("../../tests/temp_data/twoptwopgraph1C.json");
+        replica1Ci >> replica1CString;
+
+        REQUIRE(replica1AString == "{\"edges\":[[20,21]],\"edges_tombstone\":[],\"id\":1,\"vertices\":[20],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1BString == "{\"edges\":[[21,22]],\"edges_tombstone\":[],\"id\":2,\"vertices\":[21],\"vertices_tombstone\":[]}");
+		REQUIRE(replica1CString == "{\"edges\":[[22,23]],\"edges_tombstone\":[],\"id\":3,\"vertices\":[22],\"vertices_tombstone\":[]}");
+	}
+#endif
+#ifdef LOCAL_TESTING
+	SECTION("Test deserialize function reading from a file")
+	{
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);
+
+		replica1A.insertVertice(20);
+		replica1B.insertVertice(21);
+		replica1C.insertVertice(22);
+
+		replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+		replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+		replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+		replica1A.serializeFile("../../tests/temp_data/twoptwopgraph1A.json");
+		replica1B.serializeFile("../../tests/temp_data/twoptwopgraph1B.json");
+		replica1C.serializeFile("../../tests/temp_data/twoptwopgraph1C.json");
+
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2A;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2B;
+		crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica2C;
+
+		replica2A.deserializeFile("../../tests/temp_data/twoptwopgraph1A.json");
+		replica2B.deserializeFile("../../tests/temp_data/twoptwopgraph1B.json");
+		replica2C.deserializeFile("../../tests/temp_data/twoptwopgraph1C.json");
+
+		REQUIRE(replica1A.serialize() == replica2A.serialize());
+		REQUIRE(replica1B.serialize() == replica2B.serialize());
+		REQUIRE(replica1C.serialize() == replica2C.serialize());
+	}
+#endif
+}
+
 // Performance Benchmark
 TEST_CASE("Performance Benchmark", "[classic]")
 {
@@ -2648,7 +2895,7 @@ TEST_CASE("Performance Benchmark", "[classic]")
 
 		long double duration = 0;
 
-		for (int i = 0; i < 33; i++) {
+		for (int i = 0; i < 100; i++) {
 
 			crdt::state::PNCounterSB<uint32_t> handler1(1); //Represents Server 1
 			crdt::state::PNCounterSB<uint32_t> handler2(2); //Represents Server 2
@@ -2774,6 +3021,85 @@ TEST_CASE("Performance Benchmark", "[classic]")
 		}
 		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
 	}
+
+	SECTION("Performance benchmark for G-Map (String)")
+	{
+		std::cout<<"Performance benchmark for G-Map (String): \n";
+
+		long double duration = 0;
+
+		for (int i = 0; i < 33; i++) {
+
+			crdt::state::GMapSBString<uint32_t, std::string> handler1(1);
+		crdt::state::GMapSBString<uint32_t, std::string> handler2(2); 
+		crdt::state::GMapSBString<uint32_t, std::string> handler3(3);
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1A(0,10,"Hello");
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1B(0,10,"HelloMelo");
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1C(0,10,"Hello Hello");
+		handler1.addExternalReplica({replica1A});
+		handler2.addExternalReplica({replica1B});
+		handler3.addExternalReplica({replica1C});
+		REQUIRE(handler2.queryPayloadwithID(0,10) != handler1.queryPayloadwithID(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) != handler2.queryPayloadwithID(0,10));
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		REQUIRE(handler3.queryPayloadwithID(0,10) == "Hello Hello HelloMelo");
+		REQUIRE(handler2.queryPayloadwithID(0,10) == handler1.queryPayloadwithID(0,10));
+		REQUIRE(handler3.queryPayloadwithID(0,10) == handler2.queryPayloadwithID(0,10));
+		replica1A.insert(1,"Hello, my name is Bob!");
+		handler1.addExternalReplica({replica1A});
+		auto t1 = std::chrono::high_resolution_clock::now(); //First Merge
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		auto t2 = std::chrono::high_resolution_clock::now();
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count(); //First Merge Complete
+		REQUIRE(handler1.queryPayloadwithID(0,1) == handler2.queryPayloadwithID(0,1));
+		REQUIRE(handler2.queryPayloadwithID(0,1) == handler3.queryPayloadwithID(0,1));
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1D(1,10,"ABC");
+		handler3.addExternalReplica({replica1D});
+		replica1D.insert(10,"DEF");
+		handler2.addExternalReplica({replica1D});
+		replica1D.insert(10,"U");
+		handler1.addExternalReplica({replica1D});
+		auto t3 = std::chrono::high_resolution_clock::now(); //Second Merge
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		auto t4 = std::chrono::high_resolution_clock::now(); //Second Merge Complete
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		
+		duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t4 - t3).count(); //Second Merge Complete
+		REQUIRE(handler1.queryPayloadwithID(1,10) == "ABC DEF U");
+		REQUIRE(handler1.queryPayloadwithID(1,10) == handler2.queryPayloadwithID(1,10));
+		REQUIRE(handler2.queryPayloadwithID(1,10) == handler3.queryPayloadwithID(1,10));
+		crdt::state::GMapMetadata<uint32_t, std::string> replica1E(2,10,"ASDHUIFDHIUSDHFUI");
+		handler2.addExternalReplica({replica1E});
+		auto t5 = std::chrono::high_resolution_clock::now(); //Third Merge
+		handler1.updateLocalExternalPayload({handler1,handler2,handler3});
+		auto t6 = std::chrono::high_resolution_clock::now(); //Third Merge Complete
+		handler2.updateLocalExternalPayload({handler1,handler2,handler3});
+		handler3.updateLocalExternalPayload({handler1,handler2,handler3});
+		
+		duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t6 - t5).count(); //Second Merge Complete
+
+		REQUIRE(handler1.queryPayloadwithID(2,10) == handler2.queryPayloadwithID(2,10));
+		REQUIRE(handler2.queryPayloadwithID(2,10) == handler3.queryPayloadwithID(2,10));
+		REQUIRE(handler1.queryPayload(1) == handler2.queryPayload(1));
+		REQUIRE(handler2.queryPayload(1) == handler3.queryPayload(1));
+		std::vector<uint32_t> test1 = {1,10};
+		REQUIRE(handler1.queryAllKeys() == test1);
+		REQUIRE(handler2.queryAllKeys() == test1);
+		REQUIRE(handler3.queryAllKeys() == test1);
+		std::vector<std::string> test2 = { "Bob! Hello, is my name", "ABC ASDHUIFDHIUSDHFUI DEF Hello Hello HelloMelo U"};
+		REQUIRE(handler1.queryAllValues() == test2);
+		REQUIRE(handler2.queryAllValues() == test2);
+		REQUIRE(handler3.queryAllValues() == test2);			
+		}
+		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
+	}
+
+
 
 	SECTION("Performance benchmark for Priority Queue")
 	{
@@ -3008,5 +3334,42 @@ TEST_CASE("Performance Benchmark", "[classic]")
 		}
 		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
 	}
+	SECTION("Performance benchmark for TwoPTwoPGraph")
+	{
+		std::cout<< "Performance benchmark for TwoPTwoPGraph: \n";
 
+		long double duration = 0;
+
+		for (int i = 0; i < 100; i++) {
+
+			crdt::state::TwoPTwoPGraphSB<uint32_t> handler1(0);
+			crdt::state::TwoPTwoPGraphSB<uint32_t> handler2(1);
+			crdt::state::TwoPTwoPGraphSB<uint32_t> handler3(2);
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replicaA(20);
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replicaB(30);
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replicaC(40);
+
+			replicaA.insertVertice(20);
+			replicaA.insertVertice(21);
+			replicaA.insertVertice(22);
+			replicaB.insertVertice(23);
+			replicaB.insertVertice(24);
+			replicaB.insertVertice(25);
+			replicaC.insertVertice(26);
+			replicaC.insertVertice(27);
+			replicaC.insertVertice(28);
+
+			std::set<uint32_t> tempA = {20, 21, 22};
+			std::set<uint32_t> tempB = {23, 24, 25};
+			std::set<uint32_t> tempC = {26, 27, 28};
+
+			auto t1 = std::chrono::high_resolution_clock::now();
+			handler1.addExternalReplica({replicaA});
+			handler2.addExternalReplica({replicaB});
+			handler3.addExternalReplica({replicaC});
+			auto t2 = std::chrono::high_resolution_clock::now();
+			duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+		}
+		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
+	}
 }

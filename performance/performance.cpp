@@ -17,6 +17,7 @@
 #include "../src/state_based/VectorSB.hpp"
 #include "../src/operation_based/StringOB.hpp"
 #include "../src/state_based/LWWMultiSetSB.hpp"
+#include "../src/state_based/TwoPTwoPGraphSB.hpp"
 
 std::string filePath = "/home/tapasvi/workspace/CRDT-Library/performance/results/";
 
@@ -453,20 +454,62 @@ void VectorPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+void TwoPTwoPGraphPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "TwoPTwoPGraph" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::ofstream o(filePath + "TwoPTwoPGraph.csv");
+
+	for(auto num : replicas)
+	{
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(i);
+			replica1A.insertVertice(i);
+			replica1A.insertEdge(std::pair<uint32_t, uint32_t>(i, i+1));
+			serializedStrings.push_back(replica1A.serialize());
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::TwoPTwoPGraphMetadata<uint32_t>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::TwoPTwoPGraphMetadata<uint32_t> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::TwoPTwoPGraphSB<uint32_t> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
 	// performance
-	//PNCounterPerformance();
-	//GCounterPerformance();
-	//GMapPerformance();
+	PNCounterPerformance();
+	GCounterPerformance();
+	GMapPerformance();
 	LWWMultiSetPerformance();
 	MultiSetPerformance();
 	ORSetPerformance();
 	PriorityQueuePerformance();
 	TwoPSetPerformance();
 	GSetPerformance();
-	//StringPerformance();
-	//VectorPerformance();
+	StringPerformance();
+	VectorPerformance();
+	TwoPTwoPGraphPerformance();
 
 	return 0;
 }

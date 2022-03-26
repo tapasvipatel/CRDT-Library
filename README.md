@@ -54,11 +54,67 @@ This is to showcase how CRDTs can be used in a practical application.
 <h2 id="setup"> ⚙ Set Up </h2>
 This libary has only been validated on Linux OS, and support for Windows/MAC will be provided at a later time. To use the libary itself:
 
-**Tas Explain.**
+<h3 id="Dependencies"> Dependencies </h3>
 
-To launch the Trello-Clone:
+<h4 id="CMake"> CMake </h3>
 
-**Tas Explain.**
+```
+sudo-apt get install cmake
+```
+<h4 id="Catch2"> Catch2 </h3>
+
+```
+git clone https://github.com/catchorg/Catch2.git
+cd Catch2
+cmake -Bbuild -H. -DBUILD_TESTING=OFF
+sudo cmake --build build/ --target install
+```
+<h4 id="SFML"> SFML </h3>
+
+```
+sudo apt-get install libsfml-dev
+```
+<h4 id="TGUI"> TGUI </h3>
+
+```
+sudo add-apt-repository PPA:texus/tgui
+sudo apt-get update
+sudo apt-get install ligtgui-0.9-dev
+```
+
+<h3 id="BuildScripts"> Build Scripts </h3>
+
+```
+./generate.sh : Generate CRDT library and auxiliary binaries
+  * testing : test binary
+  * test_application: test application binary
+  * trello_application : trello application binary
+  * performance : performance binary
+  * clean : clean build of CRDT library
+  * networking : networking binary
+```
+
+```
+./generate_prebuilt.sh : Generate prebuilt versions of test cases for GitHub Workflow
+```
+
+<h3 id="RunScripts"> Run Scripts </h3>
+
+```
+run_performance.sh : Run performance binaries for all CRDTs
+```
+
+```
+run_test_application.sh : Run test application
+```
+
+```
+run_tests.sh : Run all tests
+```
+
+```
+run_trello_application.sh : Run single instance of trello application
+```
 
 <h2 id="guide"> 🐕‍🦺 Guide for CRDT data types</h2>
 
@@ -73,13 +129,13 @@ To add the CRDT to the server, add the metadata to the handler.
   — 
   <a href="#PNCounter">Positive Negative Counter</a>
   — 
-  <a href="#OperationCounter">Operation Grow Counter</a>
+  <a href="#2P Graph">Two Phase Two Phase Graph</a>
   — 
   <a href="#GSet">Grow Only Set</a>
   — 
   <a href="#OrSet">Or-Set</a>
   — 
-  <a href="#2PSet">Two-Phasee Set</a>
+  <a href="#2PSet">Two-Phase Set</a>
    — 
   <a href="#GMS">Grow-Only Multiset</a>
    — 
@@ -124,10 +180,10 @@ A counter that can only increase upwards. |  `+More memory efficient compared to
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
- `.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+ `.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata
 `.queryPayload()` | Get the payload of the metadata
 `.updatePayload(T payload)` | Update the payload of of the metadata
@@ -166,7 +222,6 @@ A counter that can go upwards and downwards |  `+Less memory efficient compared 
 `.increasePayload(uint32_t replicaID, T payload)` | Increases metadata by the payload using the ID of the metadata |
 `.decreasePayload(uint32_t replicaID, T payload)` |  Decreases metadata by the payload using the ID of the metadata |
 `.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
-`.serializeObject())` | Tas Explain | 
 `.queryPayload()` | Get the payload of all the metadatas |
 `.queryPayloadwithID(uint32_t replicaID)` | Gets the payload of the metadata using ID | 
 `.addExternalReplica(std::vector<PNCounterMetadata<T>> external_replica_metadata)` | Add as many metadatas as you want to the handler. 
@@ -174,10 +229,10 @@ A counter that can go upwards and downwards |  `+Less memory efficient compared 
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.queryPayloadT()` | Get the payload of the metadata |
 `.queryPayloadP()` | Get the payload of the positive counter|
@@ -224,35 +279,70 @@ Sum = 176+9 = 185
 */
 ```
 
-<h3 id="OperationCounter"> Operation Grow Counter</h3>
+<h3 id="2P Graph"> Two Phase Two Phase Graph</h3>
 
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
 |------|------------|----------|----------|
-Tas Explain |  `Tas Explain` | Tas Explain | Tas Explain |
+A Graph CRDT capable of storing vertices and edges |  `+No graph data type in STL` `-Does not support adding back a removed edge` | Keeping track of network partitions | Takes the union |
 
 
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
-| Handler | `CounterOB` | Tas Explain | `int`, `char` ,  `bool`, `double` |
-| Metadata | `CounterMetadata` | Tas Explain   | `int`, `char` ,  `bool`, `double`  |
+| Handler | `TwoPTwoPGraphSB` |  `.updateInternalPayload()`, `.queryId()`, `.queryVertices()`, `.queryVerticesTombstone() `, `.queryEdges()` , `.queryEdgesTombstone()`, `.lookupVertice(T e)` , `.addExternalReplica(std::vector<TwoPTwoPGraphMetadata<T>> external_replica_metadata)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `TwoPTwoPGraphMetadata` | `.serialize()`, `.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`,  `.deserializeFile(std::string jsonString)`, `.deserializeFile(std::string jsonString)`, `.queryId()`,  `.setVertices(std::set<T> vertices)`,  `.setVerticesTombstone(std::set<T> vertices_tombstone)`, `.setEdges(std::set<std::pair<T, T>> edges)`, `.setEdgesTombstone(std::set<std::pair<T, T>> edges_tombstone))`, `.queryVertices() `, `.queryVerticesTombstone()`, `.queryEdges()`, `.queryEdgesTombstone() `, `.insertVertice(T value) `, `.insertEdge(std::pair<T, T> value)`, `.insertVertices(std::vector<T> values) `, `.insertEdges(std::vector<std::pair<T, T>> values) `, `.removeVertice(T value)`, `.removeEdge(std::pair<T, T> value)`       | `int`, `char` , `bool`, `string`, `double`  |
 
 
 | Supported Operations (Handler) | Functionality | 
 |----------|------------|
-Tas Explain | Tas Explain |
+`.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`queryId()` | Get the ID of the metadata | 
+`.queryVertices()` | Gets all the values of the first phase of the first set | 
+`.queryVerticesTombstone() ` | Gets all the values of the second phase of the first set | 
+`.queryEdges()` | Gets all the values of the first phase of the second set | 
+`.queryEdgesTombstone()` | Gets all the values of the second phase of the second set |
+`.lookupVertice(T e)`  | Return specific metadata in the handler |
+`.addExternalReplica(std::vector<TwoPTwoPGraphMetadata<T>> external_replica_metadata)` | Add as many metadatas into the handler |
 
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-Tas Explain | Tas Explain |
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
+`.queryId()`|  Get the ID of the metadata  |
+`.setVertices(std::set<T> vertices)`| Insert multiple verticies of the graph with no duplicates |
+`.setVerticesTombstone(std::set<T> vertices_tombstone)` | Choose multiple verticies that is already inserted to be removed permanently |
+`.queryEdges()`, | Returns adjacency list of the graph  |
+`.queryEdgesTombstone() ` | Returns adjacency list of edges that are removed permanently | 
+`.insertVertice(T value) ` | Insert a vertex into the graph |
+`.insertEdge(std::pair<T, T> value)`| Insert a edge into the graph |
+`.insertVertices(std::vector<T> values) ` | Insert multiple verticies of the graph with duplicates |
+`.removeVertice(T value)` | Remove a vertex from your graph permanently |
+`.removeEdge(std::pair<T, T> value)`  | Remove an edge from yoru graph permanently |
+
 
 
 <h4> Example </h4>
 
 ```cpp
-//Tas Explain
+crdt::state::TwoPTwoPGraphSB<uint32_t> handler(0);  // Server 1
+crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1A(1); // Replica 1
+crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1B(2);  // Replica 2
+crdt::state::TwoPTwoPGraphMetadata<uint32_t> replica1C(3);  // Replica 3
+
+replica1A.insertVertice(20);
+replica1B.insertVertice(21);
+replica1C.insertVertice(22);
+
+replica1A.insertEdge(std::pair<uint32_t, uint32_t>(20, 21));
+replica1B.insertEdge(std::pair<uint32_t, uint32_t>(21, 22));
+replica1C.insertEdge(std::pair<uint32_t, uint32_t>(22, 23));
+
+// Handler now contains vertices and edges from all replicas
+handler.addExternalReplica({replica1A,replica1B,replica1C});
 ```
 
 <h3 id="GSet"> Grow-Only Set</h3>
@@ -281,10 +371,10 @@ A set that only elements can be added to it |   `+Does not allow duplicate eleme
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)` | Set the payload |
 `.queryPayload()` | Get all the elements inserted into the set |
@@ -332,10 +422,10 @@ A set allowing to insert and remove elements. Similar to a 2PSet, but the elemen
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)` | Set the payload |
 `.queryORSet() ` | Get the payload of the ORSet metadata |
@@ -386,10 +476,10 @@ A set allowing to insert and remove elements |   `+Does not allow duplicate elem
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()`|  Get the ID of the metadata  |
 `.setPayload(std::set<T> payload)`| Insert the first-phase set into the 2P set |
 `.setTombstone(std::set<T> tombstone)` | Insert the second-phase set into the 2P set |
@@ -440,10 +530,10 @@ A multi-set where only elements are allowed to be added |   `+Allow duplicate el
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the multiset |
 `.insert(T value)` | Insert a value inside the multiset |
 `.setPayload(std::multiset<T> payload)` | Initialize the multiset |
@@ -490,10 +580,10 @@ A multi-set where allowing for insertion and deletion |   `+Allow duplicate elem
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the multiset |
 `.queryTime()` , `.insert(long long int timestamp, T value)` | Get the time of the last write for multiset |
 `.insert(long long int timestamp, std::vector<T> value)` | Insert element into multiset providing the time |
@@ -549,10 +639,10 @@ A array where only elements are allowed to be added |   `+Allow duplicate elemen
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the ID of the metadata |
 `.setPayload(std::set<T> payload)`| Intialize the vector |
 `queryPayload()`| Return the vector |
@@ -597,10 +687,10 @@ A priority_queue where only elements are allowed to be added |   `+Allow duplica
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the multiset |
 `.push(T value)` | Insert a value inside the priority_queue |
 `.push(std::vector<T> value)` | Insert multiple values inside the priority_queue |
@@ -655,10 +745,10 @@ A map where only <key,value> pairs are allowed to be added |   `-Keys have to be
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryPayloadValue(K key) ` | Returns the value within the map given key |
 `.insert(K key, T value)` | Insert <Key,Value> pair into the map |
 `updateIncrease(K key, T increment)` | Increase the key by value of increment |
@@ -747,10 +837,10 @@ A mutable string where the text can be modified |   `+Support deletion of charac
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-`.serialize()`  | Tas Explain |
-`.serializeFile(std::string pathToFile)`  | Tas Explain |
-`.deserialize(std::string s)` | Tas Explain |
-`.deserializeFile(std::string jsonString)` | Tas Explain | 
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
 `.queryId()` | Get the id of the String |
 `.queryPayload()` | Return the string |
 `.setPayload(std::string payload)` | Initialize the string to the intended value |
@@ -792,21 +882,21 @@ Here is a showcase of our benchmark analysis. Our benchmark criteria was to meas
 PC Specs for Benchmark:
 https://www.userbenchmark.com/UserRun/6945534
 
-| CRDT Type | Average merge Time - C++ (ns) | Average merge Time - Python (ns) |
+| CRDT Type | Average merge Time - C++ (msec) | Average merge Time - Python (msec) |
 |------|------------|----------|
-| OB-Counter  | 98.11 (Not Valid Result) | N/A |
-| G-Set | 2672.79 | 4980.58 |
-| 2P-Set | 4359.16 | 7358.43 |
-| G-Counter | 1500.33 | 6421.28 |
-| Or-Set | 7487.43 | 13793.53 |
-| PN-Counter | 3279.23 | 7554.35 |
-| Multiset | 10034.91 | N/A |
-| *LWW-Multiset* | 8481.69 | 5234.63 |
-| *Mutable String* | 2770.35 | 2351.95 |
-| Vector | 2278.03 | N/A |
-| G-Map (Generic) | 7690.62 | N/A |
-| G-Map (String) | 192290 | N/A |
-| Priority Queue | 8739.66 | N/A |
+| 2P2P-Graph  | 0.00708377 | N/A |
+| G-Set | 0.00267279 | 0.00498058 |
+| 2P-Set | 0.00435916 | 0.00735843 |
+| G-Counter | 0.00150033 | 0.00642128 |
+| Or-Set | 0.00748743 | 0.01379353 |
+| PN-Counter | 0.00327923 | 0.00755435 |
+| Multiset | 0.01003491 | N/A |
+| *LWW-Multiset* | 0.00848169 | 0.00523463 |
+| *Mutable String* | 0.00277035 | 0.00235195 |
+| Vector | 0.00227803 | N/A |
+| G-Map (Generic) | 0.00769062 | N/A |
+| G-Map (String) | 0.19229 | N/A |
+| Priority Queue | 0.00873966 | N/A |
 
 
 *Lww-Multiset* -> In the python libary a LWW-Set was used while ours is a LWW-Multiset. The difference is a multiset allows duplicate elements while a set does not.
@@ -818,7 +908,7 @@ https://www.userbenchmark.com/UserRun/6945534
   <img src=https://i.ibb.co/kXgDkwJ/Graph.jpg"></a>
 </h1>
 
-The raw data for the benchmark can be found under the folder:  ```/Final Benchmark Result```
+The raw data for the benchmark can be found under the folder:  ```/benchmark```
 
 <h2 id="Contribute">🤝 Contribute </h2>
 Have an data structure in mind such as a binary tree or 2D arrays and want to attempt to make it into a CRDT? No open-source libary
@@ -832,7 +922,27 @@ Then leave a PR and if everything looks good, it will get merged into the reposi
 We greatly apperciate anyone who contributes or leaves feedback. 
 
 <h2 id="license"> 📝 License </h2>
+MIT License
 
+Copyright (c) 2022 [Tapasvi Patel, Rushab Roihan, Vishwa Gandhi, Winston Sun]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 
 
