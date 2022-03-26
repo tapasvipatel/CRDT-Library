@@ -103,7 +103,7 @@ void GMapPerformance()
 {
 	std::cout << "------------------------------------------------------" << std::endl;
 	std::cout << "GMap" << std::endl;
-	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
 	std::ofstream o(filePath + "GMap.csv");
 
 	for(auto num : replicas)
