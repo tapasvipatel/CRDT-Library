@@ -219,20 +219,83 @@ public:
 //Fuction Definations
 void loadWidgets(tgui::GuiBase &gui, tgui::Label::Ptr &message);
 void loadWidgets2(tgui::GuiBase &gui);
+void loadWidgets3(tgui::GuiBase &gui);
+void deleteBoard(tgui::GuiBase &gui, int boardType, string task);
+void updateTableMaster(tgui::GuiBase &gui);
 
 //Class Definations
 userInfo endUser;
 
-
-
-
-
 // -------------------------------- Window Screen 2 ----------------------------------------------------------//
+
+void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
+
+    auto timeValue = std::time(nullptr);
+    switch (boardType) {
+        case 1:
+            loadWidgets3(std::ref(gui));
+            backlogList.remove(task);
+            backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
+            backlogServer.addExternalReplica({backlogList});
+            //backlogServer.updateMetaData(backlogList.queryId(), backlogList);
+            numTasksBacklog.decreasePayload(1);
+            numTasksBacklog.serializeFile(filePath + "numtasksbacklog/" + endUser.userName + "_numtasksbacklog.json");
+            numTasksBacklogServer.addExternalReplica({numTasksBacklog});
+            updateTableMaster(std::ref(gui));
+            break;
+        case 2:
+            loadWidgets3(std::ref(gui));
+            inprogressList.remove(task);
+            inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
+            //inprogressServer.updateMetaData(inprogressList.queryId(), inprogressList);
+            inprogressServer.addExternalReplica({inprogressList});
+            numTasksInprogress.decreasePayload(1);
+            numTasksInprogress.serializeFile(filePath + "numtasksinprogress/" + endUser.userName + "_numtasksinprogress.json");
+            numTasksInprogressServer.addExternalReplica({numTasksInprogress});
+            updateTableMaster(std::ref(gui));
+            break;
+        case 3:
+            loadWidgets3(std::ref(gui));
+            readytotestList.remove(task);
+            readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
+            //readytotestServer.updateMetaData(readytotestList.queryId(), readytotestList);
+            readytotestServer.addExternalReplica({readytotestList});
+            numTasksReadytotest.decreasePayload(1);
+            numTasksReadytotest.serializeFile(filePath + "numtasksreadytotest/" + endUser.userName + "_numtasksreadytotest.json");
+            numTasksReadytotestServer.addExternalReplica({numTasksReadytotest});
+            updateTableMaster(std::ref(gui));
+            break;
+        case 4:
+            loadWidgets3(std::ref(gui));
+            completeList.remove(task);
+            completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
+            //completeServer.updateMetaData(completeList.queryId(), completeList);
+            completeServer.addExternalReplica({completeList});
+            numTasksComplete.decreasePayload(1);
+            numTasksComplete.serializeFile(filePath + "numtaskscomplete/" + endUser.userName + "_numtaskscomplete.json");
+            numTasksCompleteServer.addExternalReplica({numTasksComplete});
+            updateTableMaster(std::ref(gui));
+            break;
+        case 5:
+            loadWidgets3(std::ref(gui));
+            //auto temp = std::chrono::system_clock::now();
+            notaddedList.remove(task);
+            notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
+            //notaddedServer.updateMetaData(notaddedList.queryId(), notaddedList);
+            notaddedServer.addExternalReplica({notaddedList});
+            numTasksNotadded.decreasePayload(1);
+            numTasksNotadded.serializeFile(filePath + "numtasksnotadded/" + endUser.userName + "_numtasksnotadded.json");
+            numTasksNotaddedServer.addExternalReplica({numTasksNotadded});
+            updateTableMaster(std::ref(gui));
+            break;
+    }
+}
+
 // taps
 void updateTableMaster(tgui::GuiBase &gui)
 {
     // backlog
-    multiset<string> backlogPayload = backlogServer.queryPayload();
+    multiset<string> backlogPayload = backlogServer.queryMultiset();
     int count = 0;
     int deleteCount = 0;
     for(auto element : backlogPayload)
@@ -256,15 +319,17 @@ void updateTableMaster(tgui::GuiBase &gui)
         backlogDelete->getRenderer()->setTextColor(tgui::Color::Black);
         backlogDelete->getRenderer()->setTextStyle(tgui::Bold);
         gui.add(backlogDelete);
+        backlogDelete->onPress(&deleteBoard, std::ref(gui), 1, element);
     }
 
     // inprogress
-    multiset<string> inprogressPayload = inprogressServer.queryPayload();
+    multiset<string> inprogressPayload = inprogressServer.queryMultiset();
     count = 0;
     deleteCount = 0;
-    for(auto element = inprogressPayload.begin(); element != inprogressPayload.end(); element++)
+    for(auto element : inprogressPayload)
     {
-        auto inprogress = tgui::Button::create(*element);
+        cout << "Drawing" << endl;
+        auto inprogress = tgui::Button::create(element);
         inprogress->setSize({"12%", "12%"});
         int y = count + 308;
         count += 150;
@@ -283,10 +348,11 @@ void updateTableMaster(tgui::GuiBase &gui)
         inprogressDelete->getRenderer()->setTextColor(tgui::Color::Black);
         inprogressDelete->getRenderer()->setTextStyle(tgui::Bold);
         gui.add(inprogressDelete);
+        inprogressDelete->onPress(&deleteBoard, std::ref(gui), 2, element);
     }
 
     // readytotest
-    multiset<string> readytotestPayload = readytotestServer.queryPayload();
+    multiset<string> readytotestPayload = readytotestServer.queryMultiset();
     count = 0;
     deleteCount = 0;
     for(auto element : readytotestPayload)
@@ -310,10 +376,11 @@ void updateTableMaster(tgui::GuiBase &gui)
         readytotestDelete->getRenderer()->setTextColor(tgui::Color::Black);
         readytotestDelete->getRenderer()->setTextStyle(tgui::Bold);
         gui.add(readytotestDelete);
+        readytotestDelete->onPress(&deleteBoard, std::ref(gui), 3, element);
     }
 
     // complete
-    multiset<string> completePayload = completeServer.queryPayload();
+    multiset<string> completePayload = completeServer.queryMultiset();
     count = 0;
     deleteCount = 0;
     for(auto element : completePayload)
@@ -337,10 +404,11 @@ void updateTableMaster(tgui::GuiBase &gui)
         completeDelete->getRenderer()->setTextColor(tgui::Color::Black);
         completeDelete->getRenderer()->setTextStyle(tgui::Bold);
         gui.add(completeDelete);
+        completeDelete->onPress(&deleteBoard, std::ref(gui), 4, element);
     }
 
     // notadded
-    multiset<string> notaddedPayload = notaddedServer.queryPayload();
+    multiset<string> notaddedPayload = notaddedServer.queryMultiset();
     count = 0;
     deleteCount = 0;
     for(auto element : notaddedPayload)
@@ -364,6 +432,7 @@ void updateTableMaster(tgui::GuiBase &gui)
         notaddedDelete->getRenderer()->setTextColor(tgui::Color::Black);
         notaddedDelete->getRenderer()->setTextStyle(tgui::Bold);
         gui.add(notaddedDelete);
+        notaddedDelete->onPress(&deleteBoard, std::ref(gui), 5, element);
     }
 
     // priority list
@@ -660,6 +729,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
 
+        auto timeValue = std::time(nullptr);
         switch (boardType) {
             case 1:
                 backlogList.insert(_task);
@@ -763,6 +833,139 @@ void addBoard(tgui::GuiBase &gui, int boardType) {
     }
 }
 
+void loadWidgets3(tgui::GuiBase &gui)
+{
+    gui.removeAllWidgets();
+    const float windowHeight = gui.getView().getRect().height;
+    gui.setTextSize(static_cast<unsigned int>(0.04f * windowHeight)); 
+    tgui::Label::Ptr welcomeMessage = tgui::Label::create();
+    welcomeMessage->setSize({"100.0%", "100.0%"});
+    welcomeMessage->setPosition({"0%", "2.0%"});
+    welcomeMessage->setText("Welcome: " + endUser.getUserName());
+    //cout << endUser.getHash() << endl;
+    //message->getRenderer()->setTextColor(sf::Color(0, 200, 0));
+    gui.add(welcomeMessage);
+    gui.add(usersOnline);
+
+    // Create the merge button
+    auto mergeBoard = tgui::Button::create("Merge Board");
+    mergeBoard ->setSize({"10%", "10%"});
+    mergeBoard ->setPosition({"87%", "90%"});
+    mergeBoard->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    mergeBoard ->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(mergeBoard);
+
+    //Log Out Button
+    auto logOut = tgui::Button::create("Logout");
+    logOut ->setSize({"10%", "10%"});
+    logOut ->setPosition({"87%", "2.0%"});
+    logOut ->getRenderer()->setBackgroundColor(tgui::Color::Red);
+    logOut ->getRenderer()->setTextColor(tgui::Color::White);
+    gui.add(logOut); 
+
+    // Priority List Button
+    auto priorityListHeader = tgui::Button::create("Priority");
+    priorityListHeader ->setSize({"10%", "10%"});
+    priorityListHeader ->setPosition({"87%", "15.0%"});
+    priorityListHeader ->getRenderer()->setBackgroundColor(tgui::Color::White);
+    priorityListHeader ->getRenderer()->setTextColor(tgui::Color::Red);
+    gui.add(priorityListHeader); 
+
+    //Backlog button
+    auto backlog = tgui::Button::create("Backlog");
+    backlog->setSize({"12%", "12%"});
+    backlog->setPosition({"3%", "15%"});
+    backlog->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    backlog->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(backlog);
+
+    //Add a backlog board button
+    auto backlogAdd = tgui::Button::create("+");
+    backlogAdd->setSize(35, 35);
+    backlogAdd->setPosition(242, 192);
+    backlogAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    backlogAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    backlogAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(backlogAdd);
+
+    //In progress button
+    auto ipr = tgui::Button::create("In Progress");
+    ipr->setSize({"12%", "12%"});
+    ipr->setPosition({"20%", "15%"});
+    ipr->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    ipr->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(ipr);  
+
+    //Add an in progress board button
+    auto iprAdd = tgui::Button::create("+");
+    iprAdd->setSize(35, 35);
+    iprAdd->setPosition(557, 192);
+    iprAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    iprAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    iprAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(iprAdd);
+
+    //Ready to test button
+    auto ready = tgui::Button::create("Ready to Test");
+    ready->setSize({"12%", "12%"});
+    ready->setPosition({"37%", "15%"});
+    ready->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    ready->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(ready);
+
+    //Add a ready board button
+    auto readyAdd = tgui::Button::create("+");
+    readyAdd->setSize(35, 35);
+    readyAdd->setPosition(871, 192);
+    readyAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    readyAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    readyAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(readyAdd);
+
+    //Complete button
+    auto complete = tgui::Button::create("Complete");
+    complete->setSize({"12%", "12%"});
+    complete->setPosition({"54%", "15%"});
+    complete->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    complete->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(complete);    
+
+    //Add a complete board button
+    auto completeAdd = tgui::Button::create("+");
+    completeAdd->setSize(35, 35);
+    completeAdd->setPosition(1185, 192);
+    completeAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    completeAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    completeAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(completeAdd);
+
+    //Not added button
+    auto notAdded = tgui::Button::create("Not Added");
+    notAdded->setSize({"12%", "12%"});
+    notAdded->setPosition({"71%", "15%"});
+    notAdded->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
+    notAdded->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(notAdded);   
+
+    //Add a not added board button
+    auto notAddedAdd = tgui::Button::create("+");
+    notAddedAdd->setSize(35, 35);
+    notAddedAdd->setPosition(1499, 192);
+    notAddedAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
+    notAddedAdd->getRenderer()->setTextColor(tgui::Color::Black);
+    notAddedAdd->getRenderer()->setTextStyle(tgui::Bold);
+    gui.add(notAddedAdd);
+
+    mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
+    logOut->onPress(&logout,std::ref(gui));
+
+    backlogAdd->onPress(&addBoard, std::ref(gui), 1);
+    iprAdd->onPress(&addBoard, std::ref(gui), 2);
+    readyAdd->onPress(&addBoard, std::ref(gui), 3);
+    completeAdd->onPress(&addBoard, std::ref(gui), 4);
+    notAddedAdd->onPress(&addBoard, std::ref(gui), 5);
+    
+}
 
 void loadWidgets2(tgui::GuiBase &gui)
 {

@@ -289,6 +289,26 @@ public:
         return this->tombstone;
     }
 
+    std::multiset<T> queryMultiset()
+    {
+        std::multiset<T> queryResult;
+        for (auto const &e: this->payload) {
+            if (lookup(e)) {
+                queryResult.insert(e);
+            }
+        }
+        return queryResult;
+    }
+
+    bool lookup(T e) {
+        if (this->payload.count(e) && !this->tombstone.count(e)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     std::multiset<T> queryPayloadwithID(uint32_t replicaID)
     {
         std::multiset<T> queryResult;
