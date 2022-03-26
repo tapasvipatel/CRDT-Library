@@ -40,6 +40,7 @@ class MultiSetMetadata : CrdtMetaData
 {
 private:
     std::multiset<T> payload;
+    std::multiset<T> tombstone;
 public:
     uint32_t id;
     MultiSetMetadata() : CrdtMetaData(CrdtType::MultiSetSBType)
@@ -72,6 +73,8 @@ public:
         j["id"] = this->id;
         json internal(this->payload);
         j["payload"] = internal;
+        json internalTombstone(this->tombstone);
+        j["tombstone"] = internalTombstone;
 
         return j.dump();
     }
@@ -82,6 +85,8 @@ public:
         j["id"] = this->id;
         json internal(this->payload);
         j["payload"] = internal;
+        json internalTombstone(this->tombstone);
+        j["tombstone"] = internalTombstone;
         std::ofstream o(pathToFile);
         o << j << std::endl;
     }
@@ -95,6 +100,12 @@ public:
         {
             int32_t value = *it;
             this->payload.insert(value);
+        }
+
+        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        {
+            int32_t value = *it;
+            this->tombstone.insert(value);
         }
     }
 
@@ -111,6 +122,12 @@ public:
             T value = *it;
             this->payload.insert(value);
         }
+
+        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
+        {
+            T value = *it;
+            this->tombstone.insert(value);
+        }
     }
 
     const uint32_t& queryId() const
@@ -121,6 +138,10 @@ public:
     {
         this->payload.insert(value);
     }
+    void remove(T value) 
+    {
+        this->tombstone.insert(value);
+    }
     void insert(std::vector<T> value)
     {
         for (auto iter:value)
@@ -128,13 +149,28 @@ public:
             this->payload.insert(iter);
         }
     }
+    void remove(std::vector<T> value)
+    {
+        for (auto iter:value)
+        {
+            this->tombstone.insert(iter);
+        }
+    }
     void setPayload(std::multiset<T> payload)
     {
         this->payload = payload;
     }
+    void setTombstone(std::multiset<T> tombstone)
+    {
+        this->tombstone = tombstone;
+    }
     std::multiset<T> queryPayload()
     {
         return this->payload;
+    }
+    std::multiset<T> queryTombstone() 
+    {
+        return this->tombstone;
     }
 };
 
@@ -146,6 +182,7 @@ class MultiSetSB : CrdtObject<T>
 {
 private:
     std::multiset<T> payload;
+    std::multiset<T> tombstone;
     std::unordered_map<uint32_t,MultiSetMetadata<T>> replica_metadata;
 protected:
     bool merge(std::vector<uint32_t> replica_ids)
@@ -210,6 +247,7 @@ public:
     bool updateInternalPayload()
     {
         std::multiset<T> curr;
+        std::multiset<T> curr_ts;
         typename std::unordered_map<uint32_t,MultiSetMetadata<T>>::iterator metadata_it;
         for(metadata_it = this->replica_metadata.begin(); metadata_it != this->replica_metadata.end(); metadata_it++)
         {
@@ -218,8 +256,14 @@ public:
             {
                 curr.insert(iter);
             }
+            auto temp_ts_data = metadata_it->second.queryTombstone();
+            for (auto iter: temp_ts_data)
+            {
+                curr_ts.insert(iter);
+            }
         }
         this->payload = curr;
+        this->tombstone = curr_ts;
         return true;
     }
      bool updateExternalPayload()
@@ -240,6 +284,11 @@ public:
         return this->payload;
     }
 
+    std::multiset<T> queryTombstone()
+    {
+        return this->tombstone;
+    }
+
     std::multiset<T> queryPayloadwithID(uint32_t replicaID)
     {
         std::multiset<T> queryResult;
@@ -255,6 +304,7 @@ public:
             if (metadata_it != this->replica_metadata.end())
             {
                metadata.setPayload(fixlocalConflict(metadata_it->second.queryPayload(), metadata.queryPayload()));
+               metadata.setTombstone(fixlocalConflict(metadata_it->second.queryTombstone(), metadata.queryTombstone()));
             } 
             auto replica = this->replica_metadata.insert(std::pair<uint32_t, MultiSetMetadata<T>>(metadata.queryId(), metadata));
             if (!replica.second) replica.first->second = metadata;
