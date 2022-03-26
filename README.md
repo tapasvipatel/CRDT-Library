@@ -290,18 +290,39 @@ A Graph CRDT capable of storing vertices and edges |  `+No graph data type in ST
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
-| Handler | `CounterOB` | Tas Explain | `int`, `char` ,  `bool`, `double` |
-| Metadata | `CounterMetadata` | Tas Explain   | `int`, `char` ,  `bool`, `double`  |
+| Handler | `TwoPTwoPGraphSB` |  `.updateInternalPayload()`, `.queryId()`, `.queryVertices()`, `.queryVerticesTombstone() `, `.queryEdges()` , `.queryEdgesTombstone()`, `.lookupVertice(T e)` , `.addExternalReplica(std::vector<TwoPTwoPGraphMetadata<T>> external_replica_metadata)` | `int`, `char` , `bool`, `string`, `double`  |
+| Metadata | `TwoPTwoPGraphMetadata` | `.serialize()`, `.serializeFile(std::string pathToFile)`, `.deserialize(std::string s)`,  `.deserializeFile(std::string jsonString)`, `.deserializeFile(std::string jsonString)`, `.queryId()`,  `.setVertices(std::set<T> vertices)`,  `.setVerticesTombstone(std::set<T> vertices_tombstone)`, `.setEdges(std::set<std::pair<T, T>> edges)`, `.setEdgesTombstone(std::set<std::pair<T, T>> edges_tombstone))`, `.queryVertices() `, `.queryVerticesTombstone()`, `.queryEdges()`, `.queryEdgesTombstone() `, `.insertVertice(T value) `, `.insertEdge(std::pair<T, T> value)`, `.insertVertices(std::vector<T> values) `, `.insertEdges(std::vector<std::pair<T, T>> values) `, `.removeVertice(T value)`, `.removeEdge(std::pair<T, T> value)`       | `int`, `char` , `bool`, `string`, `double`  |
 
 
 | Supported Operations (Handler) | Functionality | 
 |----------|------------|
-Tas Explain | Tas Explain |
+`.updateInternalPayload()` | Merges all the CRDTs that it contains. Equivalent to doing a localMerge |
+`queryId()` | Get the ID of the metadata | 
+`.queryVertices()` | Gets all the values of the first phase of the first set | 
+`.queryVerticesTombstone() ` | Gets all the values of the second phase of the first set | 
+`.queryEdges()` | Gets all the values of the first phase of the second set | 
+`.queryEdgesTombstone()` | Gets all the values of the second phase of the second set |
+`.lookupVertice(T e)`  | Return specific metadata in the handler |
+`.addExternalReplica(std::vector<TwoPTwoPGraphMetadata<T>> external_replica_metadata)` | Add as many metadatas into the handler |
 
 
 | Supported Operations (Metadata) | Functionality | 
 |----------|------------|
-Tas Explain | Tas Explain |
+`.serialize()`  | Serialize the CRDT into a string |
+`.serializeFile(std::string pathToFile)`  | Serialize the CRDT into a string and save it into a file |
+`.deserialize(std::string s)` | Deserialize a string into CRDT object |
+`.deserializeFile(std::string jsonString)` | Deserialize a string from a file into a CRDT object | 
+`.queryId()`|  Get the ID of the metadata  |
+`.setVertices(std::set<T> vertices)`| Insert multiple verticies of the graph with no duplicates |
+`.setVerticesTombstone(std::set<T> vertices_tombstone)` | Choose multiple verticies that is already inserted to be removed permanently |
+`.queryEdges()`, | Returns adjacency list of the graph  |
+`.queryEdgesTombstone() ` | Returns adjacency list of edges that are removed permanently | 
+`.insertVertice(T value) ` | Insert a vertex into the graph |
+`.insertEdge(std::pair<T, T> value)`| Insert a edge into the graph |
+`.insertVertices(std::vector<T> values) ` | Insert multiple verticies of the graph with duplicates |
+`.removeVertice(T value)` | Remove a vertex from your graph permanently |
+`.removeEdge(std::pair<T, T> value)`  | Remove an edge from yoru graph permanently |
+
 
 
 <h4> Example </h4>
