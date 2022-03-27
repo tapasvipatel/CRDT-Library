@@ -80,6 +80,22 @@ public:
         return j.dump();
     }
 
+    std::string serializeS()
+    {
+        json j;
+        j["id"] = this->id;
+        json internal;
+        
+        for(auto value : this->payload)
+        {
+            internal[std::to_string(value.first)] = value.second;
+        }
+
+        j["payload"] = internal.dump();
+
+        return j.dump();
+    }
+
     void serializeFile(std::string pathToFile)
     {
         json j;

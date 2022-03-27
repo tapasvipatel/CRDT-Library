@@ -19,7 +19,8 @@
 #include "../src/state_based/LWWMultiSetSB.hpp"
 #include "../src/state_based/TwoPTwoPGraphSB.hpp"
 
-std::string filePath = "/home/tapasvi/workspace/CRDT-Library/performance/results/";
+//std::string filePath = "/home/tapasvi/workspace/CRDT-Library/performance/results/";
+std::string filePath = "/home/rushab/Capstone/GitHub/CRDT-Library/performance/results/";
 
 void PNCounterPerformance()
 {
@@ -99,11 +100,55 @@ void GCounterPerformance()
 	std::cout << "------------------------------------------------------" << std::endl;
 }
 
+
+void GMapStringPerformance()
+{
+	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "GMap String Variant" << std::endl;
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+	std::ofstream o(filePath + "GMapString.csv");
+
+	for(auto num : replicas)
+	{
+		int key = 0;
+		std::vector<std::string> serializedStrings;
+		int numReplicas = num;
+
+		for(int i = 0; i < numReplicas; i++)
+		{
+			crdt::state::GMapMetadata<uint32_t, std::string> replica1A(i,key,std::to_string(i));
+			serializedStrings.push_back(replica1A.serializeS());
+			key++;
+		}
+
+		// deserialize, then merge
+		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		std::vector<crdt::state::GMapMetadata<uint32_t, std::string>> deserializeMetadata;
+
+		for(auto s : serializedStrings)
+		{
+			crdt::state::GMapMetadata<uint32_t, std::string> metadata;
+			metadata.deserialize(s);
+			deserializeMetadata.push_back(metadata);
+		}
+
+		crdt::state::GMapSBString<uint32_t, std::string> replicaMaster;
+		replicaMaster.addExternalReplica(deserializeMetadata);
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		std::cout << numReplicas << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		o << numReplicas << "," << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	}
+	std::cout << "------------------------------------------------------" << std::endl;
+}
+
+
+
 void GMapPerformance()
 {
 	std::cout << "------------------------------------------------------" << std::endl;
 	std::cout << "GMap" << std::endl;
-	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
+	std::vector<int> replicas = {1, 2, 4, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
 	std::ofstream o(filePath + "GMap.csv");
 
 	for(auto num : replicas)
@@ -498,18 +543,19 @@ void TwoPTwoPGraphPerformance()
 int main(int argc, char* argv[])
 {
 	// performance
-	PNCounterPerformance();
-	GCounterPerformance();
-	GMapPerformance();
-	LWWMultiSetPerformance();
-	MultiSetPerformance();
-	ORSetPerformance();
-	PriorityQueuePerformance();
-	TwoPSetPerformance();
-	GSetPerformance();
-	StringPerformance();
-	VectorPerformance();
-	TwoPTwoPGraphPerformance();
+	GMapStringPerformance();
+	// PNCounterPerformance();
+	// GCounterPerformance();
+	// GMapPerformance();
+	// LWWMultiSetPerformance();
+	// MultiSetPerformance();
+	// ORSetPerformance();
+	// PriorityQueuePerformance();
+	// TwoPSetPerformance();
+	// GSetPerformance();
+	// StringPerformance();
+	// VectorPerformance();
+	// TwoPTwoPGraphPerformance();
 
 	return 0;
 }
