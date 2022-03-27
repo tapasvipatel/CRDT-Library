@@ -230,7 +230,18 @@ userInfo endUser;
 
 void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
 
-    auto timeValue = std::time(nullptr);
+    vector<char> priority;
+    for (int i = 0; i < task.length(); i++) {
+        if (task[i] == '.') {
+            break;
+        }
+        priority.push_back(task[i]);
+    }
+
+    string stringPriority(priority.begin(), priority.end());
+    int32_t key = stoi(stringPriority);
+    //auto timeValue = std::time(nullptr);
+    cout << key << endl;
     switch (boardType) {
         case 1:
             loadWidgets3(std::ref(gui));
@@ -732,7 +743,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         auto timeValue = std::time(nullptr);
         switch (boardType) {
             case 1:
-                backlogList.insert(_task);
+                backlogList.insert(_data);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
                 numTasksBacklog.increasePayload(1);
@@ -741,7 +752,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 2:
-                inprogressList.insert(_task);
+                inprogressList.insert(_data);
                 inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
                 inprogressServer.addExternalReplica({inprogressList});
                 numTasksInprogress.increasePayload(1);
@@ -750,7 +761,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 3:
-                readytotestList.insert(_task);
+                readytotestList.insert(_data);
                 readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
                 readytotestServer.addExternalReplica({readytotestList});
                 numTasksReadytotest.increasePayload(1);
@@ -759,7 +770,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 updateTableMaster(std::ref(gui));
                 break;
             case 4:
-                completeList.insert(_task);
+                completeList.insert(_data);
                 completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
                 completeServer.addExternalReplica({completeList});
                 numTasksComplete.increasePayload(1);
@@ -769,7 +780,7 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 break;
             case 5:
                 //auto temp = std::chrono::system_clock::now();
-                notaddedList.insert(_task);
+                notaddedList.insert(_data);
                 notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
                 notaddedServer.addExternalReplica({notaddedList});
                 numTasksNotadded.increasePayload(1);
