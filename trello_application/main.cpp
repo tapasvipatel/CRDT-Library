@@ -1055,8 +1055,8 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     //Add a backlog board button
     auto backlogAdd = tgui::Button::create("+");
-    backlogAdd->setSize(35, 35);
-    backlogAdd->setPosition(242, 192);
+    backlogAdd->setSize({"2%", "4%"});
+    backlogAdd->setPosition({"13%", "23%"});
     backlogAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
     backlogAdd->getRenderer()->setTextColor(tgui::Color::Black);
     backlogAdd->getRenderer()->setTextStyle(tgui::Bold);
@@ -1072,8 +1072,8 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     //Add an in progress board button
     auto iprAdd = tgui::Button::create("+");
-    iprAdd->setSize(35, 35);
-    iprAdd->setPosition(557, 192);
+    iprAdd->setSize({"2%", "4%"});
+    iprAdd->setPosition({"30.05%", "23%"});
     iprAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
     iprAdd->getRenderer()->setTextColor(tgui::Color::Black);
     iprAdd->getRenderer()->setTextStyle(tgui::Bold);
@@ -1089,8 +1089,8 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     //Add a ready board button
     auto readyAdd = tgui::Button::create("+");
-    readyAdd->setSize(35, 35);
-    readyAdd->setPosition(871, 192);
+    readyAdd->setSize({"2%", "4%"});
+    readyAdd->setPosition({"47.05%", "23%"});
     readyAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
     readyAdd->getRenderer()->setTextColor(tgui::Color::Black);
     readyAdd->getRenderer()->setTextStyle(tgui::Bold);
@@ -1106,8 +1106,8 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     //Add a complete board button
     auto completeAdd = tgui::Button::create("+");
-    completeAdd->setSize(35, 35);
-    completeAdd->setPosition(1185, 192);
+    completeAdd->setSize({"2%", "4%"});
+    completeAdd->setPosition({"64%", "23%"});
     completeAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
     completeAdd->getRenderer()->setTextColor(tgui::Color::Black);
     completeAdd->getRenderer()->setTextStyle(tgui::Bold);
@@ -1123,8 +1123,8 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     //Add a not added board button
     auto notAddedAdd = tgui::Button::create("+");
-    notAddedAdd->setSize(35, 35);
-    notAddedAdd->setPosition(1499, 192);
+    notAddedAdd->setSize({"2%", "4%"});
+    notAddedAdd->setPosition({"81%", "23%"});
     notAddedAdd->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
     notAddedAdd->getRenderer()->setTextColor(tgui::Color::Black);
     notAddedAdd->getRenderer()->setTextStyle(tgui::Bold);
