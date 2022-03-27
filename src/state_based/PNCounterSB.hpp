@@ -152,6 +152,12 @@ public:
         this->negativePayload = payload;
         this->totalPayload = this->positivePayload - this->negativePayload;
     }
+    void clear()
+    {
+        this->setPayloadT(0);
+        this->setPayloadP(0);
+        this->setPayloadN(0);
+    }
 
 };
 
@@ -263,6 +269,16 @@ public:
     void setPayLoad(T payload)
     {
         this->payload = payload;
+    }
+
+    void clear()
+    {
+        this->payload = 0;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+            i->second.setPayloadT(0);
+            i->second.setPayloadP(0);
+            i->second.setPayloadN(0);
+        }
     }
 
     T queryPayloadwithID(uint32_t replicaID) 

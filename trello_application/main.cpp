@@ -255,9 +255,6 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
             backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
             backlogServer.addExternalReplica({backlogList});
             //backlogServer.updateMetaData(backlogList.queryId(), backlogList);
-            numTasksBacklog.decreasePayload(1);
-            numTasksBacklog.serializeFile(filePath + "numtasksbacklog/" + endUser.userName + "_numtasksbacklog.json");
-            numTasksBacklogServer.addExternalReplica({numTasksBacklog});
             updateTableMaster(std::ref(gui));
             break;
         case 2:
@@ -266,9 +263,6 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
             inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
             //inprogressServer.updateMetaData(inprogressList.queryId(), inprogressList);
             inprogressServer.addExternalReplica({inprogressList});
-            numTasksInprogress.decreasePayload(1);
-            numTasksInprogress.serializeFile(filePath + "numtasksinprogress/" + endUser.userName + "_numtasksinprogress.json");
-            numTasksInprogressServer.addExternalReplica({numTasksInprogress});
             updateTableMaster(std::ref(gui));
             break;
         case 3:
@@ -277,9 +271,6 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
             readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
             //readytotestServer.updateMetaData(readytotestList.queryId(), readytotestList);
             readytotestServer.addExternalReplica({readytotestList});
-            numTasksReadytotest.decreasePayload(1);
-            numTasksReadytotest.serializeFile(filePath + "numtasksreadytotest/" + endUser.userName + "_numtasksreadytotest.json");
-            numTasksReadytotestServer.addExternalReplica({numTasksReadytotest});
             updateTableMaster(std::ref(gui));
             break;
         case 4:
@@ -288,9 +279,6 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
             completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
             //completeServer.updateMetaData(completeList.queryId(), completeList);
             completeServer.addExternalReplica({completeList});
-            numTasksComplete.decreasePayload(1);
-            numTasksComplete.serializeFile(filePath + "numtaskscomplete/" + endUser.userName + "_numtaskscomplete.json");
-            numTasksCompleteServer.addExternalReplica({numTasksComplete});
             updateTableMaster(std::ref(gui));
             break;
         case 5:
@@ -300,9 +288,6 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
             notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
             //notaddedServer.updateMetaData(notaddedList.queryId(), notaddedList);
             notaddedServer.addExternalReplica({notaddedList});
-            numTasksNotadded.decreasePayload(1);
-            numTasksNotadded.serializeFile(filePath + "numtasksnotadded/" + endUser.userName + "_numtasksnotadded.json");
-            numTasksNotaddedServer.addExternalReplica({numTasksNotadded});
             updateTableMaster(std::ref(gui));
             break;
     }
@@ -314,6 +299,21 @@ void updateTableMaster(tgui::GuiBase &gui)
     priorityList.clear();
     priorityListServer.clear();
 
+    numTasksBacklog.clear();
+    numTasksBacklogServer.clear();
+
+    numTasksInprogress.clear();
+    numTasksInprogressServer.clear();
+
+    numTasksReadytotest.clear();
+    numTasksReadytotestServer.clear();
+
+    numTasksComplete.clear();
+    numTasksCompleteServer.clear();
+
+    numTasksNotadded.clear();
+    numTasksNotaddedServer.clear();
+
     // backlog
     multiset<string> backlogPayload = backlogServer.queryMultiset();
     int count = 0;
@@ -323,6 +323,10 @@ void updateTableMaster(tgui::GuiBase &gui)
         priorityList.insert(getPriority(element), element);
         priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
+
+        numTasksBacklog.increasePayload(1);
+        numTasksBacklog.serializeFile(filePath + "numtasksbacklog/" + endUser.userName + "_numtasksbacklog.json");
+        numTasksBacklogServer.addExternalReplica({numTasksBacklog});
         
         auto backlog = tgui::Button::create(element);
         backlog->setSize({"12%", "12%"});
@@ -356,6 +360,10 @@ void updateTableMaster(tgui::GuiBase &gui)
         priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
 
+        numTasksInprogress.increasePayload(1);
+        numTasksInprogress.serializeFile(filePath + "numtasksinprogress/" + endUser.userName + "_numtasksinprogress.json");
+        numTasksInprogressServer.addExternalReplica({numTasksInprogress});
+
         auto inprogress = tgui::Button::create(element);
         inprogress->setSize({"12%", "12%"});
         int y = count + 308;
@@ -387,6 +395,10 @@ void updateTableMaster(tgui::GuiBase &gui)
         priorityList.insert(getPriority(element), element);
         priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
+
+        numTasksReadytotest.increasePayload(1);
+        numTasksReadytotest.serializeFile(filePath + "numtasksreadytotest/" + endUser.userName + "numtasksreadytotest.json");
+        numTasksReadytotestServer.addExternalReplica({numTasksReadytotest});
 
         auto readytotest = tgui::Button::create(element);
         readytotest->setSize({"12%", "12%"});
@@ -420,6 +432,10 @@ void updateTableMaster(tgui::GuiBase &gui)
         priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
 
+        numTasksComplete.increasePayload(1);
+        numTasksComplete.serializeFile(filePath + "numtaskscomplete/" + endUser.userName + "_numtaskscomplete.json");
+        numTasksCompleteServer.addExternalReplica({numTasksComplete});
+
         auto complete = tgui::Button::create(element);
         complete->setSize({"12%", "12%"});
         int y = count + 308;
@@ -451,6 +467,10 @@ void updateTableMaster(tgui::GuiBase &gui)
         priorityList.insert(getPriority(element), element);
         priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
         priorityListServer.addExternalReplica({priorityList});
+
+        numTasksNotadded.increasePayload(1);
+        numTasksNotadded.serializeFile(filePath + "numtasksnotadded/" + endUser.userName + "numtasksnotadded.json");
+        numTasksNotaddedServer.addExternalReplica({numTasksNotadded});
 
         auto notadded = tgui::Button::create(element);
         notadded->setSize({"12%", "12%"});
@@ -501,43 +521,43 @@ void updateTableMaster(tgui::GuiBase &gui)
     // update counters on the screen
     string valueone = "Num: " + to_string(numTasksBacklogServer.queryPayload());
     auto numTasksBacklogLabel = tgui::Button::create(valueone);
-    numTasksBacklogLabel->setSize({"12%", "12%"});
-    numTasksBacklogLabel->setPosition(55, 930);
-    numTasksBacklogLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
-    numTasksBacklogLabel->getRenderer()->setTextColor(tgui::Color::White);
+    numTasksBacklogLabel->setSize({"10%", "10%"});
+    numTasksBacklogLabel->setPosition({"4.5%", "90%"});
+    numTasksBacklogLabel->getRenderer()->setBackgroundColor(sf::Color(219, 153, 247));
+    numTasksBacklogLabel->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(numTasksBacklogLabel);
-
-    string valuetwo = "Num: " + to_string(numTasksCompleteServer.queryPayload());
-    auto numTasksCompleteLabel = tgui::Button::create(valuetwo);
-    numTasksCompleteLabel->setSize({"12%", "12%"});
-    numTasksCompleteLabel->setPosition(999, 930);
-    numTasksCompleteLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
-    numTasksCompleteLabel->getRenderer()->setTextColor(tgui::Color::White);
-    gui.add(numTasksCompleteLabel);
 
     string valuethree = "Num: " + to_string(numTasksInprogressServer.queryPayload());
     auto numTasksInprogressLabel = tgui::Button::create(valuethree);
-    numTasksInprogressLabel->setSize({"12%", "12%"});
-    numTasksInprogressLabel->setPosition(371, 930);
-    numTasksInprogressLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
-    numTasksInprogressLabel->getRenderer()->setTextColor(tgui::Color::White);
+    numTasksInprogressLabel->setSize({"10%", "10%"});
+    numTasksInprogressLabel->setPosition({"22.5%", "90%"});
+    numTasksInprogressLabel->getRenderer()->setBackgroundColor(sf::Color(219, 153, 247));
+    numTasksInprogressLabel->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(numTasksInprogressLabel);
-
-    string valuefour = "Num: " + to_string(numTasksNotaddedServer.queryPayload());
-    auto numTasksNotaddedLabel = tgui::Button::create(valuefour);
-    numTasksNotaddedLabel->setSize({"12%", "12%"});
-    numTasksNotaddedLabel->setPosition(1313, 930);
-    numTasksNotaddedLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
-    numTasksNotaddedLabel->getRenderer()->setTextColor(tgui::Color::White);
-    gui.add(numTasksNotaddedLabel);
 
     string valuefive = "Num: " + to_string(numTasksReadytotestServer.queryPayload());
     auto numTasksReadytotestLabel = tgui::Button::create(valuefive);
-    numTasksReadytotestLabel->setSize({"12%", "12%"});
-    numTasksReadytotestLabel->setPosition(685, 930);
-    numTasksReadytotestLabel->getRenderer()->setBackgroundColor(sf::Color(142, 68, 173));
-    numTasksReadytotestLabel->getRenderer()->setTextColor(tgui::Color::White);
+    numTasksReadytotestLabel->setSize({"10%", "10%"});
+    numTasksReadytotestLabel->setPosition({"38.5%", "90%"});
+    numTasksReadytotestLabel->getRenderer()->setBackgroundColor(sf::Color(219, 153, 247));
+    numTasksReadytotestLabel->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(numTasksReadytotestLabel);
+
+    string valuetwo = "Num: " + to_string(numTasksCompleteServer.queryPayload());
+    auto numTasksCompleteLabel = tgui::Button::create(valuetwo);
+    numTasksCompleteLabel->setSize({"10%", "10%"});
+    numTasksCompleteLabel->setPosition({"55.5%", "90%"});
+    numTasksCompleteLabel->getRenderer()->setBackgroundColor(sf::Color(219, 153, 247));
+    numTasksCompleteLabel->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(numTasksCompleteLabel);
+
+    string valuefour = "Num: " + to_string(numTasksNotaddedServer.queryPayload());
+    auto numTasksNotaddedLabel = tgui::Button::create(valuefour);
+    numTasksNotaddedLabel->setSize({"10%", "10%"});
+    numTasksNotaddedLabel->setPosition({"72.5%", "90%"});
+    numTasksNotaddedLabel->getRenderer()->setBackgroundColor(sf::Color(219, 153, 247));
+    numTasksNotaddedLabel->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(numTasksNotaddedLabel);
 }
 
 void convergeBoard(tgui::GuiBase &gui, int statusCode)
@@ -649,6 +669,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     string numTasksNotaddedFolder = rootFolder + "numtasksnotadded";
     string numTasksReadytotestFolder = rootFolder + "numtasksreadytotest";
 
+    /*
     vector<crdt::state::PNCounterMetadata<uint32_t>> numTasksBacklogMetadataList;
     for(auto & file : fs::directory_iterator(numTasksBacklogFolder))
     {
@@ -698,6 +719,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     }
 
     numTasksReadytotestServer.addExternalReplica(numTasksReadytotestMetadataList);
+    */
 
     updateTableMaster(std::ref(gui));
 }
@@ -775,36 +797,24 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 backlogList.insert(_data);
                 backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
-                numTasksBacklog.increasePayload(1);
-                numTasksBacklog.serializeFile(filePath + "numtasksbacklog/" + endUser.userName + "_numtasksbacklog.json");
-                numTasksBacklogServer.addExternalReplica({numTasksBacklog});
                 updateTableMaster(std::ref(gui));
                 break;
             case 2:
                 inprogressList.insert(_data);
                 inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
                 inprogressServer.addExternalReplica({inprogressList});
-                numTasksInprogress.increasePayload(1);
-                numTasksInprogress.serializeFile(filePath + "numtasksinprogress/" + endUser.userName + "_numtasksinprogress.json");
-                numTasksInprogressServer.addExternalReplica({numTasksInprogress});
                 updateTableMaster(std::ref(gui));
                 break;
             case 3:
                 readytotestList.insert(_data);
                 readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
                 readytotestServer.addExternalReplica({readytotestList});
-                numTasksReadytotest.increasePayload(1);
-                numTasksReadytotest.serializeFile(filePath + "numtasksreadytotest/" + endUser.userName + "_numtasksreadytotest.json");
-                numTasksReadytotestServer.addExternalReplica({numTasksReadytotest});
                 updateTableMaster(std::ref(gui));
                 break;
             case 4:
                 completeList.insert(_data);
                 completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
                 completeServer.addExternalReplica({completeList});
-                numTasksComplete.increasePayload(1);
-                numTasksComplete.serializeFile(filePath + "numtaskscomplete/" + endUser.userName + "_numtaskscomplete.json");
-                numTasksCompleteServer.addExternalReplica({numTasksComplete});
                 updateTableMaster(std::ref(gui));
                 break;
             case 5:
@@ -812,9 +822,6 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
                 notaddedList.insert(_data);
                 notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
                 notaddedServer.addExternalReplica({notaddedList});
-                numTasksNotadded.increasePayload(1);
-                numTasksNotadded.serializeFile(filePath + "numtasksnotadded/" + endUser.userName + "_numtasksnotadded.json");
-                numTasksNotaddedServer.addExternalReplica({numTasksNotadded});
                 updateTableMaster(std::ref(gui));
                 break;
         }
