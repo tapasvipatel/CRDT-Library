@@ -1,4 +1,4 @@
 bob
 1
 8418771444413088694
-User status: 1
+User status: 0

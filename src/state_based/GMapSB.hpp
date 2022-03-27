@@ -223,6 +223,11 @@ public:
         }
     }
 
+    void clear()
+    {
+        this->payload.clear();
+    }
+
 
 };
 
@@ -582,6 +587,18 @@ public:
     {
         return this->totalPayload;
     } 
+
+    void clear()
+    {
+        totalPayload.clear();
+        for (auto i = this->payload.begin(); i != this->payload.end(); i++) {
+            i->second.clear();
+        }
+
+        for (auto i = this->replica_metadata.begin(); i != this->replica_metadata.end(); i++) {
+            i->second.clear();
+        }
+    }
 
 
    void fixSameKeyConflict(GMapMetadata<K,T>& metadata)

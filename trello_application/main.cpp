@@ -228,20 +228,26 @@ userInfo endUser;
 
 // -------------------------------- Window Screen 2 ----------------------------------------------------------//
 
-void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
+int32_t getPriority(string task) {
 
     vector<char> priority;
     for (int i = 0; i < task.length(); i++) {
+
         if (task[i] == '.') {
             break;
         }
         priority.push_back(task[i]);
+
     }
 
     string stringPriority(priority.begin(), priority.end());
     int32_t key = stoi(stringPriority);
+    return key;
+}
+
+void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
+
     //auto timeValue = std::time(nullptr);
-    cout << key << endl;
     switch (boardType) {
         case 1:
             loadWidgets3(std::ref(gui));
@@ -305,12 +311,19 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
 // taps
 void updateTableMaster(tgui::GuiBase &gui)
 {
+    priorityList.clear();
+    priorityListServer.clear();
+
     // backlog
     multiset<string> backlogPayload = backlogServer.queryMultiset();
     int count = 0;
     int deleteCount = 0;
     for(auto element : backlogPayload)
     {
+        priorityList.insert(getPriority(element), element);
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+        
         auto backlog = tgui::Button::create(element);
         backlog->setSize({"12%", "12%"});
         int y = count + 308;
@@ -339,7 +352,10 @@ void updateTableMaster(tgui::GuiBase &gui)
     deleteCount = 0;
     for(auto element : inprogressPayload)
     {
-        cout << "Drawing" << endl;
+        priorityList.insert(getPriority(element), element);
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+
         auto inprogress = tgui::Button::create(element);
         inprogress->setSize({"12%", "12%"});
         int y = count + 308;
@@ -368,6 +384,10 @@ void updateTableMaster(tgui::GuiBase &gui)
     deleteCount = 0;
     for(auto element : readytotestPayload)
     {
+        priorityList.insert(getPriority(element), element);
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+
         auto readytotest = tgui::Button::create(element);
         readytotest->setSize({"12%", "12%"});
         int y = count + 308;
@@ -396,6 +416,10 @@ void updateTableMaster(tgui::GuiBase &gui)
     deleteCount = 0;
     for(auto element : completePayload)
     {
+        priorityList.insert(getPriority(element), element);
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+
         auto complete = tgui::Button::create(element);
         complete->setSize({"12%", "12%"});
         int y = count + 308;
@@ -424,6 +448,10 @@ void updateTableMaster(tgui::GuiBase &gui)
     deleteCount = 0;
     for(auto element : notaddedPayload)
     {
+        priorityList.insert(getPriority(element), element);
+        priorityList.serializeFile_StringValue(filePath + "prioritylist/" + endUser.userName + "_prioritylist.json");
+        priorityListServer.addExternalReplica({priorityList});
+
         auto notadded = tgui::Button::create(element);
         notadded->setSize({"12%", "12%"});
         int y = count + 308;
@@ -458,8 +486,7 @@ void updateTableMaster(tgui::GuiBase &gui)
             break;
         }
 
-        string data = to_string(i->first) + ". " + i->second;
-        auto priorityListButton = tgui::Button::create(data);
+        auto priorityListButton = tgui::Button::create(i->second);
         priorityListButton->setSize({"10%, 10%"});
         int y = count + 258;
         count += 100;
@@ -602,6 +629,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
 
     notaddedServer.addExternalReplica(notaddedMetadataList);
 
+    /*
     // Get priority list updates
     vector<crdt::state::GMapMetadata<int32_t, string>> priorityMetadataList;
     for(auto & file : fs::directory_iterator(prioritylistFolder))
@@ -612,6 +640,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     }
 
     priorityListServer.addExternalReplica(priorityMetadataList);
+    */
 
     // Get counter updates
     string numTasksBacklogFolder = rootFolder + "numtasksbacklog";
