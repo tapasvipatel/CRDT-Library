@@ -866,19 +866,19 @@ TEST_CASE("Test ORSetSB", "[classic]")
 		replica1B.serializeFile("../../tests/temp_data/orset1B.json");
 		replica1C.serializeFile("../../tests/temp_data/orset1C.json");
 
-        std::string replica1AString;
-        std::ifstream replica1Ai("../../tests/temp_data/orset1A.json");
-        replica1Ai >> replica1AString;
+		std::string replica1AString;
+		std::ifstream replica1Ai("../../tests/temp_data/orset1A.json");
+		replica1Ai >> replica1AString;
 
-        std::string replica1BString;
-        std::ifstream replica1Bi("../../tests/temp_data/orset1B.json");
-        replica1Bi >> replica1BString;
+		std::string replica1BString;
+		std::ifstream replica1Bi("../../tests/temp_data/orset1B.json");
+		replica1Bi >> replica1BString;
 
-        std::string replica1CString;
-        std::ifstream replica1Ci("../../tests/temp_data/orset1C.json");
-        replica1Ci >> replica1CString;
+		std::string replica1CString;
+		std::ifstream replica1Ci("../../tests/temp_data/orset1C.json");
+		replica1Ci >> replica1CString;
 
-        REQUIRE(replica1AString == replica1A.serialize());
+		REQUIRE(replica1AString == replica1A.serialize());
 		REQUIRE(replica1BString == replica1B.serialize());
 		REQUIRE(replica1CString == replica1C.serialize());
 	}
