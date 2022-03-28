@@ -34,7 +34,8 @@ crdt::state::GMapSBString<int32_t, string> priorityListServer;
 //std::thread automatic_merge_thread;
 
 string filePath = "/home/vishcapstone/Documents/CRDT-Library/trello_application/json/";
-//string filePath = "/home/tapasvi/workspace/CRDT-Library/trello_application/json/";
+string dbExportPath = "/home/vishcapstone/Documents/CRDT-Library/trello_application/database/";
+
 crdt::state::MultiSetMetadata<string> backlogList;
 crdt::state::MultiSetSB<string> backlogServer;
 crdt::state::MultiSetMetadata<string> inprogressList;
@@ -969,6 +970,43 @@ void addBoard(tgui::GuiBase &gui, int boardType) {
     }
 }
 
+void exportData(tgui::GuiBase &gui)
+{
+    /*string tableName = endUser.getUserName() + "_pncounters";
+    string filePath = dbExportPath + tableName + ".csv";
+
+    string command = "\\copy " + tableName + " TO '" + filePath + "' WITH (FORMAT CSV)";
+    PGresult *res = PQexec(conn, command.c_str());
+        
+    if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+        cout << PQerrorMessage(conn) << endl;
+        PQfinish(conn);
+        exit(1);     
+    }
+
+    PQclear(res);*/
+
+    numTasksBacklogServer.exportDB("hello");
+    backlogServer.exportDB("hello");
+
+    priorityListServer.exportDB("hello");
+
+    crdt::state::VectorSB<string> test;    
+    test.exportDB("hello");
+
+    //numTasksInprogressServer.exportDB();
+    //inprogressServer.exportDB();
+
+    //numTasksReadytotestServer.exportDB();
+    //readytotestServer.exportDB();
+
+    //numTasksCompleteServer.exportDB();
+    //completeServer.exportDB();
+
+    //numTasksNotaddedServer.exportDB();
+    //notaddedServer.exportDB();
+}
+
 void loadWidgets3(tgui::GuiBase &gui)
 {
     gui.removeAllWidgets();
@@ -1102,6 +1140,7 @@ void loadWidgets3(tgui::GuiBase &gui)
 
     mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
     logOut->onPress(&logout,std::ref(gui));
+    exportButton->onPress(&exportData, std::ref(gui));
 
     backlogAdd->onPress(&addBoard, std::ref(gui), 1);
     iprAdd->onPress(&addBoard, std::ref(gui), 2);
@@ -1244,6 +1283,7 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     mergeBoard->onPress(&convergeBoard,std::ref(gui),1);
     logOut->onPress(&logout,std::ref(gui));
+    exportButton->onPress(&exportData, std::ref(gui));
 
     backlogAdd->onPress(&addBoard, std::ref(gui), 1);
     iprAdd->onPress(&addBoard, std::ref(gui), 2);
