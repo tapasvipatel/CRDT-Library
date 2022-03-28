@@ -255,11 +255,6 @@ protected:
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -278,6 +273,31 @@ public:
     ~GMapSB()
     {
         ;
+    }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, (key-value), \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+            std::map<K,T> mdPayload = i->second.queryPayload();
+
+            for (auto element = mdPayload.begin(); element != mdPayload.end(); element++) {
+                outputFileStream << element->first << "-" << element->second << ", ";
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
     }
 
     void insert(uint32_t replicaID, K key, T value)
@@ -452,11 +472,6 @@ protected:
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -479,6 +494,31 @@ public:
     void setID(uint32_t id)
     {
         this->id = id;
+    }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, (key-value), \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+            std::map<K,T> mdPayload = i->second.queryPayload();
+
+            for (auto element = mdPayload.begin(); element != mdPayload.end(); element++) {
+                outputFileStream << element->first << "-" << element->second << ", ";
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
     }
 
     std::string fixlocalConflict(std::string StringA, std::string StringB, K key, int sysCall)

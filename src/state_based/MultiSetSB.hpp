@@ -172,6 +172,25 @@ public:
     {
         return this->tombstone;
     }
+    std::multiset<T> queryMultiset()
+    {
+        std::multiset<T> queryResult;
+        for (auto const &e: this->payload) {
+            if (lookup(e)) {
+                queryResult.insert(e);
+            }
+        }
+        return queryResult;
+    }
+
+    bool lookup(T e) {
+        if (this->payload.count(e) && !this->tombstone.count(e)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 };
 
 /*
@@ -199,11 +218,6 @@ protected:
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -223,6 +237,31 @@ public:
     {
         ;
     }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, payload, \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+
+            for (auto element : i->second.queryMultiset()) {
+                outputFileStream << element << ", ";
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
+    }
+
     std::multiset<T> fixlocalConflict(std::multiset<T> multisetA, std::multiset<T> multisetB)
     {
         std::multiset<T> fixConflict;

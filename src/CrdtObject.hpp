@@ -73,7 +73,7 @@ protected:
     virtual bool merge(std::vector<uint32_t> replica_ids) = 0;
     virtual bool serialize(std::string& buffer) = 0;
     virtual bool deserialize(std::string& buffer) = 0;
-    virtual bool exportDB() = 0;
+    virtual bool exportDB(std::string file) = 0;
     virtual bool importDB() = 0;
 public:    
     CrdtObject()

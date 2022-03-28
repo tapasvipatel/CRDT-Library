@@ -173,6 +173,26 @@ public:
     {
         this->tombstone.insert(value);
     }
+
+    std::set<T> queryTwoPSet()
+    {
+        std::set<T> queryResult;
+        for (auto const &e: this->payload) {
+            if (lookup(e)) {
+                queryResult.insert(e);
+            }
+        }
+        return queryResult;
+    }
+
+    bool lookup(T e) {
+        if (this->payload.count(e) && !this->tombstone.count(e)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 };
 
 /*
@@ -201,11 +221,6 @@ protected:
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -226,6 +241,30 @@ public:
     ~TwoPSetSB()
     {
         ;
+    }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, payload, \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+
+            for (auto element : i->second.queryTwoPSet()) {
+                outputFileStream << element << ", ";
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
     }
 
     void insert(uint32_t replicaID, T value) 

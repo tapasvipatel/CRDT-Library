@@ -178,11 +178,6 @@ protected:
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -204,6 +199,31 @@ public:
     {
         ;
     }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, payload, \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+
+            for (auto element : i->second.queryORSet()) {
+                outputFileStream << element << ", ";
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
+    }
+
     void insert(uint32_t replicaID, T value) 
     {
         auto findOrSet = replica_metadata.find(replicaID);

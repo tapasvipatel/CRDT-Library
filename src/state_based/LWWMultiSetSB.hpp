@@ -299,6 +299,20 @@ public:
         currentTime = std::max(currentTime, timestamp);
         this->tombstone[timestamp] = tombstone;    
     }
+    std::multiset<T> queryLWWMultiSet()
+    {
+        std::multiset<T> queryResult;
+        std::unordered_map<T,int> inTombStone;
+        for (auto const &e: this->queryTombstone()) {
+            inTombStone[e]++;
+        }
+        for (auto const &e: this->queryPayload()) {
+            if (inTombStone[e] <= 0)
+                queryResult.insert(e);
+            inTombStone[e]--;
+        }
+        return queryResult;
+    }
 };
 
 /*
@@ -326,11 +340,6 @@ bool merge(std::vector<uint32_t> replica_ids)
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -350,6 +359,31 @@ public:
     {
         ;
     }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, payload, \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+
+            for (auto element : i->second.queryLWWMultiSet()) {
+                outputFileStream << element << ", ";
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
+    }
+
     void insert(uint32_t replicaID, long long int timestamp, T value) 
     {
         auto findMS = replica_metadata.find(replicaID);

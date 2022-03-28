@@ -188,11 +188,6 @@ protected:
         return false;
     }
 
-    bool exportDB()
-    {
-        return false;
-    }
-
     bool importDB()
     {
         return false;
@@ -211,6 +206,33 @@ public:
     ~PriorityQueueSB()
     {
         ;
+    }
+
+    bool exportDB(std::string file)
+    {
+        std::ofstream outputFileStream;
+        outputFileStream.open(file);
+
+        outputFileStream << "replica, payload, \n";
+
+        int count = 1;
+        for (auto i = replica_metadata.begin(); i != replica_metadata.end(); i++) {
+
+            outputFileStream << count << ", ";
+
+            while(!i->second.payload.empty())
+            {  
+                auto element = i->second.payload().top();
+                outputFileStream << element << ", ";
+                i->second.payload().pop();
+            }
+
+            outputFileStream << "\n";
+            count++;
+        }
+
+        outputFileStream.close();
+        return true;
     }
 
     std::priority_queue<T> fixlocalConflict(std::priority_queue<T> pq1, std::priority_queue<T> pq2)
