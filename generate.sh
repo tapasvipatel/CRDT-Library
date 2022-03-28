@@ -6,6 +6,7 @@ TEST_APPLICATION=0
 PERFORMANCE=0
 CLEAN=0
 NETWORKING=0
+DATABASE_APPLICATION=0
 
 while [[ $# -gt 0 ]]; do
 	key="$1"
@@ -43,6 +44,12 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 		-networking)
 		NETWORKING=1
+		shift
+		;;
+	esac
+	case $key in
+		-database_application)
+		DATABASE_APPLICATION=1
 		shift
 		;;
 	esac
@@ -86,6 +93,10 @@ fi
 
 if [ $NETWORKING -eq 1 ]; then
 	cmake_flags=${cmake_flags}' -DBUILD_NETWORKING=1'
+fi
+
+if [ $DATABASE_APPLICATION -eq 1 ]; then
+	cmake_flags=${cmake_flags}' -DBUILD_DATABASE_APPLICATION=1'
 fi
 
 cmake $cmake_flags ../ && make clean && make

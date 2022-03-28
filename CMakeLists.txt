@@ -29,3 +29,7 @@ endif()
 if(BUILD_NETWORKING)
     add_subdirectory(networking_application)
 endif()
+
+if(BUILD_DATABASE_APPLICATION)
+    add_subdirectory(database_application)
+endif()
