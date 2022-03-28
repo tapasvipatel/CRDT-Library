@@ -993,10 +993,10 @@ void loadWidgets3(tgui::GuiBase &gui)
 
     // Create the export button
     auto exportButton = tgui::Button::create("Export");
-    mergeBoard ->setSize({"10%", "10%"});
-    mergeBoard ->setPosition({"87%", "80%"});
-    mergeBoard->getRenderer()->setBackgroundColor(sf::Color(107, 193, 250));
-    mergeBoard ->getRenderer()->setTextColor(tgui::Color::Black);
+    exportButton->setSize({"10%", "10%"});
+    exportButton->setPosition({"87%", "75%"});
+    exportButton->getRenderer()->setBackgroundColor(sf::Color(107, 193, 250));
+    exportButton->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(exportButton);
 
     //Log Out Button
@@ -1132,6 +1132,14 @@ void loadWidgets2(tgui::GuiBase &gui)
     mergeBoard->getRenderer()->setBackgroundColor(sf::Color(0, 240, 0));
     mergeBoard ->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(mergeBoard);
+
+    // Create the export button
+    auto exportButton = tgui::Button::create("Export");
+    exportButton->setSize({"10%", "10%"});
+    exportButton->setPosition({"87%", "75%"});
+    exportButton->getRenderer()->setBackgroundColor(sf::Color(107, 193, 250));
+    exportButton->getRenderer()->setTextColor(tgui::Color::Black);
+    gui.add(exportButton);
 
     //Log Out Button
     auto logOut = tgui::Button::create("Logout");
