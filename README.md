@@ -28,6 +28,8 @@
   — 
   <a href="#Contribute">Contribute</a>
   — 
+  <a href="#credits">Special Thanks</a>
+  — 
   <a href="#license">License</a>
 </div>
 <hr>
@@ -921,6 +923,9 @@ or `/src/state_based`  and create your CRDT. Remember to add the CRDT in the
 Then leave a PR and if everything looks good, it will get merged into the repository. 
 We greatly apperciate anyone who contributes or leaves feedback. 
 
+<h2 id="credits">👏 Special Thanks</h2>                   
+                   
+                   
 <h2 id="license"> 📝 License </h2>
 MIT License
 
