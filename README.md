@@ -616,7 +616,7 @@ for (int i: handler1.queryPayload()) cout << i; //Should print (30, 40)
 
 | What is it? | Capability | Practical UseCases | Merging Policy | 
 |------|------------|----------|----------|
-A array where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are put in the order they come in` | To view the order at which users clock in at work. | First Write Wins |
+A array where only elements are allowed to be added |   `+Allow duplicate elements` `-Does not support removing elements` `+Elements are put in the order they come in` | To view the order at which users clock in at work. | Union in the order that it comes in. |
 
 | Name | Identifier | Supported Operations | Data types supported |
 |------|------------|----------|------------|
