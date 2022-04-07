@@ -1,0 +1,137 @@
+We would like to thank all the following people who have helped us in the development of our
+project.
+
+CRDT Research Papers <use: pseudo-code used from research papers>
+The following research papers were used to develop our CRDTs. We would like to thank all the
+authors, researchers, and contributors who wrote the pseudo-code for the CRDT algorithms that
+we implemented, taught us the fundamentals of CRDTs, and inspired us to create our own
+CRDTs.
+https://hal.inria.fr/inria-00555588/document [1]
+https://hal.inria.fr/inria-00609399v1/document [2]
+https://hal.inria.fr/hal-00932833/document [3]
+https://arxiv.org/pdf/0710.1784.pdf [4]
+
+CRDT Youtube Videos <use: gain understandings of CRDTs>
+The following videos were watched to gain a further understanding of CRDTs.
+https://www.youtube.com/watch?v=M8-WFTjZoA0&ab_channel=TL%3BDR%2F%2FJavaScri
+ptcodecastsforworkingdevs [5]
+https://www.youtube.com/watch?v=oyUHd894w18&ab_channel=MicrosoftResearch [6]
+
+CRDT Github Links <use: explore more CRDT resources>
+Thank you to Alan Gibson and team for creating a list of CRDT resources compiled into one
+location.
+https://github.com/alangibson/awesome-crdt [7]
+Nlohmann JSON C++ library <use: external software used for creating JSON objects>
+Thank you to Niels Lohmann for the development of the C++ JSON Library.
+https://github.com/nlohmann/json [8]
+
+Catch2 C++ Testing Framework <use: external software used for writing test cases>
+Thank you to Martin Horenovsky and the developer team for creating the C++ Catch2 Testing
+Framework.
+https://github.com/catchorg/Catch2 [9]
+
+Networking Tutorial for C Based Sockets <use: external software used for communicating
+over the network>
+Thank you to Silver Moon for writing the tutorial on how to use C sockets in networking.
+www.binarytides.com/socket-programming-c-linux-tutorial/ [10]
+
+PostgreSQL Tutorial <use: external software used for interfacing with PostgreSQL
+database>
+Thank you to Jan Bodnar for creating this tutorial on how to use C++ PostgreSQL API features.
+https://zetcode.com/db/postgresqlc/ [11]
+
+PostgreSQL MakeFile <use: tutorial on how to integrate PostgreSQL into C++>
+Thank you to Hui Yuan for creating this YouTube video on how to link the PostgreSQL library to
+our application.
+https://youtu.be/bYRZVG9ea5M [12]
+
+TGUI <use: external software used for developing GUI TrelloRDT application>
+Thank you to Bruno Van de Velde and the team of developers for creating the TGUI software
+which we used in our TrelloRDT application.
+https://tgui.eu/ [13]
+
+SFML <use: external software used for developing GUI of TrelloRDT application>
+Thank you to the team of developers for creating the SFML library which we used in our
+TrelloRDT application.
+https://www.sfml-dev.org/ [14]
+
+Blackotf Font <use: the font used to develop TrelloRDT icon image>
+Thank you to the designers for designing the blackjack font which we used in our TrelloRDT
+application.
+https://www.fontsquirrel.com/fonts/blackjack [15]
+
+Ubuntu and Open-Source Packages (eg. C++ Compiler, CMake, etc) <use: external
+software used for the development of the CRDT Library>
+Thank you to the developers in the open-source community for creating Ubuntu and the various
+packages, tools, and software that comes with it. Without it, we would not have been able to
+develop this C++ library.
+https://ubuntu.com/ [16]
+
+Python CRDT Library <use: used to perform benchmark performance against our CRDT
+Library>
+Thank you to Anshul Ahuja and Geetesh Gupta for developing this Python CRDT library which
+we performed our benchmark comparison.
+https://github.com/anshulahuja98/python3-crdt [17]
+
+Readme format Inspiration <use: used to develop our own Readme>
+Thanks to Humaiyan Uddin Github repository: https://github.com/humaiyun/Keplar [18] and
+https://github.com/peer-base/js-delta-crdts [19], for the inspiration behind how the readme was
+formatted.
+
+Inspiration for Application <use: inspiration to develop TrelloRDT>
+Special thanks to https://trello.com/ [20] and https://github.com/automerge/trellis [21] for the
+inspiration behind our application, TrelloRDT.
+
+Capstone Teaching Team <clarification, development, and support>
+Thank you to Professor Hans-Arno Jacobsen, Yunhao Mao, and Inci McGreal for all your help,
+support, and advice throughout this Capstone Project.
+
+[1] Marc Shapiro, Nuno Preguiça, Carlos Baquero, Marek Zawirski. A comprehensive study of
+Convergent and Commutative Replicated Data Types. [Research Report] RR-7506, Inria –
+Centre Paris Rocquencourt; INRIA. 2011, pp.50. ffinria-00555588f
+[2] Marc Shapiro, Nuno Preguiça, Carlos Baquero, Marek Zawirski. Conflict-free Replicated
+Data Types. [Research Report] RR-7687, 2011, pp.18. ffinria-00609399v1
+[3] Marc Shapiro, Nuno Preguiça, Carlos Baquero, Marek Zawirski. Convergent and
+Commutative Replicated Data Types. Bulletin- European Association for Theoretical
+Computer Science, European Association for Theoretical Computer Science; 1999, 2011,
+pp.67-88. ffhal-00932833
+[4] Marc Shapiro, Nuno Preguiça. Designing a commutative replicated data type. INRIA.
+October 2007
+[5] J. L. Martin, “Conflict-Free Replicated Data Types (CRDT) for Distributed JavaScript
+Apps.”, YouTube, Mar. 23, 2020. [Video recording]. Available:
+https://www.youtube.com/watch?v=M8-WFTjZoA0, Accessed on: Mar. 28, 2022.
+[6] M. Shapiro, “Strong Eventual Consistency and Conflict-free Replicated Data Types”,
+YouTube, Aug. 16, 2016. [Video recording]. Available:
+https://www.youtube.com/watch?v=oyUHd894w18, Accessed on: Mar. 28, 2022.
+[7] A. Gibson, et al, “Awesome CRDT”, GitHub, July 14, 2020. [Online]. Available:
+https://github.com/alangibson/awesome-crdt. [Accessed: 28-Mar-2022].
+[8] N. Lohmann, et al, “JSON for Modern C++”, GitHub, Mar. 25, 2022. [Online]. Available:
+https://github.com/nlohmann/json. [Accessed: 28-Mar-2022].
+[9] M. Horenovsky, et al, “Catch2”, GitHub, Mar. 24, 2022. [Online]. Available:
+https://github.com/catchorg/Catch2. [Accessed: 28-Mar-2022].
+[10] S. Moon, “Socket programming in C on Linux – The Ultimate Guide for Beginners”,
+BinaryTides, May 17, 2020. [Online]. Available:
+https://www.binarytides.com/socket-programming-c-linux-tutorial/. [Accessed:
+28-Mar-2022].
+[11] J. Bodnar, “PostgreSQL C,” ZetCode, 06-07-2020. [Online]. Available:
+https://zetcode.com/db/postgresqlc/. [Accessed: 25-Jan-2022].
+[12] H. Yuan, “C++ Programming on Linux - Connect to Posgresql DB using libpq,” YouTube,
+Dec. 26, 2020. [Video recording]. Available: https://youtu.be/bYRZVG9ea5M, Accessed on:
+46
+Jan. 25, 2022.
+[13] B. Van de Velde, et al, “Texus' Graphical User Interface”, TGUI, Mar. 26, 2022. [Online].
+Available: https://tgui.eu/. [Accessed: 28- Mar- 2022].
+[14] L. Gomila, et al, “Simple and Fast Multimedia Library”, SFML, Mar. 28, 2022. [Online].
+Available: https://www.sfml-dev.org/. [Accessed: 28-Mar-2022].
+[15] Typadelic, “Black Jack”, Font Squirrel, Jan. 27, 2009. [Online]. Available:
+https://www.fontsquirrel.com/fonts/blackjack. [Accessed: 28-Mar-2022].
+[16] Ubuntu, 2022. [Online]. Available: https://ubuntu.com/. [Accessed: 28-Mar-2022].
+[17] A. Ahuja, G. Gupta, et al, “python3-crdt”, GitHub, Jan. 23, 2021. [Online]. Available:
+https://github.com/anshulahuja98/python3-crdt. [Accessed: 28-Mar-2022].
+[18] H. Uddin, "Keplar", GitHub, Feb. 19, 2022. [Online]. Available:
+https://github.com/humaiyun/Keplar. [Accessed: 28-Mar-2022].
+[19] J. Pick, P. Teixeira, J. Addison, et al, "js-delta-crdts", GitHub, Oct. 3, 2019. [Online].
+Available: https://github.com/peer-base/js-delta-crdts. [Accessed: 28-Mar-2022].
+[20] Trello, Atlassian, 2022. [Online]. Available: https://trello.com/. [Accessed: 28-Mar-2022].
+[21] M. Kleppmann, J. Peterson, L. Schmidt, P. van Hardenberg, et al, “Trellis”, GitHub, May
+18, 2020. [Online]. Available: https://github.com/automerge/trellis. [Accessed: 28-Mar-2022].
