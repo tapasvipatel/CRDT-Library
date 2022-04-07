@@ -228,8 +228,9 @@ int main(int argc, char* argv[])
 	counter1Metadata.id = server_port;
 
 	// Initialize servers
-	list_servers.push_back(2020);
-	list_servers.push_back(2021);
+	list_servers.push_back(3020);
+	list_servers.push_back(3021);
+	list_servers.push_back(3022);
 
 	start_server = true;
 	start_client = true;

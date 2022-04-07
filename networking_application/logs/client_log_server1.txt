@@ -1,4 +1,8 @@
 CLIENT: Initiating request
-CLIENT: Connected to server (127.0.0.1,2021)
-CLIENT: Disconnected from server (127.0.0.1,2021)
+CLIENT: Connected to server (127.0.0.1,3021)
+CLIENT: Disconnected from server (127.0.0.1,3021)
+CLIENT: Finished request
+CLIENT: Initiating request
+CLIENT: Connected to server (127.0.0.1,3022)
+CLIENT: Disconnected from server (127.0.0.1,3022)
 CLIENT: Finished request

@@ -3,6 +3,3 @@ SERVER: Waiting for connection
 SERVER: Accepted connection
 SERVER: Processing request
 SERVER: Waiting for connection
-SERVER: Accepted connection
-SERVER: Processing request
-SERVER: Waiting for connection
