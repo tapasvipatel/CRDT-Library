@@ -103,6 +103,7 @@ void handle_requests()
 		message += orset1Metadata.serialize();
 		message += "\n";
 		message += vector1Metadata.serialize();
+		message += "\n";
 
 		write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
 
@@ -125,6 +126,7 @@ void generate_requests()
 	{
 		if(server_info != server_port)
 		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 			client_log << "CLIENT: Initiating request" << std::endl;
 
 			// Initialize socket parameters
@@ -199,6 +201,9 @@ void generate_requests()
 			close(socket_client);
 			client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
 			client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 		}
 	}
 }

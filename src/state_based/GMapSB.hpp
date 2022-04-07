@@ -80,6 +80,22 @@ public:
         return j.dump();
     }
 
+    std::string serializeTEMP()
+    {
+        json j;
+        j["id"] = this->id;
+        json internal;
+        
+        for(auto value : this->payload)
+        {
+            json internalPayload(value.second);
+            internal[std::to_string(value.first)] = internalPayload;
+        }
+
+        j["payload"] = internal.dump();
+        return j.dump();
+    }
+
     void serializeFile(std::string pathToFile)
     {
         json j;
@@ -130,6 +146,20 @@ public:
         }
     }
 
+    void deserializeTEMP(std::string s)
+    {
+        json j = json::parse(s);
+        this->id = j["id"];
+
+        std::string payload_string = j["payload"];
+        json internal = json::parse(payload_string);
+
+        for(json::iterator it = internal.begin(); it != internal.end(); ++it)
+        {
+            this->payload[std::stoi(it.key())] = it.value();
+        }
+    }
+
     void deserializeFile(std::string jsonString)
     {
         std::ifstream i(jsonString);
@@ -163,7 +193,6 @@ public:
         for(json::iterator it = internal.begin(); it != internal.end(); ++it)
         {
             std::string value = it.value();
-            value.erase(remove(value.begin(), value.end(), '"'), value.end());
             this->payload[std::stoi(it.key())] = value;
         }
     }

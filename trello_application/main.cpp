@@ -6,6 +6,15 @@
 #include <chrono>
 #include <thread>
 #include <unistd.h>
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <thread>
+#include <chrono>
+#include <sstream>
 // #include <SFML/Graphics.hpp>
 #include <TGUI/TGUI.hpp>
 #include "userLogin.hpp"
@@ -28,6 +37,17 @@ crdt::state::GMapMetadata<int32_t, string> priorityList;
 crdt::state::GMapSBString<int32_t, string> priorityListServer;
 
 //taps
+bool start_server;
+bool start_client;
+std::string server_name;
+std::string server_ip_address;
+int server_port;
+std::vector<int> list_servers;
+bool startConverge;
+
+void generate_requests();
+void handle_requests();
+
 //void automatic_merge(tgui::GuiBase &gui);
 //std::thread automatic_merge_thread;
 
@@ -458,6 +478,10 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     }
 
     // tapshere
+    generate_requests();
+    updateTableMaster(std::ref(gui));
+
+    return;
     // Read all crdts and update in local copy
     string rootFolder = filePath;
     string backlogFolder = rootFolder + "backlog";
@@ -767,7 +791,13 @@ void addBoard(tgui::GuiBase &gui, int boardType) {
 void loadWidgets2(tgui::GuiBase &gui)
 {
     gui.removeAllWidgets();
-    convergeBoard(gui,0);
+    if(startConverge)
+    {
+        convergeBoard(gui,0);
+    }
+
+    startConverge = true;
+
     const float windowHeight = gui.getView().getRect().height;
     gui.setTextSize(static_cast<unsigned int>(0.04f * windowHeight)); 
     tgui::Label::Ptr welcomeMessage = tgui::Label::create();
@@ -1089,17 +1119,166 @@ void loadWidgets(tgui::GuiBase &gui, tgui::Label::Ptr &message)
 
 // -------------------------------------------------------------------------------------------------------------------//
 
-//void automatic_merge(tgui::GuiBase &gui)
-//{
-//    while(true)
-//    {
-//        sleep(10);
-//        convergeBoard(gui, 1);
-//    }
-//}
-
-int main()
+void automatic_merge(tgui::GuiBase &gui)
 {
+    while(true)
+    {
+        sleep(10);
+        //convergeBoard(gui, 1);
+        generate_requests();
+    }
+}
+
+void handle_requests()
+{
+    // Initialize server parameters
+    int socket_server;
+    struct sockaddr_in server_sockaddr, client;
+    socket_server = socket(AF_INET, SOCK_STREAM, 0);
+
+    // Initialize sockaddr structure
+    server_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_sockaddr.sin_family = AF_INET;
+    server_sockaddr.sin_port = htons(server_port);
+
+    // Bind the server to the socket
+    bind(socket_server, (struct sockaddr*)&server_sockaddr, sizeof(server_sockaddr));
+    listen(socket_server, 3);
+
+    int new_connection_socket;
+    int size_of_sockaddr_in = sizeof(struct sockaddr_in);
+
+    // Handle new connection requests
+    while((new_connection_socket = accept(socket_server, (struct sockaddr*)&client, (socklen_t*)&size_of_sockaddr_in)))
+    {
+        std::string message;
+        message += backlogList.serialize();
+        message += "\n";
+        message += inprogressList.serialize();
+        message += "\n";
+        message += readytotestList.serialize();
+        message += "\n";
+        message += completeList.serialize();
+        message += "\n";
+        message += notaddedList.serialize();
+        message += "\n";
+        message += numTasksBacklog.serialize();
+        message += "\n";
+        message += numTasksInprogress.serialize();
+        message += "\n";
+        message += numTasksReadytotest.serialize();
+        message += "\n";
+        message += numTasksComplete.serialize();
+        message += "\n";
+        message += numTasksNotadded.serialize();
+        message += "\n";
+        message += priorityList.serializeTEMP();
+        message += "\n";
+
+        std::cout << message << std::endl;
+
+        write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
+
+        if(!start_server)
+        {
+            close(socket_server);
+            return;
+        }
+    }
+
+    close(socket_server);
+}
+
+void generate_requests()
+{
+    for(auto server_info : list_servers)
+    {
+        if(server_info != server_port)
+        {
+            // Initialize socket parameters
+            int socket_client;
+            struct sockaddr_in client_sockaddr;
+            char response[5000];
+
+            socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+            // Initialize sockaddr structure
+            client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+            client_sockaddr.sin_family = AF_INET;
+            client_sockaddr.sin_port = htons(server_info);
+
+            // Connect to specified port
+            connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+
+            // Receive response from server
+            recv(socket_client, response, 5000, 0);
+
+            std::string response_string(response);
+            std::vector<std::string> serialized_strings;
+            std::stringstream serialized_string_stream(response_string);
+            std::string temp;
+
+            while(getline(serialized_string_stream, temp, '\n'))
+            {
+                serialized_strings.push_back(temp);
+            }
+
+            crdt::state::MultiSetMetadata<string> backlogListNew;
+            backlogListNew.deserialize(serialized_strings[0]);
+            backlogServer.addExternalReplica({backlogList, backlogListNew});
+
+            crdt::state::MultiSetMetadata<string> inprogressListNew;
+            inprogressListNew.deserialize(serialized_strings[1]);
+            inprogressServer.addExternalReplica({inprogressList, inprogressListNew});
+
+            crdt::state::MultiSetMetadata<string> readytotestListNew;
+            readytotestListNew.deserialize(serialized_strings[2]);
+            readytotestServer.addExternalReplica({readytotestList, readytotestListNew});
+
+            crdt::state::MultiSetMetadata<string> completeListNew;
+            completeListNew.deserialize(serialized_strings[3]);
+            completeServer.addExternalReplica({completeList, completeListNew});
+
+            crdt::state::MultiSetMetadata<string> notaddedListNew;
+            notaddedListNew.deserialize(serialized_strings[4]);
+            notaddedServer.addExternalReplica({notaddedList, notaddedListNew});
+
+            crdt::state::PNCounterMetadata<uint32_t> numTasksBacklogNew;
+            numTasksBacklogNew.deserialize(serialized_strings[5]);
+            numTasksBacklogServer.addExternalReplica({numTasksBacklog, numTasksBacklogNew});
+
+            crdt::state::PNCounterMetadata<uint32_t> numTasksInprogressNew;
+            numTasksInprogressNew.deserialize(serialized_strings[6]);
+            numTasksInprogressServer.addExternalReplica({numTasksInprogress, numTasksInprogressNew});
+
+            crdt::state::PNCounterMetadata<uint32_t> numTasksReadytotestNew;
+            numTasksReadytotestNew.deserialize(serialized_strings[7]);
+            numTasksReadytotestServer.addExternalReplica({numTasksReadytotest, numTasksReadytotestNew});
+
+            crdt::state::PNCounterMetadata<uint32_t> numTasksCompleteNew;
+            numTasksCompleteNew.deserialize(serialized_strings[8]);
+            numTasksCompleteServer.addExternalReplica({numTasksComplete, numTasksCompleteNew});
+
+            crdt::state::PNCounterMetadata<uint32_t> numTasksNotaddedNew;
+            numTasksNotaddedNew.deserialize(serialized_strings[9]);
+            numTasksNotaddedServer.addExternalReplica({numTasksNotadded, numTasksNotaddedNew});
+
+            crdt::state::GMapMetadata<int32_t, string> priorityListNew;
+            priorityListNew.deserializeTEMP(serialized_strings[10]);
+            priorityListServer.addExternalReplica({priorityList, priorityListNew});
+
+            close(socket_client);
+        }
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    startConverge = false;
+    server_name = argv[1];
+    server_ip_address = argv[2];
+    server_port = std::stoi(argv[3]);
+
     sf::RenderWindow window(sf::VideoMode(1920, 1080), "TrelloRDT");
     tgui::Gui gui(window);
     sf::Image Icon;
@@ -1110,6 +1289,16 @@ int main()
     tgui::Label::Ptr message = tgui::Label::create();
     gui.setFont("../../blackjack.otf");
     loadWidgets(gui, message);
+
+    // Initialize servers
+    list_servers.push_back(2020);
+    list_servers.push_back(2021);
+    list_servers.push_back(2022);
+
+    start_server = true;
+    start_client = true;
+
+    std::thread server_thread(handle_requests);
 
     while (window.isOpen())
     {
