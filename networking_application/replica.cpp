@@ -144,6 +144,642 @@ void handle_requests()
 	server_log << "SERVER: Stopped server" << std::endl;
 }
 
+void generate_requests_string()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge string
+			crdt::operation::StringMetaData<std::string> new_string;
+			new_string.deserialize(serialized_strings[11]);
+			string1.addExternalReplica({string1Metadata, new_string});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "String Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_priorityqueue()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge priorityqueue
+			crdt::state::PriorityQueueMetadata<int> new_priorityqueue;
+			new_priorityqueue.deserialize(serialized_strings[10]);
+			priorityqueue1.addExternalReplica({priorityqueue1Metadata, new_priorityqueue});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "PriorityQueue Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_twoptwopgraph()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge twoptwopgraph
+			crdt::state::TwoPTwoPGraphMetadata<int> new_twoptwopgraph;
+			new_twoptwopgraph.deserialize(serialized_strings[9]);
+			twoptwopgraph1.addExternalReplica({twoptwopgraph1Metadata, new_twoptwopgraph});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "TwoPTwoPGraph Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_vector()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge vector
+			crdt::state::VectorMetadata<std::string> new_vector;
+			new_vector.deserialize(serialized_strings[8]);
+			vector1.addExternalReplica({vector1Metadata, new_vector});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "Vector Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_orset()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge orset
+			crdt::state::ORSetMetadata<std::string> new_orset;
+			new_orset.deserialize(serialized_strings[7]);
+			orset1.addExternalReplica({orset1Metadata, new_orset});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "ORSet Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_lwwmultiset()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge lwwmultiset
+			crdt::state::LWWMultiSetMetadata<int> new_lwwmultiset;
+			new_lwwmultiset.deserialize(serialized_strings[6]);
+			lwwmultiset1.addExternalReplica({lwwmultiset1Metadata, new_lwwmultiset});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "LWWMultiset Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_multiset()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge multiset
+			crdt::state::MultiSetMetadata<int> new_multiset;
+			new_multiset.deserialize(serialized_strings[5]);
+			multiset1.addExternalReplica({multiset1Metadata, new_multiset});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "Multiset Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_gset()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge gset
+			crdt::state::GSetMetadata<std::string> new_gset;
+			new_gset.deserialize(serialized_strings[4]);
+			gset1.addExternalReplica({gset1Metadata, new_gset});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "GSet Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_gmap()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge gmap
+			crdt::state::GMapMetadata<int, int> new_gmap;
+			new_gmap.deserialize(serialized_strings[3]);
+			gmap1.addExternalReplica({gmap1Metadata, new_gmap});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "GMap Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_gcounter()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge gcounter
+			crdt::state::GCounterMetadata<int> new_gcounter;
+			new_gcounter.deserialize(serialized_strings[2]);
+			gcounter1.addExternalReplica({gcounter1Metadata, new_gcounter});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "GCounter Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_twopset()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge twopset
+			crdt::state::TwoPSetMetadata<std::string> new_set;
+			new_set.deserialize(serialized_strings[1]);
+			set1.addExternalReplica({set1Metadata, new_set});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "TwoPSet Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
+void generate_requests_pncounter()
+{
+	for(auto server_info : list_servers)
+	{
+		if(server_info != server_port)
+		{
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			//client_log << "CLIENT: Initiating request" << std::endl;
+
+			// Initialize socket parameters
+			int socket_client;
+			struct sockaddr_in client_sockaddr;
+			char response[5000];
+
+			socket_client = socket(AF_INET, SOCK_STREAM, 0);
+
+			// Initialize sockaddr structure
+			client_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+			client_sockaddr.sin_family = AF_INET;
+			client_sockaddr.sin_port = htons(server_info);
+
+			// Connect to specified port
+			connect(socket_client, (struct sockaddr*)&client_sockaddr, sizeof(client_sockaddr));
+			//client_log << "CLIENT: Connected to server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+
+			// Receive response from server
+			recv(socket_client, response, 5000, 0);
+
+			std::string response_string(response);
+			std::vector<std::string> serialized_strings;
+			std::stringstream serialized_string_stream(response_string);
+			std::string temp;
+
+			while(getline(serialized_string_stream, temp, '\n'))
+			{
+				serialized_strings.push_back(temp);
+			}
+
+			// Merge pncounter
+			crdt::state::PNCounterMetadata<int> new_counter;
+			new_counter.deserialize(serialized_strings[0]);
+			counter1.addExternalReplica({counter1Metadata, new_counter});
+
+			close(socket_client);
+			//client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
+			//client_log << "CLIENT: Finished request" << std::endl;
+
+			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+			std::cout << "PNCounter Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+		}
+	}
+}
+
 void generate_requests()
 {
 	for(auto server_info : list_servers)
@@ -274,13 +910,17 @@ int main(int argc, char* argv[])
 	// Initialize servers
 	list_servers.push_back(3020);
 	list_servers.push_back(3021);
-	list_servers.push_back(3022);
+	//list_servers.push_back(3022);
 
 	start_server = true;
 	start_client = true;
 
-	std::string server_log_path = "/home/tapasvi/workspace/CRDT-Library/networking_application/logs/server_log_" + server_name + ".txt";
-	std::string client_log_path = "/home/tapasvi/workspace/CRDT-Library/networking_application/logs/client_log_" + server_name + ".txt";
+	//std::string server_log_path = "/home/tapasvi/workspace/CRDT-Library/networking_application/logs/server_log_" + server_name + ".txt";
+	//std::string client_log_path = "/home/tapasvi/workspace/CRDT-Library/networking_application/logs/client_log_" + server_name + ".txt";
+
+	std::string server_log_path = "/home/vishcapstone/Documents/CRDT-Library/networking_application/logs/server_log_" + server_name + ".txt";
+	std::string client_log_path = "/home/vishcapstone/Documents/CRDT-Library/networking_application/logs/server_log_" + server_name + ".txt";
+
 	server_log.open(server_log_path);
 	client_log.open(client_log_path);
 
@@ -444,6 +1084,21 @@ int main(int argc, char* argv[])
 		else if(list_tokens[0] == "sync")
 		{
 			generate_requests();
+		}
+		else if (list_tokens[0] == "perf")
+		{
+			generate_requests_pncounter();
+			generate_requests_twopset();
+			generate_requests_gcounter();
+			generate_requests_gmap();
+			generate_requests_gset();
+			generate_requests_multiset();
+			generate_requests_lwwmultiset();
+			generate_requests_orset();
+			generate_requests_vector();
+			generate_requests_twoptwopgraph();
+			generate_requests_priorityqueue();
+			generate_requests_string();
 		}
 		else if(list_tokens[0] == "twopset")
 		{
