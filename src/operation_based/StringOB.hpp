@@ -119,7 +119,7 @@ public:
     void erase(int startIndex, int endIndex)
     {
         if (startIndex >= this->payload.size() || startIndex < 0) return;
-        if (endIndex >= this->pyalod.size() || endIndex < 0) return;
+        if (endIndex >= this->payload.size() || endIndex < 0) return;
         this->payload.erase(startIndex,endIndex);
     }
 };

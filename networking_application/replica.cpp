@@ -25,6 +25,7 @@ ALL CREDITS GIVEN TO THIS WEBSITE AND ITS AUTHORS FOR SIMPLIFYING THE PROCESS TO
 #include "../src/state_based/VectorSB.hpp"
 #include "../src/state_based/TwoPTwoPGraphSB.hpp"
 #include "../src/state_based/PriorityQueueSB.hpp"
+#include "../src/operation_based/StringOB.hpp"
 
 bool start_server;
 bool start_client;
@@ -70,6 +71,9 @@ crdt::state::TwoPTwoPGraphMetadata<int> twoptwopgraph1Metadata;
 
 crdt::state::PriorityQueueSB<int> priorityqueue1;
 crdt::state::PriorityQueueMetadata<int> priorityqueue1Metadata;
+
+crdt::operation::StringOB<std::string> string1;
+crdt::operation::StringMetaData<std::string> string1Metadata;
 
 void handle_requests()
 {
@@ -121,6 +125,8 @@ void handle_requests()
 		message += twoptwopgraph1Metadata.serialize();
 		message += "\n";
 		message += priorityqueue1Metadata.serialize();
+		message += "\n";
+		message += string1Metadata.serialize();
 		message += "\n";
 
 		write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
@@ -231,6 +237,11 @@ void generate_requests()
 			new_priorityqueue.deserialize(serialized_strings[10]);
 			priorityqueue1.addExternalReplica({priorityqueue1Metadata, new_priorityqueue});
 
+			// Merge string
+			crdt::operation::StringMetaData<std::string> new_string;
+			new_string.deserialize(serialized_strings[11]);
+			string1.addExternalReplica({string1Metadata, new_string});
+
 			close(socket_client);
 			client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
 			client_log << "CLIENT: Finished request" << std::endl;
@@ -313,6 +324,7 @@ int main(int argc, char* argv[])
 			std::cout << "> Vector<string>" << std::endl;
 			std::cout << "> TwoPTwoPGraph<int>" << std::endl;
 			std::cout << "> PriorityQueue<int>" << std::endl;
+			std::cout << "> String<string>" << std::endl;
 			std::cout << "------------------------------------------" << std::endl;
 		}
 		else if(list_tokens[0] == "print")
@@ -423,6 +435,9 @@ int main(int argc, char* argv[])
 			}
 			priorityqueueString += "}";
 			std::cout << "Priority Queue Values: " << priorityqueueString << std::endl;
+
+			// String
+			std::cout << "String Value: " << string1.queryPayload() << std::endl;
 
 			std::cout << "------------------------------------------" << std::endl;
 		}
@@ -632,6 +647,27 @@ int main(int argc, char* argv[])
 			}
 
 			priorityqueue1.addExternalReplica({priorityqueue1Metadata});
+		}
+		else if(list_tokens[0] == "string")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				string1Metadata.insert(std::stoi(list_tokens[2]), list_tokens[3]);
+			}
+			else if(list_tokens[1] == "erase")
+			{
+				string1Metadata.erase(std::stoi(list_tokens[2]), std::stoi(list_tokens[3]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << string1Metadata.serialize() << std::endl;
+			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, erase, serialize]" << std::endl;
+			}
+
+			string1.addExternalReplica({string1Metadata});
 		}
 	}
 
