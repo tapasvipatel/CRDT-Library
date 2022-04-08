@@ -20,6 +20,7 @@ ALL CREDITS GIVEN TO THIS WEBSITE AND ITS AUTHORS FOR SIMPLIFYING THE PROCESS TO
 #include "../src/state_based/GMapSB.hpp"
 #include "../src/state_based/GSetSB.hpp"
 #include "../src/state_based/MultiSetSB.hpp"
+#include "../src/state_based/LWWMultiSetSB.hpp"
 #include "../src/state_based/ORSetSB.hpp"
 #include "../src/state_based/VectorSB.hpp"
 
@@ -52,6 +53,9 @@ crdt::state::GSetMetadata<std::string> gset1Metadata;
 
 crdt::state::MultiSetSB<int> multiset1;
 crdt::state::MultiSetMetadata<int> multiset1Metadata;
+
+crdt::state::LWWMultiSetSB<int> lwwmultiset1;
+crdt::state::LWWMultiSetMetadata<int> lwwmultiset1Metadata;
 
 crdt::state::ORSetSB<std::string> orset1;
 crdt::state::ORSetMetadata<std::string> orset1Metadata;
@@ -99,6 +103,8 @@ void handle_requests()
 		message += gset1Metadata.serialize();
 		message += "\n";
 		message += multiset1Metadata.serialize();
+		message += "\n";
+		message += lwwmultiset1Metadata.serialize();
 		message += "\n";
 		message += orset1Metadata.serialize();
 		message += "\n";
@@ -188,14 +194,19 @@ void generate_requests()
 			new_multiset.deserialize(serialized_strings[5]);
 			multiset1.addExternalReplica({multiset1Metadata, new_multiset});
 
+			// Merge lwwmultiset
+			crdt::state::LWWMultiSetMetadata<int> new_lwwmultiset;
+			new_lwwmultiset.deserialize(serialized_strings[6]);
+			lwwmultiset1.addExternalReplica({lwwmultiset1Metadata, new_lwwmultiset});
+
 			// Merge orset
 			crdt::state::ORSetMetadata<std::string> new_orset;
-			new_orset.deserialize(serialized_strings[6]);
+			new_orset.deserialize(serialized_strings[7]);
 			orset1.addExternalReplica({orset1Metadata, new_orset});
 
 			// Merge vector
 			crdt::state::VectorMetadata<std::string> new_vector;
-			new_vector.deserialize(serialized_strings[7]);
+			new_vector.deserialize(serialized_strings[8]);
 			vector1.addExternalReplica({vector1Metadata, new_vector});
 
 			close(socket_client);
@@ -243,6 +254,8 @@ int main(int argc, char* argv[])
 	std::thread server_thread(handle_requests);
 	//std::thread client_thread(client_requests);
 
+	std::chrono::steady_clock::time_point referenceTime = std::chrono::steady_clock::now();
+
 	std::string input_command = "";
 
 	while(input_command.compare("exit"))
@@ -273,6 +286,7 @@ int main(int argc, char* argv[])
 			std::cout << "> GMap<int, int>" << std::endl;
 			std::cout << "> GSet<string>" << std::endl;
 			std::cout << "> MultiSet<int>" << std::endl;
+			std::cout << "> LWWMultiSet<int>" << std::endl;
 			std::cout << "> ORSet<string>" << std::endl;
 			std::cout << "> Vector<string>" << std::endl;
 			std::cout << "------------------------------------------" << std::endl;
@@ -326,6 +340,16 @@ int main(int argc, char* argv[])
 			}
 			multisetString += "}";
 			std::cout << "MultiSet Value: " << multisetString << std::endl;
+
+			// LWWMultiset
+			std::multiset<int> lwwmultiset_payload = lwwmultiset1.queryPayload();
+			std::string lwwmultisetString = "{";
+			for(auto item : lwwmultiset_payload)
+			{
+				lwwmultisetString += std::to_string(item) + ",";
+			}
+			lwwmultisetString += "}";
+			std::cout << "LWWMultiset Value: " << lwwmultisetString << std::endl;
 
 			// ORSet
 			std::vector<std::string> orset_payload = orset1.queryPayload();
@@ -463,6 +487,25 @@ int main(int argc, char* argv[])
 			}
 
 			multiset1.addExternalReplica({multiset1Metadata});
+		}
+		else if(list_tokens[0] == "lwwmultiset")
+		{
+			if(list_tokens[1] == "insert")
+			{
+				std::chrono::steady_clock::time_point insertionTime = std::chrono::steady_clock::now();
+				long long int metadataInsertionTime = (long long int) (std::chrono::duration_cast<std::chrono::seconds>(insertionTime - referenceTime).count());
+				lwwmultiset1Metadata.insert(metadataInsertionTime, std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << lwwmultiset1Metadata.serialize() << std::endl;
+			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insert, serialize]" << std::endl;
+			}
+
+			lwwmultiset1.addExternalReplica({lwwmultiset1Metadata});
 		}
 		else if(list_tokens[0] == "orset")
 		{
