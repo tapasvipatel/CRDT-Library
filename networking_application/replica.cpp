@@ -24,6 +24,7 @@ ALL CREDITS GIVEN TO THIS WEBSITE AND ITS AUTHORS FOR SIMPLIFYING THE PROCESS TO
 #include "../src/state_based/ORSetSB.hpp"
 #include "../src/state_based/VectorSB.hpp"
 #include "../src/state_based/TwoPTwoPGraphSB.hpp"
+#include "../src/state_based/PriorityQueueSB.hpp"
 
 bool start_server;
 bool start_client;
@@ -66,6 +67,9 @@ crdt::state::VectorMetadata<std::string> vector1Metadata;
 
 crdt::state::TwoPTwoPGraphSB<int> twoptwopgraph1;
 crdt::state::TwoPTwoPGraphMetadata<int> twoptwopgraph1Metadata;
+
+crdt::state::PriorityQueueSB<int> priorityqueue1;
+crdt::state::PriorityQueueMetadata<int> priorityqueue1Metadata;
 
 void handle_requests()
 {
@@ -115,6 +119,8 @@ void handle_requests()
 		message += vector1Metadata.serialize();
 		message += "\n";
 		message += twoptwopgraph1Metadata.serialize();
+		message += "\n";
+		message += priorityqueue1Metadata.serialize();
 		message += "\n";
 
 		write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
@@ -220,6 +226,11 @@ void generate_requests()
 			new_twoptwopgraph.deserialize(serialized_strings[9]);
 			twoptwopgraph1.addExternalReplica({twoptwopgraph1Metadata, new_twoptwopgraph});
 
+			// Merge priorityqueue
+			crdt::state::PriorityQueueMetadata<int> new_priorityqueue;
+			new_priorityqueue.deserialize(serialized_strings[10]);
+			priorityqueue1.addExternalReplica({priorityqueue1Metadata, new_priorityqueue});
+
 			close(socket_client);
 			client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
 			client_log << "CLIENT: Finished request" << std::endl;
@@ -301,6 +312,7 @@ int main(int argc, char* argv[])
 			std::cout << "> ORSet<string>" << std::endl;
 			std::cout << "> Vector<string>" << std::endl;
 			std::cout << "> TwoPTwoPGraph<int>" << std::endl;
+			std::cout << "> PriorityQueue<int>" << std::endl;
 			std::cout << "------------------------------------------" << std::endl;
 		}
 		else if(list_tokens[0] == "print")
@@ -401,6 +413,16 @@ int main(int argc, char* argv[])
 			}
 			edgesString += "}";
 			std::cout << "TwoPTwoPGraph Edges Values: " << edgesString << std::endl;
+
+			// PriorityQueue
+			std::vector<int> priorityqueue_vectorPayload = priorityqueue1.queryPayloadVector();
+			std::string priorityqueueString = "{";
+			for(auto item : priorityqueue_vectorPayload)
+			{
+				priorityqueueString += std::to_string(item) + ",";
+			}
+			priorityqueueString += "}";
+			std::cout << "Priority Queue Values: " << priorityqueueString << std::endl;
 
 			std::cout << "------------------------------------------" << std::endl;
 		}
@@ -593,6 +615,23 @@ int main(int argc, char* argv[])
 			}
 
 			twoptwopgraph1.addExternalReplica({twoptwopgraph1Metadata});
+		}
+		else if(list_tokens[0] == "priorityqueue")
+		{
+			if(list_tokens[1] == "push")
+			{
+				priorityqueue1Metadata.push(std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << priorityqueue1Metadata.serialize() << std::endl;
+			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[push, serialize]" << std::endl;
+			}
+
+			priorityqueue1.addExternalReplica({priorityqueue1Metadata});
 		}
 	}
 
