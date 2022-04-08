@@ -23,6 +23,7 @@ ALL CREDITS GIVEN TO THIS WEBSITE AND ITS AUTHORS FOR SIMPLIFYING THE PROCESS TO
 #include "../src/state_based/LWWMultiSetSB.hpp"
 #include "../src/state_based/ORSetSB.hpp"
 #include "../src/state_based/VectorSB.hpp"
+#include "../src/state_based/TwoPTwoPGraphSB.hpp"
 
 bool start_server;
 bool start_client;
@@ -62,6 +63,9 @@ crdt::state::ORSetMetadata<std::string> orset1Metadata;
 
 crdt::state::VectorSB<std::string> vector1;
 crdt::state::VectorMetadata<std::string> vector1Metadata;
+
+crdt::state::TwoPTwoPGraphSB<int> twoptwopgraph1;
+crdt::state::TwoPTwoPGraphMetadata<int> twoptwopgraph1Metadata;
 
 void handle_requests()
 {
@@ -109,6 +113,8 @@ void handle_requests()
 		message += orset1Metadata.serialize();
 		message += "\n";
 		message += vector1Metadata.serialize();
+		message += "\n";
+		message += twoptwopgraph1Metadata.serialize();
 		message += "\n";
 
 		write(new_connection_socket, (char*)&message[0], strlen((char*)&message[0]));
@@ -209,6 +215,11 @@ void generate_requests()
 			new_vector.deserialize(serialized_strings[8]);
 			vector1.addExternalReplica({vector1Metadata, new_vector});
 
+			// Merge twoptwopgraph
+			crdt::state::TwoPTwoPGraphMetadata<int> new_twoptwopgraph;
+			new_twoptwopgraph.deserialize(serialized_strings[9]);
+			twoptwopgraph1.addExternalReplica({twoptwopgraph1Metadata, new_twoptwopgraph});
+
 			close(socket_client);
 			client_log << "CLIENT: Disconnected from server (127.0.0.1," << std::to_string(server_info) << ")" << std::endl;
 			client_log << "CLIENT: Finished request" << std::endl;
@@ -289,6 +300,7 @@ int main(int argc, char* argv[])
 			std::cout << "> LWWMultiSet<int>" << std::endl;
 			std::cout << "> ORSet<string>" << std::endl;
 			std::cout << "> Vector<string>" << std::endl;
+			std::cout << "> TwoPTwoPGraph<int>" << std::endl;
 			std::cout << "------------------------------------------" << std::endl;
 		}
 		else if(list_tokens[0] == "print")
@@ -370,6 +382,25 @@ int main(int argc, char* argv[])
 			}
 			vectorString += "}";
 			std::cout << "Vector Value: " << vectorString << std::endl;
+
+			// TwoPTwoPGraph
+			std::set<int> vertices_payload = twoptwopgraph1.queryVertices();
+			std::string verticesString = "{";
+			for(auto item : vertices_payload)
+			{
+				verticesString += std::to_string(item) + ",";
+			}
+			verticesString += "}";
+			std::cout << "TwoPTwoPGraph Vertices Values: " << verticesString << std::endl;
+
+			std::set<std::pair<int, int>> edges_payload = twoptwopgraph1.queryEdges();
+			std::string edgesString = "{";
+			for(auto item : edges_payload)
+			{
+				edgesString += "(" + std::to_string(item.first) + "," + std::to_string(item.second) + ")" + ",";
+			}
+			edgesString += "}";
+			std::cout << "TwoPTwoPGraph Edges Values: " << edgesString << std::endl;
 
 			std::cout << "------------------------------------------" << std::endl;
 		}
@@ -540,6 +571,28 @@ int main(int argc, char* argv[])
 			}
 
 			vector1.addExternalReplica({vector1Metadata});
+		}
+		else if(list_tokens[0] == "twoptwopgraph")
+		{
+			if(list_tokens[1] == "insertVertex")
+			{
+				twoptwopgraph1Metadata.insertVertice(std::stoi(list_tokens[2]));
+			}
+			else if(list_tokens[1] == "insertEdge")
+			{
+				auto edgeToInsert = std::make_pair(std::stoi(list_tokens[2]), std::stoi(list_tokens[3]));
+				twoptwopgraph1Metadata.insertEdge(edgeToInsert);
+			}
+			else if(list_tokens[1] == "serialize")
+			{
+				std::cout << twoptwopgraph1Metadata.serialize() << std::endl;
+			}
+			else if(list_tokens[1] == "help")
+			{
+				std::cout << "[insertVertex, insertEdge, serialize]" << std::endl;
+			}
+
+			twoptwopgraph1.addExternalReplica({twoptwopgraph1Metadata});
 		}
 	}
 

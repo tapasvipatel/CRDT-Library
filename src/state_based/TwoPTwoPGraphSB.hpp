@@ -349,12 +349,12 @@ public:
         return this->vertices_tombstone;
     }
 
-    std::set<T> queryEdges() 
+    std::set<std::pair<T, T>> queryEdges() 
     {
         return this->edges;
     }
 
-    std::set<T> queryEdgesTombstone() 
+    std::set<std::pair<T, T>> queryEdgesTombstone() 
     {
         return this->edges_tombstone;
     }
