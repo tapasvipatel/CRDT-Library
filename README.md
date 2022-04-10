@@ -924,7 +924,7 @@ Then leave a PR and if everything looks good, it will get merged into the reposi
 We greatly apperciate anyone who contributes or leaves feedback. 
 
 <h2 id="credits">👏 Special Thanks</h2>                   
-                   
+Special thanks to all the individuals, projects, creators and developers who have created awesome software for which we were able to build our library off of. A detailed list can be found in acknowledgements.txt.                   
                    
 <h2 id="license"> 📝 License </h2>
 MIT License
