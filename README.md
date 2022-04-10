@@ -868,6 +868,23 @@ cout << handler1.queryPayload(); //Will print ("Hello Sun World")
 
 
 <h2 id="showcase"> 🖼 Showcase - TrelloRDT </h2>
+<h1 align="center">
+  <img src="https://i.ibb.co/vqHf8CB/Gitdiagram-drawio.png"</a>
+</h1>
+
+| Module | Description | 
+|----------|------------|
+`1. Login Page`  | Create a new account or login.  |
+`2. Online User Display`  | **CRDT used from the library:** Grow Only Vector. Will show you who else is online. |
+`3. Add New Board` | Create a new board.  |
+`4. Displaying Boards` | **CRDT used from the library:** Last-Write-Wins Multiset. Displays the board, click red button to delete.  | 
+`5. Displaying Number of Boards used` | **CRDT used from the library:** Postive-Negative Counter. Shows how many boards are in each category. |
+`6. Task Priority List` |  **CRDT used from the library:** Grow-Only Map (Generic). Displays the priority of tasks needing to be complete. |
+`7. Merge` | Merge your board with everyone else. |
+`8. Logout` | Logout of application |
+`9. Add Board Page` | Assign the task to someone, list the task, and the urgency. |
+`10. Text-Format Database` | Stores all the user information |
+
 
 <h2 id="UnitTesting">✅ CI/CD Integration - Catch2 </h2>
 For our testing framework and Github workflow we are using Catch2. All our unit tests can be found in the directory:
@@ -904,6 +921,7 @@ https://www.userbenchmark.com/UserRun/6945534
 *Lww-Multiset* -> In the python libary a LWW-Set was used while ours is a LWW-Multiset. The difference is a multiset allows duplicate elements while a set does not.
 
 *Mutable String* -> The algorithm for merging was different compared to our one. Furthermore strings in C++ are mutable while in Python they are not. 
+
 
 
 <h1 align="center">
