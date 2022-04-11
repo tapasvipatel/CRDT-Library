@@ -220,11 +220,11 @@ public:
 
             outputFileStream << count << ", ";
 
-            while(!i->second.payload.empty())
+            while(!i->second.queryPayload().empty())
             {  
-                auto element = i->second.payload().top();
+                auto element = i->second.queryPayload().top();
                 outputFileStream << element << ", ";
-                i->second.payload().pop();
+                i->second.queryPayload().pop();
             }
 
             outputFileStream << "\n";

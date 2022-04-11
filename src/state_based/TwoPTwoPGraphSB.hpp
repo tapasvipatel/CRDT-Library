@@ -303,7 +303,7 @@ public:
             }
 
             for (auto element : i->second.queryEdges()) {
-                outputFileStream << "E: " << element << ", ";
+                outputFileStream << "E: " << "(" << element.first << "-" << element.second << ")" << ", ";
             }
 
             outputFileStream << "\n";
