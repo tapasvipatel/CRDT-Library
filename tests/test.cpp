@@ -12,7 +12,6 @@
 #include "../src/state_based/TwoPSetSB.hpp"
 #include "../src/state_based/ORSetSB.hpp"
 #include "../src/state_based/VectorSB.hpp"
-#include "../src/operation_based/CounterOB.hpp"
 #include "../src/state_based/GCounterSB.hpp"
 #include "../src/state_based/PNCounterSB.hpp"
 #include "../src/state_based/GMapSB.hpp"
@@ -22,49 +21,6 @@
 #include "../src/state_based/TwoPTwoPGraphSB.hpp"
 #include "../src/operation_based/StringOB.hpp"
 
-
-TEST_CASE("Test CounterOB", "[classic]")
-{
-	SECTION("Test Overloaded Operators")
-	{
-		crdt::operation::CounterOB<uint32_t> obj1(1);
-		crdt::operation::CounterOB<uint32_t> obj2(2);
-		crdt::operation::CounterOB<uint32_t> obj3;
-		crdt::operation::CounterOB<uint32_t> obj4;
-		obj3 = obj1 + obj2;
-		obj4 = obj2 - obj1;
-
-		REQUIRE(obj1.query_payload() == 1);
-		REQUIRE(obj2.query_payload() == 2);
-		REQUIRE(obj3.query_payload() == 3);
-		REQUIRE(obj4.query_payload() == 1);
-
-		obj4 = obj3;
-		REQUIRE(obj4.query_payload() == 3);
-
-		crdt::operation::CounterOB<uint32_t> one(1);
-		crdt::operation::CounterOB<uint32_t> two(2);
-		crdt::operation::CounterOB<uint32_t> three(3);
-		crdt::operation::CounterOB<uint32_t> four(4);
-		crdt::operation::CounterOB<uint32_t> five(5);
-
-		REQUIRE(one < two);
-		REQUIRE(five > three);
-
-		four++;
-		REQUIRE((four == five) == true);
-		REQUIRE((one != two) == true);
-
-		three--;
-
-		REQUIRE(one.query_num_increments() == 1);
-		REQUIRE(two.query_num_increments() == 2);
-		REQUIRE(three.query_num_increments() == 3);
-		REQUIRE(three.query_num_decrements() == 1);
-		REQUIRE(three.query_payload() == 2);
-		REQUIRE(four.query_num_increments() == 5);
-	}
-}
 
 TEST_CASE("Test GSetSB", "[classic]")
 {
@@ -2600,36 +2556,6 @@ TEST_CASE("Test TwoPTwoPGraphSB", "[classic]")
 // Performance Benchmark
 TEST_CASE("Performance Benchmark", "[classic]")
 {
-	SECTION("Performance benchmark for OB-Counter")
-	{
-		std::cout<<"Performance benchmark for OB-Counter: \n";
-
-		//std::clock_t start;
-		long double duration = 0;
-
-		for (int i = 0; i < 50; i++) {
-
-			crdt::operation::CounterOB<uint32_t> obj1(1);
-			crdt::operation::CounterOB<uint32_t> obj2(2);
-			crdt::operation::CounterOB<uint32_t> obj3;
-			crdt::operation::CounterOB<uint32_t> obj4;
-
-			//start = std::clock();
-			auto t1 = std::chrono::high_resolution_clock::now();
-
-			obj3 = obj1 + obj2;
-			obj4 = obj2 - obj1;
-			
-			auto t2 = std::chrono::high_resolution_clock::now();
-			duration += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-			//duration += ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-			
-			REQUIRE(obj3.query_payload() == 3);
-			REQUIRE(obj4.query_payload() == 1);
-		}
-		std::cout<< "   Averge merging time: " << (duration/100.0) << " nanoseconds \n";
-	}
-
 	SECTION("Performance benchmark for G-Set")
 	{
 		std::cout<<"Performance benchmark for G-Set: \n";
