@@ -252,7 +252,7 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
         case 1:
             loadWidgets3(std::ref(gui));
             backlogList.remove(task);
-            backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
+            backlogList.serializeFileApp(filePath + "backlog/" + endUser.userName + "_backlog.json");
             backlogServer.addExternalReplica({backlogList});
             //backlogServer.updateMetaData(backlogList.queryId(), backlogList);
             updateTableMaster(std::ref(gui));
@@ -260,7 +260,7 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
         case 2:
             loadWidgets3(std::ref(gui));
             inprogressList.remove(task);
-            inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
+            inprogressList.serializeFileApp(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
             //inprogressServer.updateMetaData(inprogressList.queryId(), inprogressList);
             inprogressServer.addExternalReplica({inprogressList});
             updateTableMaster(std::ref(gui));
@@ -268,7 +268,7 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
         case 3:
             loadWidgets3(std::ref(gui));
             readytotestList.remove(task);
-            readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
+            readytotestList.serializeFileApp(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
             //readytotestServer.updateMetaData(readytotestList.queryId(), readytotestList);
             readytotestServer.addExternalReplica({readytotestList});
             updateTableMaster(std::ref(gui));
@@ -276,7 +276,7 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
         case 4:
             loadWidgets3(std::ref(gui));
             completeList.remove(task);
-            completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
+            completeList.serializeFileApp(filePath + "complete/" + endUser.userName + "_complete.json");
             //completeServer.updateMetaData(completeList.queryId(), completeList);
             completeServer.addExternalReplica({completeList});
             updateTableMaster(std::ref(gui));
@@ -285,7 +285,7 @@ void deleteBoard(tgui::GuiBase &gui, int boardType, string task) {
             loadWidgets3(std::ref(gui));
             //auto temp = std::chrono::system_clock::now();
             notaddedList.remove(task);
-            notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
+            notaddedList.serializeFileApp(filePath + "notadded/" + endUser.userName + "_notadded.json");
             //notaddedServer.updateMetaData(notaddedList.queryId(), notaddedList);
             notaddedServer.addExternalReplica({notaddedList});
             updateTableMaster(std::ref(gui));
@@ -599,7 +599,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     for(auto & file : fs::directory_iterator(backlogFolder))
     {
         crdt::state::MultiSetMetadata<string> replica;
-        replica.deserializeFile(file.path());
+        replica.deserializeFileApp(file.path());
         backlogMetadataList.push_back(replica);
     }
 
@@ -610,7 +610,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     for(auto & file : fs::directory_iterator(completeFolder))
     {
         crdt::state::MultiSetMetadata<string> replica;
-        replica.deserializeFile(file.path());
+        replica.deserializeFileApp(file.path());
         completeMetadataList.push_back(replica);
     }
 
@@ -621,7 +621,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     for(auto & file : fs::directory_iterator(inprogressFolder))
     {
         crdt::state::MultiSetMetadata<string> replica;
-        replica.deserializeFile(file.path());
+        replica.deserializeFileApp(file.path());
         inprogressMetadataList.push_back(replica);
     }
 
@@ -632,7 +632,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     for(auto & file : fs::directory_iterator(readytotestFolder))
     {
         crdt::state::MultiSetMetadata<string> replica;
-        replica.deserializeFile(file.path());
+        replica.deserializeFileApp(file.path());
         readytotestMetadataList.push_back(replica);
     }
 
@@ -643,7 +643,7 @@ void convergeBoard(tgui::GuiBase &gui, int statusCode)
     for(auto & file : fs::directory_iterator(notaddedFolder))
     {
         crdt::state::MultiSetMetadata<string> replica;
-        replica.deserializeFile(file.path());
+        replica.deserializeFileApp(file.path());
         notaddedMetadataList.push_back(replica);
     }
 
@@ -795,32 +795,32 @@ void createBoard(tgui::EditBox::Ptr assignee, tgui::EditBox::Ptr task, tgui::Edi
         switch (boardType) {
             case 1:
                 backlogList.insert(_data);
-                backlogList.serializeFile(filePath + "backlog/" + endUser.userName + "_backlog.json");
+                backlogList.serializeFileApp(filePath + "backlog/" + endUser.userName + "_backlog.json");
                 backlogServer.addExternalReplica({backlogList});
                 updateTableMaster(std::ref(gui));
                 break;
             case 2:
                 inprogressList.insert(_data);
-                inprogressList.serializeFile(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
+                inprogressList.serializeFileApp(filePath + "inprogress/" + endUser.userName + "_inprogress.json");
                 inprogressServer.addExternalReplica({inprogressList});
                 updateTableMaster(std::ref(gui));
                 break;
             case 3:
                 readytotestList.insert(_data);
-                readytotestList.serializeFile(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
+                readytotestList.serializeFileApp(filePath + "readytotest/" + endUser.userName + "_readytotest.json");
                 readytotestServer.addExternalReplica({readytotestList});
                 updateTableMaster(std::ref(gui));
                 break;
             case 4:
                 completeList.insert(_data);
-                completeList.serializeFile(filePath + "complete/" + endUser.userName + "_complete.json");
+                completeList.serializeFileApp(filePath + "complete/" + endUser.userName + "_complete.json");
                 completeServer.addExternalReplica({completeList});
                 updateTableMaster(std::ref(gui));
                 break;
             case 5:
                 //auto temp = std::chrono::system_clock::now();
                 notaddedList.insert(_data);
-                notaddedList.serializeFile(filePath + "notadded/" + endUser.userName + "_notadded.json");
+                notaddedList.serializeFileApp(filePath + "notadded/" + endUser.userName + "_notadded.json");
                 notaddedServer.addExternalReplica({notaddedList});
                 updateTableMaster(std::ref(gui));
                 break;
