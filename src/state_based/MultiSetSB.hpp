@@ -73,13 +73,21 @@ public:
         j["id"] = this->id;
         json internal(this->payload);
         j["payload"] = internal;
-        json internalTombstone(this->tombstone);
-        j["tombstone"] = internalTombstone;
 
         return j.dump();
     }
 
     void serializeFile(std::string pathToFile)
+    {
+        json j;
+        j["id"] = this->id;
+        json internal(this->payload);
+        j["payload"] = internal;
+        std::ofstream o(pathToFile);
+        o << j << std::endl;
+    }
+
+    void serializeFileApp(std::string pathToFile)
     {
         json j;
         j["id"] = this->id;
@@ -101,15 +109,24 @@ public:
             int32_t value = *it;
             this->payload.insert(value);
         }
-
-        for(json::iterator it = j["tombstone"].begin(); it != j["tombstone"].end(); ++it)
-        {
-            int32_t value = *it;
-            this->tombstone.insert(value);
-        }
     }
 
     void deserializeFile(std::string jsonString)
+    {
+        std::ifstream i(jsonString);
+        json j;
+        i >> j;
+
+        this->id = j["id"];
+
+        for(json::iterator it = j["payload"].begin(); it != j["payload"].end(); ++it)
+        {
+            T value = *it;
+            this->payload.insert(value);
+        }
+    }
+
+    void deserializeFileApp(std::string jsonString)
     {
         std::ifstream i(jsonString);
         json j;
