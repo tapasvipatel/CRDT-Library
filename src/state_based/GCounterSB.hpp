@@ -39,10 +39,11 @@ template<typename T=int32_t>
 class GCounterMetadata : CrdtMetaData
 {
 private:
-    uint32_t id;
-    T payload;
 
 public:
+    uint32_t id;
+    T payload;
+    
     GCounterMetadata() : CrdtMetaData(CrdtType::GCounterSBType)
     {
         ;
