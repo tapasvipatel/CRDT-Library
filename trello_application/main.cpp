@@ -269,7 +269,7 @@ void updateTableMaster(tgui::GuiBase &gui)
 
         auto backlogDelete = tgui::Button::create("-");
         backlogDelete->setSize(35, 35);
-        int deleteY = deleteCount + 374;
+        int deleteY = deleteCount + 400;
         deleteCount += 150;
         backlogDelete->setPosition(242, deleteY);
         backlogDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
@@ -296,7 +296,7 @@ void updateTableMaster(tgui::GuiBase &gui)
 
         auto inprogressDelete = tgui::Button::create("-");
         inprogressDelete->setSize(35, 35);
-        int deleteY = deleteCount + 374;
+        int deleteY = deleteCount + 400;
         deleteCount += 150;
         inprogressDelete->setPosition(558, deleteY);
         inprogressDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
@@ -323,7 +323,7 @@ void updateTableMaster(tgui::GuiBase &gui)
 
         auto readytotestDelete = tgui::Button::create("-");
         readytotestDelete->setSize(35, 35);
-        int deleteY = deleteCount + 374;
+        int deleteY = deleteCount + 400;
         deleteCount += 150;
         readytotestDelete->setPosition(872, deleteY);
         readytotestDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
@@ -350,7 +350,7 @@ void updateTableMaster(tgui::GuiBase &gui)
 
         auto completeDelete = tgui::Button::create("-");
         completeDelete->setSize(35, 35);
-        int deleteY = deleteCount + 374;
+        int deleteY = deleteCount + 400;
         deleteCount += 150;
         completeDelete->setPosition(1186, deleteY);
         completeDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
@@ -377,7 +377,7 @@ void updateTableMaster(tgui::GuiBase &gui)
 
         auto notaddedDelete = tgui::Button::create("-");
         notaddedDelete->setSize(35, 35);
-        int deleteY = deleteCount + 374;
+        int deleteY = deleteCount + 400;
         deleteCount += 150;
         notaddedDelete->setPosition(1500, deleteY);
         notaddedDelete->getRenderer()->setBackgroundColor(sf::Color(240, 0, 0));
@@ -401,8 +401,8 @@ void updateTableMaster(tgui::GuiBase &gui)
         string data = to_string(i->first) + ". " + i->second;
         auto priorityListButton = tgui::Button::create(data);
         priorityListButton->setSize({"10%, 10%"});
-        int y = count + 258;
-        count += 100;
+        int y = count + 290;
+        count += 120;
         string y_position = to_string(y);
         priorityListButton->setPosition(1610, y);
         priorityListButton->getRenderer()->setBackgroundColor(sf::Color(153, 204, 255));
