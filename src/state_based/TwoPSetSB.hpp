@@ -78,7 +78,7 @@ public:
         json internalPayload(this->payload);
         j["payload"] = internalPayload;
         json internalTombstone(this->tombstone);
-        j["tombstome"] = internalTombstone;
+        j["tombstone"] = internalTombstone;
 
         return j.dump();
     }

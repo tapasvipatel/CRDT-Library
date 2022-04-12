@@ -883,7 +883,7 @@ void generate_requests()
 			client_log << "CLIENT: Finished request" << std::endl;
 
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-			std::cout << "Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+			//std::cout << "Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 		}
 	}
 }
