@@ -1252,7 +1252,7 @@ int main(int argc, char* argv[])
 			}
 			else if(list_tokens[1] == "help")
 			{
-				std::cout << "[insert, serialize]" << std::endl;
+				std::cout << "[insert, delete, serialize]" << std::endl;
 			}
 
 			orset1.addExternalReplica({orset1Metadata});
