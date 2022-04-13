@@ -37,9 +37,9 @@ template<typename K, typename T = uint32_t>
 class GMapMetadata : CrdtMetaData
 {
 private:
+public:
     uint32_t id;
     std::map<K,T> payload;
-public:
     GMapMetadata() : CrdtMetaData(CrdtType::GMapSBType)
     {
         ;

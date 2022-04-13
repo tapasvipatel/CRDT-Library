@@ -883,7 +883,7 @@ void generate_requests()
 			client_log << "CLIENT: Finished request" << std::endl;
 
 			std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-			std::cout << "Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+			//std::cout << "Network Latency (microseconds): " << " : " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 		}
 	}
 }
@@ -906,11 +906,21 @@ int main(int argc, char* argv[])
 	// Initialize CRDTs
 	set1Metadata.id = server_port;
 	counter1Metadata.id = server_port;
+	gcounter1Metadata.id = server_port;
+	gmap1Metadata.id = server_port;
+	gset1Metadata.id = server_port;
+	multiset1Metadata.id = server_port;
+	lwwmultiset1Metadata.id = server_port;
+	orset1Metadata.id = server_port;
+	vector1Metadata.id = server_port;
+	twoptwopgraph1Metadata.id = server_port;
+	priorityqueue1Metadata.id = server_port;
+	string1Metadata.id = server_port;
 
 	// Initialize servers
 	list_servers.push_back(3020);
 	list_servers.push_back(3021);
-	//list_servers.push_back(3022);
+	list_servers.push_back(3022);
 
 	start_server = true;
 	start_client = true;
@@ -1242,7 +1252,7 @@ int main(int argc, char* argv[])
 			}
 			else if(list_tokens[1] == "help")
 			{
-				std::cout << "[insert, serialize]" << std::endl;
+				std::cout << "[insert, delete, serialize]" << std::endl;
 			}
 
 			orset1.addExternalReplica({orset1Metadata});

@@ -35,9 +35,9 @@ template<typename T=std::string>
 class StringMetaData: CrdtMetaData
 {
 private:
+public:
     uint32_t id;
     std::string payload;
-public:
     StringMetaData() : CrdtMetaData(CrdtType::StringOBType)
     {
         ;
