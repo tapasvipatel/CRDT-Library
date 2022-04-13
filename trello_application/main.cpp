@@ -826,10 +826,10 @@ void loadWidgets2(tgui::GuiBase &gui)
 
     // Priority List Button
     auto priorityListHeader = tgui::Button::create("Priority");
-    priorityListHeader ->setSize({"10%", "10%"});
-    priorityListHeader ->setPosition({"87%", "15.0%"});
-    priorityListHeader ->getRenderer()->setBackgroundColor(tgui::Color::White);
-    priorityListHeader ->getRenderer()->setTextColor(tgui::Color::Red);
+    priorityListHeader ->setSize({"12%", "12%"});
+    priorityListHeader ->setPosition({"86%", "15.0%"});
+    priorityListHeader ->getRenderer()->setBackgroundColor(sf::Color(138, 222, 136));
+    priorityListHeader ->getRenderer()->setTextColor(tgui::Color::Black);
     gui.add(priorityListHeader); 
 
     //Backlog button
